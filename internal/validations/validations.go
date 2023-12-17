@@ -108,7 +108,21 @@ func CheckURL(tag string, mainURL, wellKnownURL string, maxLen int) error {
 	if wk.Host != m.Host {
 		return fmt.Errorf("%s.url and %s.wellKnown hostnames don't match", tag, tag)
 	}
-	if !strings.HasPrefix(wk.Path, m.Path) {
+
+	basePath := strings.TrimRight(m.Path, "/")
+	wkPath := strings.TrimRight(wk.Path, "/")
+
+	// If the base path is the root of the domain, then .well-known should also be.
+	if basePath == "" && strings.TrimRight(wkPath, sfx) != "" {
+		return fmt.Errorf("%s.url and %s.wellKnown paths don't match", tag, tag)
+	}
+
+	// If it's not at the root, then basPath should be a suffix of the well known path.
+	// eg:
+	// github.com/user ~= github.com/user/project/blob/main/.well-known/funding-json-urls
+	// github.com/user/project ~= github.com/user/project/blob/main/.well-known/funding-json-urls
+	// github.com/use !~= github.com/user/project/blob/main/.well-known/funding-json-urls
+	if !strings.HasPrefix(wkPath, basePath) || wkPath[len(basePath)] != '/' {
 		return fmt.Errorf("%s.url and %s.wellKnown paths don't match", tag, tag)
 	}
 

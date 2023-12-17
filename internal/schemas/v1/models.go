@@ -62,7 +62,7 @@ type History struct {
 	Description string  `json:"description"`
 }
 
-type Root struct {
+type Entry struct {
 	Version  string    `json:"version"`
 	Entity   Entity    `json:"entity"`
 	Projects []Project `json:"projects"`

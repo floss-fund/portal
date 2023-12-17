@@ -37,8 +37,8 @@ func New(exactVersion string, opt *Opt) *Schema {
 }
 
 // Parse parses and validates a given JSON body against the schema and returns the parsed object.
-func (s *Schema) Parse(b []byte) (Root, error) {
-	var r Root
+func (s *Schema) Parse(b []byte) (Entry, error) {
+	var r Entry
 	if err := json.Unmarshal(b, &r); err != nil {
 		return r, err
 	}
