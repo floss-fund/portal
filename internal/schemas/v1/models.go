@@ -1,8 +1,8 @@
 package v1
 
 var (
-	EntityTypes     = []string{"individual", "group", "organisation"}
-	EntityRoles     = []string{"owner", "steward", "maintainer", "contributor"}
+	EntityTypes     = []string{"individual", "group", "organisation", "other"}
+	EntityRoles     = []string{"owner", "steward", "maintainer", "contributor", "other"}
 	ChannelTypes    = []string{"bank", "gateway", "cheque", "cash", "other"}
 	PlanFrequencies = []string{"one-time", "weekly", "biweekly", "fornightly", "monthly", "bimonthly", "yearly"}
 	PlanStatuses    = []string{"active", "inactive"}
