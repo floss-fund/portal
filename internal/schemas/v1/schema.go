@@ -139,14 +139,16 @@ func (s *Schema) ValidateProject(o Project, n int) error {
 	}
 
 	// Languages.
-	for i, lang := range o.Languages {
-		langTag := fmt.Sprintf("projects[%d].languages[%d]", n, i)
-		if err := validations.InRange[int](langTag, len(lang), 2, 64); err != nil {
+	for i, f := range o.Frameworks {
+		fTag := fmt.Sprintf("projects[%d].frameworks[%d]", n, i)
+		if err := validations.InRange[int](fTag, len(f), 2, 64); err != nil {
 			return err
 		}
 
-		if err := validations.InMap(langTag, "default programming language list", lang, s.opt.ProgrammingLanguages); err != nil {
-			return err
+		if strings.HasPrefix(f, "lang:") {
+			if err := validations.InMap(fTag, "default programming language list", f, s.opt.ProgrammingLanguages); err != nil {
+				return err
+			}
 		}
 	}
 
