@@ -1,5 +1,7 @@
 package v1
 
+import "encoding/json"
+
 var (
 	EntityTypes     = []string{"individual", "group", "organisation", "other"}
 	EntityRoles     = []string{"owner", "steward", "maintainer", "contributor", "other"}
@@ -8,12 +10,15 @@ var (
 	PlanStatuses    = []string{"active", "inactive"}
 )
 
+//easyjson:json
 type URL struct {
 	URL       string `json:"url"`
-	WellKnown string `json:"wellKnown"`
+	WellKnown string `json:"well-known"`
 }
 
 // Entity represents an entity in charge of a project: individual, organisation etc.
+//
+//easyjson:json
 type Entity struct {
 	Type       string `json:"type"`
 	Role       string `json:"role"`
@@ -24,6 +29,8 @@ type Entity struct {
 }
 
 // Project represents a FOSS project.
+//
+//easyjson:json
 type Project struct {
 	Name          string   `json:"name"`
 	Description   string   `json:"description"`
@@ -35,6 +42,8 @@ type Project struct {
 }
 
 // Channel is a loose representation of a payment channel. eg: bank, cash, or a processor like PayPal.
+//
+//easyjson:json
 type Channel struct {
 	ID          string `json:"id"`
 	Type        string `json:"type"`
@@ -43,6 +52,8 @@ type Channel struct {
 }
 
 // Plan represents a payment plan / ask for the project.
+//
+//easyjson:json
 type Plan struct {
 	ID          string   `json:"id"`
 	Status      string   `json:"status"`
@@ -55,6 +66,8 @@ type Plan struct {
 }
 
 // History represents a very course, high level income/expense statement.
+//
+//easyjson:json
 type History struct {
 	Year        int     `json:"year"`
 	Income      float64 `json:"income"`
@@ -62,10 +75,15 @@ type History struct {
 	Description string  `json:"description"`
 }
 
-type Entry struct {
-	Version  string    `json:"version"`
-	Entity   Entity    `json:"entity"`
-	Projects []Project `json:"projects"`
+//easyjson:json
+type Manifest struct {
+	ID       string          `json:"id"`
+	UUID     string          `json:"uuid"`
+	Version  string          `json:"version"`
+	URL      string          `json:"url"`
+	Body     json.RawMessage `json:"body"`
+	Entity   Entity          `json:"entity"`
+	Projects []Project       `json:"projects"`
 
 	Funding struct {
 		Channels []Channel `json:"channels"`

@@ -1,0 +1,27 @@
+[app]
+address = ":9000"
+
+# The website URL to be used on the frontend pages.
+# Example: portal.site.com
+root_url = "http://localhost:9000"
+
+
+[site]
+
+
+[crawl]
+# Number of workers (goroutines) to spawn to do HTTP .well-known endpoint verifications.
+max_workers = 100
+
+# HTTP requests.
+max_retries = 3
+conn_timeout = "3s"
+useragent = "floss-fund-crawler"
+max_file_size = 50 # KBs
+
+[db]
+host = "localhost"
+port = 5432
+db = "dbname"
+user = "username"
+password = "password"

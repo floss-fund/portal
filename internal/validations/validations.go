@@ -63,40 +63,34 @@ func IsEmail(tag, s string, maxLen int) error {
 	return nil
 }
 
-func IsURL(tag, u string) error {
-	if err := InRange[int](tag, len(u), 8, 1024); err != nil {
-		return err
+func IsURL(tag, u string, maxLen int) (*url.URL, error) {
+	if err := InRange[int](tag, len(u), 10, maxLen); err != nil {
+		return nil, err
 	}
 
 	p, err := url.Parse(u)
 	if err != nil || (p.Scheme != "https" && p.Scheme != "http") {
-		return fmt.Errorf("%s is not a valid URL", tag)
+		return nil, fmt.Errorf("%s is not a valid URL", tag)
 	}
 
-	return nil
+	return p, nil
 }
 
 func CheckURL(tag string, mainURL, wellKnownURL string, maxLen int) error {
-	if err := InRange[int](tag+".url", len(mainURL), 8, maxLen); err != nil {
+	// Validate the main URL.
+	m, err := IsURL(tag+".url", mainURL, maxLen)
+	if err != nil {
 		return err
-	}
-	m, err := url.Parse(mainURL)
-	if err != nil || (m.Scheme != "https" && m.Scheme != "http") {
-		return fmt.Errorf("%s.url is not a valid URL", tag)
 	}
 
 	if wellKnownURL == "" {
 		return nil
 	}
 
-	// Validate the well known URL.
-	if err := InRange[int](tag, len(wellKnownURL), 8, 1024); err != nil {
+	// Validate its corresponding well known URL.
+	wk, err := IsURL(tag+".well-known", wellKnownURL, maxLen)
+	if err != nil {
 		return err
-	}
-
-	wk, err := url.Parse(wellKnownURL)
-	if err != nil || (wk.Scheme != "https" && wk.Scheme != "http") {
-		return fmt.Errorf("%s.wellKnown is not a valid URL", m)
 	}
 
 	sfx := "/.well-known/funding-json-urls"
@@ -109,15 +103,17 @@ func CheckURL(tag string, mainURL, wellKnownURL string, maxLen int) error {
 		return fmt.Errorf("%s.url and %s.wellKnown hostnames don't match", tag, tag)
 	}
 
-	basePath := strings.TrimRight(m.Path, "/")
-	wkPath := strings.TrimRight(wk.Path, "/")
+	var (
+		basePath = strings.TrimRight(m.Path, "/")
+		wkPath   = strings.TrimRight(wk.Path, "/")
+	)
 
 	// If the base path is the root of the domain, then .well-known should also be.
 	if basePath == "" && strings.TrimRight(wkPath, sfx) != "" {
 		return fmt.Errorf("%s.url and %s.wellKnown paths don't match", tag, tag)
 	}
 
-	// If it's not at the root, then basPath should be a suffix of the well known path.
+	// If it's not at the root, then basePath should be a suffix of the well known path.
 	// eg:
 	// github.com/user ~= github.com/user/project/blob/main/.well-known/funding-json-urls
 	// github.com/user/project ~= github.com/user/project/blob/main/.well-known/funding-json-urls

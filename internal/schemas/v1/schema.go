@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -36,50 +35,45 @@ func New(exactVersion string, opt *Opt) *Schema {
 	}
 }
 
-// Parse parses and validates a given JSON body against the schema and returns the parsed object.
-func (s *Schema) Parse(b []byte) (Entry, error) {
-	var r Entry
-	if err := json.Unmarshal(b, &r); err != nil {
-		return r, err
-	}
-
+// Validate validates a given manifest against its schema.
+func (s *Schema) Validate(m Manifest) (Manifest, error) {
 	// Entity.
-	if err := s.ValidateEntity(r.Entity); err != nil {
-		return r, err
+	if err := s.ValidateEntity(m.Entity); err != nil {
+		return m, err
 	}
 
 	// Projects.
-	for n, o := range r.Projects {
+	for n, o := range m.Projects {
 		if err := s.ValidateProject(o, n); err != nil {
-			return r, err
+			return m, err
 		}
 	}
 
 	// Funding channels.
 	chIDs := make(map[string]struct{})
-	for n, o := range r.Funding.Channels {
+	for n, o := range m.Funding.Channels {
 		if err := s.ValidateChannel(o, n); err != nil {
-			return r, err
+			return m, err
 		}
 
 		chIDs[o.ID] = struct{}{}
 	}
 
 	// Funding plans.
-	for n, o := range r.Funding.Plans {
+	for n, o := range m.Funding.Plans {
 		if err := s.ValidatePlan(o, n, chIDs); err != nil {
-			return r, err
+			return m, err
 		}
 	}
 
 	// History.
-	for n, o := range r.Funding.History {
+	for n, o := range m.Funding.History {
 		if err := s.ValidateHistory(o, n); err != nil {
-			return r, err
+			return m, err
 		}
 	}
 
-	return r, nil
+	return m, nil
 }
 
 func (s *Schema) ValidateEntity(o Entity) error {

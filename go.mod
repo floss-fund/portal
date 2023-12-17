@@ -13,11 +13,13 @@ require (
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/lib/pq v1.10.0
 	github.com/spf13/pflag v1.0.5
+	github.com/zerodha/easyjson v1.0.0
 	golang.org/x/mod v0.14.0
 )
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
 	github.com/knadh/koanf/maps v0.1.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
