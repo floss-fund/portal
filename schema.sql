@@ -54,3 +54,12 @@ CREATE TABLE entries (
 DROP INDEX IF EXISTS idx_uuid; CREATE UNIQUE INDEX idx_uuid ON entries(uuid);
 DROP INDEX IF EXISTS idx_version; CREATE UNIQUE INDEX idx_version ON entries(version);
 DROP INDEX IF EXISTS idx_status; CREATE UNIQUE INDEX idx_status ON entries(status);
+
+-- settings
+DROP TABLE IF EXISTS settings CASCADE;
+CREATE TABLE settings (
+    key             TEXT NOT NULL UNIQUE,
+    value           JSONB NOT NULL DEFAULT '{}',
+    updated_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+DROP INDEX IF EXISTS idx_settings_key; CREATE INDEX idx_settings_key ON settings(key);
