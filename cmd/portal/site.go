@@ -34,8 +34,8 @@ func handleSubmitPage(c echo.Context) error {
 		return err
 	}
 
-	if !strings.HasSuffix(u.Path, app.consts.FundingManifestPath) {
-		return fmt.Errorf("URI doesn't end in %s", app.consts.FundingManifestPath)
+	if !strings.HasSuffix(u.Path, app.consts.ManifestURI) {
+		return fmt.Errorf("URI doesn't end in %s", app.consts.ManifestURI)
 	}
 
 	return c.JSON(http.StatusOK, 200)

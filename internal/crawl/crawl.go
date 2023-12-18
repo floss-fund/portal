@@ -2,6 +2,7 @@ package crawl
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,25 +12,31 @@ import (
 )
 
 type Schema interface {
-	Validate(v1.Manifest) error
+	Validate(v1.Manifest) (v1.Manifest, error)
 }
 
 type Opt struct {
-	Useragent    string
-	MaxHostConns int
-	ReqTimeout   time.Duration
-	Retries      int
+	UserAgent    string        `json:"useragent"`
+	MaxHostConns int           `json:"max_host_conns"`
+	ReqTimeout   time.Duration `json:"req_timeout"`
+	Attempts     int           `json:"attempts"`
+	MaxBytes     int64         `json:"max_bytes"`
 }
 
 type Crawl struct {
-	opt Opt
-	sc  Schema
-	hc  *http.Client
+	opt     Opt
+	sc      Schema
+	headers http.Header
+	hc      *http.Client
 }
 
 func New(o Opt, sc Schema) *Crawl {
+	h := http.Header{}
+	h.Set("User-Agent", o.UserAgent)
+
 	return &Crawl{
-		sc: sc,
+		sc:      sc,
+		headers: h,
 		hc: &http.Client{
 			Timeout: o.ReqTimeout,
 			Transport: &http.Transport{
@@ -43,49 +50,84 @@ func New(o Opt, sc Schema) *Crawl {
 }
 
 // FetchManifest fetches a given funding.json manifest, parses it, and returns.
-func (c *Crawl) FetchManifest(u string) (v1.Manifest, error) {
-	var (
-		body []byte
-		err  error
-	)
-
-	h := http.Header{}
-	h.Set("Useragent", c.opt.Useragent)
-
-	for n := 0; n < c.opt.Retries; n++ {
-		body, err = c.exec(http.MethodGet, u, nil, h)
-		if err == nil {
-			break
-		}
-	}
-
+func (c *Crawl) FetchManifest(manifestURL string) (v1.Manifest, error) {
+	b, err := c.fetch(manifestURL)
 	if err != nil {
 		return v1.Manifest{}, err
 	}
 
-	var out v1.Manifest
-	if err := out.UnmarshalJSON(body); err != nil {
-		return out, fmt.Errorf("error parsing JSON body: %v", err)
-	}
-
-	return out, nil
+	return c.ParseManifest(b, true)
 }
 
 // ParseManifest parses a given JSON body, validates it, and returns the manifest.
-func (c *Crawl) ParseManifest(b []byte) (v1.Manifest, error) {
-	var out v1.Manifest
-	if err := out.UnmarshalJSON(b); err != nil {
-		return out, fmt.Errorf("error parsing JSON body: %v", err)
+func (c *Crawl) ParseManifest(b []byte, checkProvenance bool) (v1.Manifest, error) {
+	var m v1.Manifest
+	if err := m.UnmarshalJSON(b); err != nil {
+		return m, fmt.Errorf("error parsing JSON body: %v", err)
 	}
 
-	if err := c.sc.Validate(out); err != nil {
-		return out, err
+	// Validate the manifest's schema.
+	if v, err := c.sc.Validate(m); err != nil {
+		return v, err
+	} else {
+		m = v
 	}
 
-	return out, nil
+	// Establish the provenance of all URLs mentioned in the manifest.
+
+	return m, nil
 }
 
-func (c *Crawl) exec(method, rURL string, reqBody []byte, headers http.Header) ([]byte, error) {
+// CheckProvenance fetches the .well-known URL list for the given u and checks
+// wehther the manifestURL is present in it, establishing its provenance.
+func (c *Crawl) CheckProvenance(u v1.URL, manifestURL string) error {
+	if u.WellKnown == "" {
+		return nil
+	}
+
+	body, err := c.fetch(u.WellKnown)
+	if err != nil {
+		return err
+	}
+
+	ub := []byte(manifestURL)
+	for n, b := range bytes.Split(body, []byte("\n")) {
+		if bytes.Equal(ub, b) {
+			return nil
+		}
+
+		if n > 100 {
+			return errors.New("too many lines in the .well-known list")
+		}
+	}
+
+	return errors.New("the manifest URL was not found in the .well-known list")
+}
+
+// fetch fetches a given URL with error retries.
+func (c *Crawl) fetch(u string) ([]byte, error) {
+	var (
+		body  []byte
+		err   error
+		retry bool
+	)
+
+	// Retry N times.
+	for n := 0; n < c.opt.Attempts; n++ {
+		body, retry, err = c.doReq(http.MethodGet, u, nil, c.headers)
+		if err == nil || !retry {
+			break
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
+
+// doReq executes an HTTP doReq. The bool indicates whether it's a retriable error.
+func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) ([]byte, bool, error) {
 	var (
 		err      error
 		postBody io.Reader
@@ -98,7 +140,7 @@ func (c *Crawl) exec(method, rURL string, reqBody []byte, headers http.Header) (
 
 	req, err := http.NewRequest(method, rURL, postBody)
 	if err != nil {
-		return nil, err
+		return nil, true, err
 	}
 
 	if headers != nil {
@@ -106,7 +148,6 @@ func (c *Crawl) exec(method, rURL string, reqBody []byte, headers http.Header) (
 	} else {
 		req.Header = http.Header{}
 	}
-	req.Header.Set("User-Agent", "listmonk")
 
 	// If a content-type isn't set, set the default one.
 	if req.Header.Get("Content-Type") == "" {
@@ -122,7 +163,7 @@ func (c *Crawl) exec(method, rURL string, reqBody []byte, headers http.Header) (
 
 	r, err := c.hc.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, true, err
 	}
 	defer func() {
 		// Drain and close the body to let the Transport reuse the connection
@@ -131,13 +172,13 @@ func (c *Crawl) exec(method, rURL string, reqBody []byte, headers http.Header) (
 	}()
 
 	if r.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-200 response from URL: %d", r.StatusCode)
+		return nil, false, fmt.Errorf("non-200 response from URL: %d", r.StatusCode)
 	}
 
-	body, err := io.ReadAll(r.Body)
+	body, err := io.ReadAll(io.LimitReader(r.Body, c.opt.MaxBytes))
 	if err != nil {
-		return nil, err
+		return nil, true, err
 	}
 
-	return body, nil
+	return body, false, nil
 }

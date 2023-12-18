@@ -11,6 +11,8 @@ import (
 	"unicode"
 
 	"floss.fund/portal/internal/core"
+	"floss.fund/portal/internal/crawl"
+	v1 "floss.fund/portal/internal/schemas/v1"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/goyesql/v2"
 	goyesqlx "github.com/knadh/goyesql/v2/sqlx"
@@ -78,9 +80,10 @@ func initConfig() {
 }
 
 func initConstants(ko *koanf.Koanf) Consts {
-	var c Consts
-	if err := ko.UnmarshalWithConf("", &c, koanf.UnmarshalConf{Tag: "json", FlatPaths: true}); err != nil {
-		lo.Fatalf("error unmarshalling config constants: %v", err)
+	c := Consts{
+		RootURL:      ko.MustString("app.root_url"),
+		ManifestURI:  ko.MustString("app.manifest_uri"),
+		WellKnownURI: ko.MustString("app.wellknown_uri"),
 	}
 
 	return c
@@ -147,7 +150,7 @@ func initHTTPServer(app *App, ko *koanf.Koanf) *echo.Echo {
 	return srv
 }
 
-func initCore(fs stuffbin.FileSystem, db *sqlx.DB) *core.Core {
+func initCore(fs stuffbin.FileSystem, db *sqlx.DB, ko *koanf.Koanf) *core.Core {
 	// Load SQL queries.
 	qB, err := fs.Read("/queries.sql")
 	if err != nil {
@@ -165,14 +168,24 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB) *core.Core {
 		lo.Fatalf("no SQL queries loaded: %v", err)
 	}
 
-	opt := core.Opt{
-		CrawlUseragent:    ko.MustString("crawl.useragent"),
-		CrawlMaxHostConns: ko.MustInt("crawl.max_host_conns"),
-		CrawlReqTimeout:   ko.MustDuration("crawl.req_timeout"),
-		CrawlRetries:      ko.Int("crawl.retries"),
-	}
+	opt := core.Opt{}
 
 	return core.New(&q, opt)
+}
+
+func initCrawl(db *sqlx.DB, ko *koanf.Koanf) *crawl.Crawl {
+	opt := crawl.Opt{
+		UserAgent:    ko.MustString("crawl.useragent"),
+		MaxHostConns: ko.MustInt("crawl.max_host_conns"),
+		ReqTimeout:   ko.MustDuration("crawl.req_timeout"),
+		Attempts:     ko.MustInt("crawl.attempts"),
+		MaxBytes:     ko.MustInt64("crawl.max_bytes"),
+	}
+
+	sc := v1.New("v1.0.0", &v1.Opt{
+		WellKnownPath: ko.MustString("app.wellknown_path"),
+	})
+	return crawl.New(opt, sc)
 }
 
 func generateNewFiles() error {

@@ -17,9 +17,9 @@ var (
 )
 
 type Consts struct {
-	RootURL             string `json:"app.root_url"`
-	FundingManifestPath string `json:"app.funding_manifest_path"`
-	WellKnownPath       string `json:"app.wellknown_path"`
+	RootURL      string `json:"app.root_url"`
+	ManifestURI  string `json:"app.manifest_path"`
+	WellKnownURI string `json:"app.wellknown_path"`
 }
 
 // App contains the "global" components that are passed around, especially through HTTP handlers.
@@ -72,7 +72,7 @@ func main() {
 	checkUpgrade(db)
 
 	// Initialize queries and data handler.
-	app.core = initCore(app.fs, db)
+	app.core = initCore(app.fs, db, ko)
 
 	// Initialize the echo HTTP server.
 	srv := initHTTPServer(app, ko)

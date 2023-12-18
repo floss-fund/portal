@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"floss.fund/portal/internal/validations"
@@ -25,6 +26,8 @@ type Opt struct {
 
 	// Map of curency code and names.
 	Currencies map[string]string
+
+	WellKnownPath string
 }
 
 // New returns a new instance of Schema.
@@ -37,14 +40,19 @@ func New(exactVersion string, opt *Opt) *Schema {
 
 // Validate validates a given manifest against its schema.
 func (s *Schema) Validate(m Manifest) (Manifest, error) {
+	mURL, err := validations.IsURL("manifest URL", m.URL, 1024)
+	if err != nil {
+		return m, err
+	}
+
 	// Entity.
-	if err := s.ValidateEntity(m.Entity); err != nil {
+	if err := s.ValidateEntity(m.Entity, mURL); err != nil {
 		return m, err
 	}
 
 	// Projects.
 	for n, o := range m.Projects {
-		if err := s.ValidateProject(o, n); err != nil {
+		if err := s.ValidateProject(o, n, mURL); err != nil {
 			return m, err
 		}
 	}
@@ -76,7 +84,7 @@ func (s *Schema) Validate(m Manifest) (Manifest, error) {
 	return m, nil
 }
 
-func (s *Schema) ValidateEntity(o Entity) error {
+func (s *Schema) ValidateEntity(o Entity, manifest *url.URL) error {
 	if err := validations.InList("entity.type", o.Type, EntityTypes); err != nil {
 		return err
 	}
@@ -97,14 +105,14 @@ func (s *Schema) ValidateEntity(o Entity) error {
 		return err
 	}
 
-	if err := validations.CheckURL("entity.webpageUrl", o.WebpageURL.URL, o.WebpageURL.WellKnown, 1024); err != nil {
+	if err := validations.WellKnownURL("entity.webpageUrl", manifest, o.WebpageURL.URL, o.WebpageURL.WellKnown, s.opt.WellKnownPath, 1024); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Schema) ValidateProject(o Project, n int) error {
+func (s *Schema) ValidateProject(o Project, n int, manifest *url.URL) error {
 	if err := validations.InRange[int](fmt.Sprintf("projects[%d].name", n), len(o.Name), 1, 256); err != nil {
 		return err
 	}
@@ -113,11 +121,11 @@ func (s *Schema) ValidateProject(o Project, n int) error {
 		return err
 	}
 
-	if err := validations.CheckURL(fmt.Sprintf("projects[%d].webpageUrl", n), o.WebpageURL.URL, o.WebpageURL.WellKnown, 1024); err != nil {
+	if err := validations.WellKnownURL(fmt.Sprintf("projects[%d].webpageUrl", n), manifest, o.WebpageURL.URL, o.WebpageURL.WellKnown, s.opt.WellKnownPath, 1024); err != nil {
 		return err
 	}
 
-	if err := validations.CheckURL(fmt.Sprintf("projects[%d].repositoryURL", n), o.RepositoryUrl.URL, o.RepositoryUrl.WellKnown, 1024); err != nil {
+	if err := validations.WellKnownURL(fmt.Sprintf("projects[%d].repositoryURL", n), manifest, o.RepositoryUrl.URL, o.RepositoryUrl.WellKnown, s.opt.WellKnownPath, 1024); err != nil {
 		return err
 	}
 

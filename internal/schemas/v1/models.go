@@ -1,6 +1,8 @@
 package v1
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 var (
 	EntityTypes     = []string{"individual", "group", "organisation", "other"}
@@ -13,7 +15,7 @@ var (
 //easyjson:json
 type URL struct {
 	URL       string `json:"url"`
-	WellKnown string `json:"well-known"`
+	WellKnown string `json:"wellKnown"`
 }
 
 // Entity represents an entity in charge of a project: individual, organisation etc.

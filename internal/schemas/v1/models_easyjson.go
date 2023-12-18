@@ -38,7 +38,7 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV1(in *jlexer.Lexer, ou
 		switch key {
 		case "url":
 			out.URL = string(in.String())
-		case "well-known":
+		case "wellKnown":
 			out.WellKnown = string(in.String())
 		default:
 			in.SkipRecursive()
@@ -60,7 +60,7 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV1(out *jwriter.Writer,
 		out.String(string(in.URL))
 	}
 	{
-		const prefix string = ",\"well-known\":"
+		const prefix string = ",\"wellKnown\":"
 		out.RawString(prefix)
 		out.String(string(in.WellKnown))
 	}
