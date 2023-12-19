@@ -27,7 +27,7 @@ type Opt struct {
 	// Map of curency code and names.
 	Currencies map[string]string
 
-	WellKnownPath string
+	WellKnownURI string
 }
 
 // New returns a new instance of Schema.
@@ -68,6 +68,9 @@ func (s *Schema) Validate(m Manifest) (Manifest, error) {
 	}
 
 	// Funding plans.
+	if err := validations.InRange[int]("plans", len(m.Funding.Plans), 1, 30); err != nil {
+		return m, err
+	}
 	for n, o := range m.Funding.Plans {
 		if err := s.ValidatePlan(o, n, chIDs); err != nil {
 			return m, err
@@ -75,6 +78,9 @@ func (s *Schema) Validate(m Manifest) (Manifest, error) {
 	}
 
 	// History.
+	if err := validations.InRange[int]("history", len(m.Funding.Plans), 0, 50); err != nil {
+		return m, err
+	}
 	for n, o := range m.Funding.History {
 		if err := s.ValidateHistory(o, n); err != nil {
 			return m, err
@@ -89,7 +95,7 @@ func (s *Schema) ValidateEntity(o Entity, manifest *url.URL) error {
 		return err
 	}
 
-	if err := validations.InList("entity.role", o.Type, EntityRoles); err != nil {
+	if err := validations.InList("entity.role", o.Role, EntityRoles); err != nil {
 		return err
 	}
 
@@ -105,7 +111,7 @@ func (s *Schema) ValidateEntity(o Entity, manifest *url.URL) error {
 		return err
 	}
 
-	if err := validations.WellKnownURL("entity.webpageUrl", manifest, o.WebpageURL.URL, o.WebpageURL.WellKnown, s.opt.WellKnownPath, 1024); err != nil {
+	if err := validations.WellKnownURL("entity.webpageUrl", manifest, o.WebpageURL.URL, o.WebpageURL.WellKnown, s.opt.WellKnownURI, 1024); err != nil {
 		return err
 	}
 
@@ -121,11 +127,11 @@ func (s *Schema) ValidateProject(o Project, n int, manifest *url.URL) error {
 		return err
 	}
 
-	if err := validations.WellKnownURL(fmt.Sprintf("projects[%d].webpageUrl", n), manifest, o.WebpageURL.URL, o.WebpageURL.WellKnown, s.opt.WellKnownPath, 1024); err != nil {
+	if err := validations.WellKnownURL(fmt.Sprintf("projects[%d].webpageUrl", n), manifest, o.WebpageURL.URL, o.WebpageURL.WellKnown, s.opt.WellKnownURI, 1024); err != nil {
 		return err
 	}
 
-	if err := validations.WellKnownURL(fmt.Sprintf("projects[%d].repositoryUrl", n), manifest, o.RepositoryUrl.URL, o.RepositoryUrl.WellKnown, s.opt.WellKnownPath, 1024); err != nil {
+	if err := validations.WellKnownURL(fmt.Sprintf("projects[%d].repositoryUrl", n), manifest, o.RepositoryUrl.URL, o.RepositoryUrl.WellKnown, s.opt.WellKnownURI, 1024); err != nil {
 		return err
 	}
 
@@ -135,7 +141,7 @@ func (s *Schema) ValidateProject(o Project, n int, manifest *url.URL) error {
 		return err
 	}
 	if strings.HasPrefix(o.License, "spdx:") {
-		if err := validations.InMap(licenseTag, "spdx license list", o.License, s.opt.Licenses); err != nil {
+		if err := validations.InMap(licenseTag, "spdx license list", strings.TrimPrefix(o.License, "spdx:"), s.opt.Licenses); err != nil {
 			return err
 		}
 	}
@@ -151,7 +157,7 @@ func (s *Schema) ValidateProject(o Project, n int, manifest *url.URL) error {
 		}
 
 		if strings.HasPrefix(f, "lang:") {
-			if err := validations.InMap(fTag, "default programming language list", f, s.opt.ProgrammingLanguages); err != nil {
+			if err := validations.InMap(fTag, "default programming language list", strings.TrimPrefix(f, "lang:"), s.opt.ProgrammingLanguages); err != nil {
 				return err
 			}
 		}
@@ -175,7 +181,7 @@ func (s *Schema) ValidateChannel(o Channel, n int) error {
 		return err
 	}
 
-	if err := validations.InList(fmt.Sprintf("channels[%d].type", n), o.Type, EntityTypes); err != nil {
+	if err := validations.InList(fmt.Sprintf("channels[%d].type", n), o.Type, ChannelTypes); err != nil {
 		return err
 	}
 
