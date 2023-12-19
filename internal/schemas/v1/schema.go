@@ -117,7 +117,7 @@ func (s *Schema) ValidateProject(o Project, n int, manifest *url.URL) error {
 		return err
 	}
 
-	if err := validations.InRange[int](fmt.Sprintf("projects[%d].description", n), len(o.Description), 1, 1024); err != nil {
+	if err := validations.InRange[int](fmt.Sprintf("projects[%d].description", n), len(o.Description), 5, 1024); err != nil {
 		return err
 	}
 
@@ -125,7 +125,7 @@ func (s *Schema) ValidateProject(o Project, n int, manifest *url.URL) error {
 		return err
 	}
 
-	if err := validations.WellKnownURL(fmt.Sprintf("projects[%d].repositoryURL", n), manifest, o.RepositoryUrl.URL, o.RepositoryUrl.WellKnown, s.opt.WellKnownPath, 1024); err != nil {
+	if err := validations.WellKnownURL(fmt.Sprintf("projects[%d].repositoryUrl", n), manifest, o.RepositoryUrl.URL, o.RepositoryUrl.WellKnown, s.opt.WellKnownPath, 1024); err != nil {
 		return err
 	}
 
@@ -140,7 +140,10 @@ func (s *Schema) ValidateProject(o Project, n int, manifest *url.URL) error {
 		}
 	}
 
-	// Languages.
+	// Frameworks.
+	if err := validations.InRange[int](fmt.Sprintf("projects[%d].frameworks", n), len(o.Frameworks), 0, 5); err != nil {
+		return err
+	}
 	for i, f := range o.Frameworks {
 		fTag := fmt.Sprintf("projects[%d].frameworks[%d]", n, i)
 		if err := validations.InRange[int](fTag, len(f), 2, 64); err != nil {
@@ -155,7 +158,7 @@ func (s *Schema) ValidateProject(o Project, n int, manifest *url.URL) error {
 	}
 
 	// Tags.
-	if err := validations.MaxItems[[]string](fmt.Sprintf("projects[%d].tags", n), o.Tags, 10); err != nil {
+	if err := validations.InRange[int](fmt.Sprintf("projects[%d].tags", n), len(o.Tags), 1, 10); err != nil {
 		return err
 	}
 	for i, t := range o.Tags {
@@ -200,7 +203,7 @@ func (s *Schema) ValidatePlan(o Plan, n int, channelIDs map[string]struct{}) err
 		return err
 	}
 
-	if err := validations.InRange[int](fmt.Sprintf("plans[%d].description", n), len(o.Description), 3, 1024); err != nil {
+	if err := validations.InRange[int](fmt.Sprintf("plans[%d].description", n), len(o.Description), 0, 1024); err != nil {
 		return err
 	}
 
@@ -226,7 +229,7 @@ func (s *Schema) ValidatePlan(o Plan, n int, channelIDs map[string]struct{}) err
 }
 
 func (s *Schema) ValidateHistory(o History, n int) error {
-	if err := validations.InRange[int](fmt.Sprintf("history[%d].year", n), o.Year, 1970, 2050); err != nil {
+	if err := validations.InRange[int](fmt.Sprintf("history[%d].year", n), o.Year, 1970, 2075); err != nil {
 		return err
 	}
 
