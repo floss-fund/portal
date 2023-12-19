@@ -434,8 +434,6 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV13(in *jlexer.Lexer, o
 			out.UUID = string(in.String())
 		case "version":
 			out.Version = string(in.String())
-		case "url":
-			out.URL = string(in.String())
 		case "body":
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.Body).UnmarshalJSON(data))
@@ -495,11 +493,6 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV13(out *jwriter.Writer
 		const prefix string = ",\"version\":"
 		out.RawString(prefix)
 		out.String(string(in.Version))
-	}
-	{
-		const prefix string = ",\"url\":"
-		out.RawString(prefix)
-		out.String(string(in.URL))
 	}
 	{
 		const prefix string = ",\"body\":"

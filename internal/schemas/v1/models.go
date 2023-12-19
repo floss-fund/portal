@@ -79,10 +79,12 @@ type History struct {
 
 //easyjson:json
 type Manifest struct {
+	// This is added internally and is not expected in the manifest itself.
+	URL string `json:"-"`
+
 	ID       string          `json:"id"`
 	UUID     string          `json:"uuid"`
 	Version  string          `json:"version"`
-	URL      string          `json:"url"`
 	Body     json.RawMessage `json:"body"`
 	Entity   Entity          `json:"entity"`
 	Projects []Project       `json:"projects"`

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -24,17 +25,19 @@ type Opt struct {
 }
 
 type Crawl struct {
-	opt     Opt
+	opt     *Opt
 	sc      Schema
 	headers http.Header
 	hc      *http.Client
+	lo      *log.Logger
 }
 
-func New(o Opt, sc Schema) *Crawl {
+func New(o *Opt, sc Schema, lo *log.Logger) *Crawl {
 	h := http.Header{}
 	h.Set("User-Agent", o.UserAgent)
 
 	return &Crawl{
+		opt:     o,
 		sc:      sc,
 		headers: h,
 		hc: &http.Client{
@@ -46,6 +49,7 @@ func New(o Opt, sc Schema) *Crawl {
 				IdleConnTimeout:       o.ReqTimeout,
 			},
 		},
+		lo: lo,
 	}
 }
 
@@ -56,17 +60,18 @@ func (c *Crawl) FetchManifest(manifestURL string) (v1.Manifest, error) {
 		return v1.Manifest{}, err
 	}
 
-	return c.ParseManifest(b, true)
+	return c.ParseManifest(b, manifestURL, true)
 }
 
 // ParseManifest parses a given JSON body, validates it, and returns the manifest.
-func (c *Crawl) ParseManifest(b []byte, checkProvenance bool) (v1.Manifest, error) {
+func (c *Crawl) ParseManifest(b []byte, manifestURL string, checkProvenance bool) (v1.Manifest, error) {
 	var m v1.Manifest
 	if err := m.UnmarshalJSON(b); err != nil {
 		return m, fmt.Errorf("error parsing JSON body: %v", err)
 	}
 
 	// Validate the manifest's schema.
+	m.URL = manifestURL
 	if v, err := c.sc.Validate(m); err != nil {
 		return v, err
 	} else {
@@ -74,6 +79,20 @@ func (c *Crawl) ParseManifest(b []byte, checkProvenance bool) (v1.Manifest, erro
 	}
 
 	// Establish the provenance of all URLs mentioned in the manifest.
+	if checkProvenance {
+		if err := c.CheckProvenance(m.Entity.WebpageURL, manifestURL); err != nil {
+			return m, err
+		}
+
+		for _, o := range m.Projects {
+			if err := c.CheckProvenance(o.WebpageURL, manifestURL); err != nil {
+				return m, err
+			}
+			if err := c.CheckProvenance(o.RepositoryUrl, manifestURL); err != nil {
+				return m, err
+			}
+		}
+	}
 
 	return m, nil
 }
@@ -101,7 +120,7 @@ func (c *Crawl) CheckProvenance(u v1.URL, manifestURL string) error {
 		}
 	}
 
-	return errors.New("the manifest URL was not found in the .well-known list")
+	return fmt.Errorf("manifest URL %s was not found in the .well-known list", manifestURL)
 }
 
 // fetch fetches a given URL with error retries.
@@ -127,11 +146,19 @@ func (c *Crawl) fetch(u string) ([]byte, error) {
 }
 
 // doReq executes an HTTP doReq. The bool indicates whether it's a retriable error.
-func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) ([]byte, bool, error) {
+func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) (respBody []byte, retry bool, retErr error) {
 	var (
 		err      error
 		postBody io.Reader
 	)
+
+	defer func() {
+		msg := "OK"
+		if retErr != nil {
+			msg = retErr.Error()
+		}
+		c.lo.Printf("%s %s -> %v", method, rURL, msg)
+	}()
 
 	// Encode POST / PUT params.
 	if method == http.MethodPost || method == http.MethodPut {
@@ -172,7 +199,7 @@ func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) 
 	}()
 
 	if r.StatusCode != http.StatusOK {
-		return nil, false, fmt.Errorf("non-200 response from URL: %d", r.StatusCode)
+		return nil, false, fmt.Errorf("URL %s returned %d", rURL, r.StatusCode)
 	}
 
 	body, err := io.ReadAll(io.LimitReader(r.Body, c.opt.MaxBytes))
