@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	mrand "math/rand"
 	"os"
 	"unicode"
@@ -173,7 +175,7 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB, ko *koanf.Koanf) *core.Core {
 	return core.New(&q, opt)
 }
 
-func initCrawl(db *sqlx.DB, ko *koanf.Koanf) *crawl.Crawl {
+func initCrawl(sc *v1.Schema, ko *koanf.Koanf) *crawl.Crawl {
 	opt := crawl.Opt{
 		UserAgent:    ko.MustString("crawl.useragent"),
 		MaxHostConns: ko.MustInt("crawl.max_host_conns"),
@@ -182,10 +184,60 @@ func initCrawl(db *sqlx.DB, ko *koanf.Koanf) *crawl.Crawl {
 		MaxBytes:     ko.MustInt64("crawl.max_bytes"),
 	}
 
+	return crawl.New(&opt, sc, lo)
+}
+
+func initSchema(ko *koanf.Koanf) *v1.Schema {
+	// SPDX license index.
+	licenses := make(map[string]string)
+	if b, err := os.ReadFile(ko.MustString("data_files.spdx")); err != nil {
+		log.Fatalf("error reading spdx file: %v", err)
+	} else {
+		o := struct {
+			Licenses []struct {
+				Name string `json:"name"`
+				ID   string `json:"licenseId"`
+			} `json:"licenses"`
+		}{}
+
+		if err := json.Unmarshal(b, &o); err != nil {
+			lo.Fatalf("error unmarshalling spdx file: %v", err)
+		}
+
+		for _, l := range o.Licenses {
+			licenses[l.ID] = l.Name
+		}
+	}
+
+	// Programming language list.
+	langs := make(map[string]string)
+	if b, err := os.ReadFile(ko.MustString("data_files.languages")); err != nil {
+		log.Fatalf("error reading programming languages file: %v", err)
+	} else {
+		if err := json.Unmarshal(b, &langs); err != nil {
+			lo.Fatalf("error unmarshalling programming languages file: %v", err)
+		}
+	}
+
+	// Currencies list.
+	currencies := make(map[string]string)
+	if b, err := os.ReadFile(ko.MustString("data_files.currencies")); err != nil {
+		log.Fatalf("error reading currencies file: %v", err)
+	} else {
+		if err := json.Unmarshal(b, &currencies); err != nil {
+			lo.Fatalf("error unmarshalling currencies file: %v", err)
+		}
+	}
+
+	// Initialize schema.
 	sc := v1.New("v1.0.0", &v1.Opt{
-		WellKnownPath: ko.MustString("app.wellknown_path"),
+		WellKnownURI:         ko.MustString("app.wellknown_uri"),
+		Licenses:             licenses,
+		ProgrammingLanguages: langs,
+		Currencies:           currencies,
 	})
-	return crawl.New(opt, sc)
+
+	return sc
 }
 
 func generateNewFiles() error {

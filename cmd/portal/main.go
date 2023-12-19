@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"floss.fund/portal/internal/core"
+	"floss.fund/portal/internal/crawl"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/koanf/v2"
 	"github.com/knadh/stuffbin"
@@ -27,6 +28,7 @@ type App struct {
 	consts  Consts
 	siteTpl *template.Template
 	core    *core.Core
+	crawl   *crawl.Crawl
 
 	db *sqlx.DB
 	fs stuffbin.FileSystem
@@ -73,6 +75,7 @@ func main() {
 
 	// Initialize queries and data handler.
 	app.core = initCore(app.fs, db, ko)
+	app.crawl = initCrawl(initSchema(ko), ko)
 
 	// Initialize the echo HTTP server.
 	srv := initHTTPServer(app, ko)
