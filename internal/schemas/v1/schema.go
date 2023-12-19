@@ -234,7 +234,7 @@ func (s *Schema) ValidatePlan(o Plan, n int, channelIDs map[string]struct{}) err
 	return nil
 }
 
-func (s *Schema) ValidateHistory(o History, n int) error {
+func (s *Schema) ValidateHistory(o HistoryItem, n int) error {
 	if err := validations.InRange[int](fmt.Sprintf("history[%d].year", n), o.Year, 1970, 2075); err != nil {
 		return err
 	}

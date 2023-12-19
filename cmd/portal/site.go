@@ -31,11 +31,22 @@ func handleSubmitPage(c echo.Context) error {
 
 	u, err := validations.IsURL("url", mURL, 1024)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	if !strings.HasSuffix(u.Path, app.consts.ManifestURI) {
-		return fmt.Errorf("URI doesn't end in %s", app.consts.ManifestURI)
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("URI doesn't end in %s", app.consts.ManifestURI))
+	}
+
+	// Fetch and validate the manifest.
+	m, err := app.crawl.FetchManifest(mURL)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// Add it to the database.
+	if _, err := app.core.UpsertManifest(m); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "error saving manifest to database. Retry later.")
 	}
 
 	return c.JSON(http.StatusOK, 200)

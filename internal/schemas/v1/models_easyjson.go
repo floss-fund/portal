@@ -90,7 +90,73 @@ func (v *URL) UnmarshalJSON(data []byte) error {
 func (v *URL) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV1(l, v)
 }
-func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV11(in *jlexer.Lexer, out *Project) {
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV11(in *jlexer.Lexer, out *Projects) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(Projects, 0, 0)
+			} else {
+				*out = Projects{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v1 Project
+			(v1).UnmarshalEasyJSON(in)
+			*out = append(*out, v1)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV11(out *jwriter.Writer, in Projects) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v2, v3 := range in {
+			if v2 > 0 {
+				out.RawByte(',')
+			}
+			(v3).MarshalEasyJSON(out)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Projects) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{FloatFmt: ""}
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV11(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Projects) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV11(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Projects) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV11(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Projects) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV11(l, v)
+}
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV12(in *jlexer.Lexer, out *Project) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -135,9 +201,9 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV11(in *jlexer.Lexer, o
 					out.Frameworks = (out.Frameworks)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v1 string
-					v1 = string(in.String())
-					out.Frameworks = append(out.Frameworks, v1)
+					var v4 string
+					v4 = string(in.String())
+					out.Frameworks = append(out.Frameworks, v4)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -158,9 +224,9 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV11(in *jlexer.Lexer, o
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v2 string
-					v2 = string(in.String())
-					out.Tags = append(out.Tags, v2)
+					var v5 string
+					v5 = string(in.String())
+					out.Tags = append(out.Tags, v5)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -175,7 +241,7 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV11(in *jlexer.Lexer, o
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV11(out *jwriter.Writer, in Project) {
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV12(out *jwriter.Writer, in Project) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -211,11 +277,11 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV11(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v3, v4 := range in.Frameworks {
-				if v3 > 0 {
+			for v6, v7 := range in.Frameworks {
+				if v6 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v4))
+				out.String(string(v7))
 			}
 			out.RawByte(']')
 		}
@@ -227,11 +293,11 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV11(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v5, v6 := range in.Tags {
-				if v5 > 0 {
+			for v8, v9 := range in.Tags {
+				if v8 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v6))
+				out.String(string(v9))
 			}
 			out.RawByte(']')
 		}
@@ -242,27 +308,93 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV11(out *jwriter.Writer
 // MarshalJSON supports json.Marshaler interface
 func (v Project) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{FloatFmt: ""}
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV11(&w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV12(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Project) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV11(w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV12(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Project) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV11(&r, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV12(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Project) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV11(l, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV12(l, v)
 }
-func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV12(in *jlexer.Lexer, out *Plan) {
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV13(in *jlexer.Lexer, out *Plans) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(Plans, 0, 0)
+			} else {
+				*out = Plans{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v10 Plan
+			(v10).UnmarshalEasyJSON(in)
+			*out = append(*out, v10)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV13(out *jwriter.Writer, in Plans) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v11, v12 := range in {
+			if v11 > 0 {
+				out.RawByte(',')
+			}
+			(v12).MarshalEasyJSON(out)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Plans) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{FloatFmt: ""}
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV13(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Plans) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV13(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Plans) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV13(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Plans) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV13(l, v)
+}
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV14(in *jlexer.Lexer, out *Plan) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -311,9 +443,9 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV12(in *jlexer.Lexer, o
 					out.Channels = (out.Channels)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v7 string
-					v7 = string(in.String())
-					out.Channels = append(out.Channels, v7)
+					var v13 string
+					v13 = string(in.String())
+					out.Channels = append(out.Channels, v13)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -328,7 +460,7 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV12(in *jlexer.Lexer, o
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV12(out *jwriter.Writer, in Plan) {
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV14(out *jwriter.Writer, in Plan) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -374,11 +506,11 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV12(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v8, v9 := range in.Channels {
-				if v8 > 0 {
+			for v14, v15 := range in.Channels {
+				if v14 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v9))
+				out.String(string(v15))
 			}
 			out.RawByte(']')
 		}
@@ -389,27 +521,27 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV12(out *jwriter.Writer
 // MarshalJSON supports json.Marshaler interface
 func (v Plan) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{FloatFmt: ""}
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV12(&w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV14(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Plan) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV12(w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV14(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Plan) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV12(&r, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV14(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Plan) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV12(l, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV14(l, v)
 }
-func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV13(in *jlexer.Lexer, out *Manifest) {
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV15(in *jlexer.Lexer, out *Manifest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -441,28 +573,7 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV13(in *jlexer.Lexer, o
 		case "entity":
 			(out.Entity).UnmarshalEasyJSON(in)
 		case "projects":
-			if in.IsNull() {
-				in.Skip()
-				out.Projects = nil
-			} else {
-				in.Delim('[')
-				if out.Projects == nil {
-					if !in.IsDelim(']') {
-						out.Projects = make([]Project, 0, 0)
-					} else {
-						out.Projects = []Project{}
-					}
-				} else {
-					out.Projects = (out.Projects)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v10 Project
-					(v10).UnmarshalEasyJSON(in)
-					out.Projects = append(out.Projects, v10)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
+			(out.Projects).UnmarshalEasyJSON(in)
 		case "funding":
 			easyjsonD2b7633eDecode(in, &out.Funding)
 		default:
@@ -475,13 +586,18 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV13(in *jlexer.Lexer, o
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV13(out *jwriter.Writer, in Manifest) {
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV15(out *jwriter.Writer, in Manifest) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"id\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.ID))
 	}
 	{
@@ -507,18 +623,7 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV13(out *jwriter.Writer
 	{
 		const prefix string = ",\"projects\":"
 		out.RawString(prefix)
-		if in.Projects == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v11, v12 := range in.Projects {
-				if v11 > 0 {
-					out.RawByte(',')
-				}
-				(v12).MarshalEasyJSON(out)
-			}
-			out.RawByte(']')
-		}
+		(in.Projects).MarshalEasyJSON(out)
 	}
 	{
 		const prefix string = ",\"funding\":"
@@ -531,30 +636,30 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV13(out *jwriter.Writer
 // MarshalJSON supports json.Marshaler interface
 func (v Manifest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{FloatFmt: ""}
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV13(&w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV15(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Manifest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV13(w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV15(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Manifest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV13(&r, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV15(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Manifest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV13(l, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV15(l, v)
 }
 func easyjsonD2b7633eDecode(in *jlexer.Lexer, out *struct {
-	Channels []Channel `json:"channels"`
-	Plans    []Plan    `json:"plans"`
-	History  []History `json:"history"`
+	Channels Channels `json:"channels"`
+	Plans    Plans    `json:"plans"`
+	History  History  `json:"history"`
 }) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
@@ -575,74 +680,11 @@ func easyjsonD2b7633eDecode(in *jlexer.Lexer, out *struct {
 		}
 		switch key {
 		case "channels":
-			if in.IsNull() {
-				in.Skip()
-				out.Channels = nil
-			} else {
-				in.Delim('[')
-				if out.Channels == nil {
-					if !in.IsDelim(']') {
-						out.Channels = make([]Channel, 0, 1)
-					} else {
-						out.Channels = []Channel{}
-					}
-				} else {
-					out.Channels = (out.Channels)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v13 Channel
-					(v13).UnmarshalEasyJSON(in)
-					out.Channels = append(out.Channels, v13)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
+			(out.Channels).UnmarshalEasyJSON(in)
 		case "plans":
-			if in.IsNull() {
-				in.Skip()
-				out.Plans = nil
-			} else {
-				in.Delim('[')
-				if out.Plans == nil {
-					if !in.IsDelim(']') {
-						out.Plans = make([]Plan, 0, 0)
-					} else {
-						out.Plans = []Plan{}
-					}
-				} else {
-					out.Plans = (out.Plans)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v14 Plan
-					(v14).UnmarshalEasyJSON(in)
-					out.Plans = append(out.Plans, v14)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
+			(out.Plans).UnmarshalEasyJSON(in)
 		case "history":
-			if in.IsNull() {
-				in.Skip()
-				out.History = nil
-			} else {
-				in.Delim('[')
-				if out.History == nil {
-					if !in.IsDelim(']') {
-						out.History = make([]History, 0, 1)
-					} else {
-						out.History = []History{}
-					}
-				} else {
-					out.History = (out.History)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v15 History
-					(v15).UnmarshalEasyJSON(in)
-					out.History = append(out.History, v15)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
+			(out.History).UnmarshalEasyJSON(in)
 		default:
 			in.SkipRecursive()
 		}
@@ -654,9 +696,9 @@ func easyjsonD2b7633eDecode(in *jlexer.Lexer, out *struct {
 	}
 }
 func easyjsonD2b7633eEncode(out *jwriter.Writer, in struct {
-	Channels []Channel `json:"channels"`
-	Plans    []Plan    `json:"plans"`
-	History  []History `json:"history"`
+	Channels Channels `json:"channels"`
+	Plans    Plans    `json:"plans"`
+	History  History  `json:"history"`
 }) {
 	out.RawByte('{')
 	first := true
@@ -664,54 +706,21 @@ func easyjsonD2b7633eEncode(out *jwriter.Writer, in struct {
 	{
 		const prefix string = ",\"channels\":"
 		out.RawString(prefix[1:])
-		if in.Channels == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v16, v17 := range in.Channels {
-				if v16 > 0 {
-					out.RawByte(',')
-				}
-				(v17).MarshalEasyJSON(out)
-			}
-			out.RawByte(']')
-		}
+		(in.Channels).MarshalEasyJSON(out)
 	}
 	{
 		const prefix string = ",\"plans\":"
 		out.RawString(prefix)
-		if in.Plans == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v18, v19 := range in.Plans {
-				if v18 > 0 {
-					out.RawByte(',')
-				}
-				(v19).MarshalEasyJSON(out)
-			}
-			out.RawByte(']')
-		}
+		(in.Plans).MarshalEasyJSON(out)
 	}
 	{
 		const prefix string = ",\"history\":"
 		out.RawString(prefix)
-		if in.History == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v20, v21 := range in.History {
-				if v20 > 0 {
-					out.RawByte(',')
-				}
-				(v21).MarshalEasyJSON(out)
-			}
-			out.RawByte(']')
-		}
+		(in.History).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
-func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV14(in *jlexer.Lexer, out *History) {
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV16(in *jlexer.Lexer, out *HistoryItem) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -748,7 +757,7 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV14(in *jlexer.Lexer, o
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV14(out *jwriter.Writer, in History) {
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV16(out *jwriter.Writer, in HistoryItem) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -776,29 +785,95 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV14(out *jwriter.Writer
 }
 
 // MarshalJSON supports json.Marshaler interface
+func (v HistoryItem) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{FloatFmt: ""}
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV16(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v HistoryItem) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV16(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *HistoryItem) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV16(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *HistoryItem) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV16(l, v)
+}
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV17(in *jlexer.Lexer, out *History) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(History, 0, 1)
+			} else {
+				*out = History{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v16 HistoryItem
+			(v16).UnmarshalEasyJSON(in)
+			*out = append(*out, v16)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV17(out *jwriter.Writer, in History) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v17, v18 := range in {
+			if v17 > 0 {
+				out.RawByte(',')
+			}
+			(v18).MarshalEasyJSON(out)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
 func (v History) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{FloatFmt: ""}
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV14(&w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV17(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v History) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV14(w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV17(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *History) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV14(&r, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV17(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *History) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV14(l, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV17(l, v)
 }
-func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV15(in *jlexer.Lexer, out *Entity) {
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV18(in *jlexer.Lexer, out *Entity) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -839,7 +914,7 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV15(in *jlexer.Lexer, o
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV15(out *jwriter.Writer, in Entity) {
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV18(out *jwriter.Writer, in Entity) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -879,27 +954,93 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV15(out *jwriter.Writer
 // MarshalJSON supports json.Marshaler interface
 func (v Entity) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{FloatFmt: ""}
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV15(&w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV18(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Entity) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV15(w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV18(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Entity) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV15(&r, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV18(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Entity) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV15(l, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV18(l, v)
 }
-func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV16(in *jlexer.Lexer, out *Channel) {
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV19(in *jlexer.Lexer, out *Channels) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(Channels, 0, 1)
+			} else {
+				*out = Channels{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v19 Channel
+			(v19).UnmarshalEasyJSON(in)
+			*out = append(*out, v19)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV19(out *jwriter.Writer, in Channels) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v20, v21 := range in {
+			if v20 > 0 {
+				out.RawByte(',')
+			}
+			(v21).MarshalEasyJSON(out)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Channels) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{FloatFmt: ""}
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV19(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Channels) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV19(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Channels) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV19(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Channels) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV19(l, v)
+}
+func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV110(in *jlexer.Lexer, out *Channel) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -936,7 +1077,7 @@ func easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV16(in *jlexer.Lexer, o
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV16(out *jwriter.Writer, in Channel) {
+func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV110(out *jwriter.Writer, in Channel) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -966,23 +1107,23 @@ func easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV16(out *jwriter.Writer
 // MarshalJSON supports json.Marshaler interface
 func (v Channel) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{FloatFmt: ""}
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV16(&w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV110(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Channel) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV16(w, v)
+	easyjsonD2b7633eEncodeFlossFundPortalInternalSchemasV110(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Channel) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV16(&r, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV110(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Channel) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV16(l, v)
+	easyjsonD2b7633eDecodeFlossFundPortalInternalSchemasV110(l, v)
 }

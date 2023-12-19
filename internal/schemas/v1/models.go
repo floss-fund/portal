@@ -43,6 +43,9 @@ type Project struct {
 	Tags          []string `json:"tags"`
 }
 
+//easyjson:json
+type Projects []Project
+
 // Channel is a loose representation of a payment channel. eg: bank, cash, or a processor like PayPal.
 //
 //easyjson:json
@@ -52,6 +55,9 @@ type Channel struct {
 	Address     string `json:"address"`
 	Description string `json:"description"`
 }
+
+// easyjson:json
+type Channels []Channel
 
 // Plan represents a payment plan / ask for the project.
 //
@@ -67,31 +73,37 @@ type Plan struct {
 	Channels    []string `json:"channels"`
 }
 
+// easyjson:json
+type Plans []Plan
+
 // History represents a very course, high level income/expense statement.
 //
 //easyjson:json
-type History struct {
+type HistoryItem struct {
 	Year        int     `json:"year"`
 	Income      float64 `json:"income"`
 	Expenses    float64 `json:"expenses"`
 	Description string  `json:"description"`
 }
 
+// easyjson:json
+type History []HistoryItem
+
 //easyjson:json
 type Manifest struct {
 	// This is added internally and is not expected in the manifest itself.
-	URL string `json:"-"`
+	URL string `json:"-" db:"-"`
 
 	ID       string          `json:"id"`
 	UUID     string          `json:"uuid"`
 	Version  string          `json:"version"`
 	Body     json.RawMessage `json:"body"`
 	Entity   Entity          `json:"entity"`
-	Projects []Project       `json:"projects"`
+	Projects Projects        `json:"projects"`
 
 	Funding struct {
-		Channels []Channel `json:"channels"`
-		Plans    []Plan    `json:"plans"`
-		History  []History `json:"history"`
+		Channels Channels `json:"channels"`
+		Plans    Plans    `json:"plans"`
+		History  History  `json:"history"`
 	} `json:"funding"`
 }

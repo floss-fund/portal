@@ -49,7 +49,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 
 -- manifests
-DROP TYPE IF EXISTS entry_status CASCADE; CREATE TYPE entry_status AS ENUM ('pending', 'enabled', 'expiring', 'disabled');
+DROP TYPE IF EXISTS entry_status CASCADE; CREATE TYPE entry_status AS ENUM ('pending', 'active', 'expiring', 'disabled');
 DROP TABLE IF EXISTS manifests CASCADE;
 CREATE TABLE manifests (
     id                   SERIAL PRIMARY KEY,

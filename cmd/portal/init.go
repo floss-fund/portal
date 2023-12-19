@@ -172,7 +172,7 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB, ko *koanf.Koanf) *core.Core {
 
 	opt := core.Opt{}
 
-	return core.New(&q, opt)
+	return core.New(&q, opt, lo)
 }
 
 func initCrawl(sc *v1.Schema, ko *koanf.Koanf) *crawl.Crawl {

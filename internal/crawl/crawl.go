@@ -2,6 +2,7 @@ package crawl
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -72,6 +73,7 @@ func (c *Crawl) ParseManifest(b []byte, manifestURL string, checkProvenance bool
 
 	// Validate the manifest's schema.
 	m.URL = manifestURL
+	m.Body = json.RawMessage(b)
 	if v, err := c.sc.Validate(m); err != nil {
 		return v, err
 	} else {
@@ -199,7 +201,7 @@ func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) 
 	}()
 
 	if r.StatusCode != http.StatusOK {
-		return nil, false, fmt.Errorf("URL %s returned %d", rURL, r.StatusCode)
+		return nil, false, fmt.Errorf("%s returned %d", rURL, r.StatusCode)
 	}
 
 	body, err := io.ReadAll(io.LimitReader(r.Body, c.opt.MaxBytes))

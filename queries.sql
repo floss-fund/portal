@@ -10,7 +10,9 @@ INSERT INTO manifests (version, url, body, entity, projects, funding_channels, f
 		funding_plans=EXCLUDED.funding_plans,
 		funding_history=EXCLUDED.funding_history,
 		meta=EXCLUDED.meta,
-		status=EXCLUDED.status,
+		status=(
+			CASE WHEN $10 = 'pending' AND manifests.status = 'active' THEN 'active' ELSE EXCLUDED.status END
+		),
 		updated_at=NOW()
 	WHERE manifests.status != 'disabled'
 	RETURNING *;
