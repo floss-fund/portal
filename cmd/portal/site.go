@@ -39,7 +39,7 @@ func handleSubmitPage(c echo.Context) error {
 	}
 
 	// Fetch and validate the manifest.
-	m, err := app.crawl.FetchManifest(mURL)
+	m, err := app.crawl.FetchManifest(u)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

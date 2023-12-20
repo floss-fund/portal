@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"net/url"
 )
 
 var (
@@ -16,6 +17,10 @@ var (
 type URL struct {
 	URL       string `json:"url"`
 	WellKnown string `json:"wellKnown"`
+
+	// Parsed URLs.
+	URLobj       *url.URL `json:"-" db:"-"`
+	WellKnownObj *url.URL `json:"-" db:"-"`
 }
 
 // Entity represents an entity in charge of a project: individual, organisation etc.
@@ -106,4 +111,10 @@ type Manifest struct {
 		Plans    Plans    `json:"plans"`
 		History  History  `json:"history"`
 	} `json:"funding"`
+}
+
+type ManifestURL struct {
+	ID     int      `json:"id"`
+	URL    string   `json:"url"`
+	URLobj *url.URL `json:"-" db:"-"`
 }

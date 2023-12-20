@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 
 	v1 "floss.fund/portal/internal/schemas/v1"
 	"github.com/jmoiron/sqlx"
@@ -21,7 +22,9 @@ const (
 
 // Queries contains prepared DB queries.
 type Queries struct {
-	UpsertManifest *sqlx.Stmt `query:"upsert-manifest"`
+	UpsertManifest       *sqlx.Stmt `query:"upsert-manifest"`
+	GetForCrawling       *sqlx.Stmt `query:"get-for-crawling"`
+	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
 }
 
 type Core struct {
@@ -76,4 +79,37 @@ func (d *Core) UpsertManifest(m v1.Manifest) (v1.Manifest, error) {
 	}
 
 	return m, nil
+}
+
+// GetManifestsURLsByAge retrieves manifest URLs that need to be crawled again. It returns records in batches of limit length,
+// continued from the last processed row ID which is the offsetID.
+func (d *Core) GetManifestsURLsByAge(age string, offsetID, limit int) ([]v1.ManifestURL, error) {
+	var out []v1.ManifestURL
+	if err := d.q.GetForCrawling.Select(&out, offsetID, age, limit); err != nil {
+		d.log.Printf("error fetching URLs for crawling: %v", err)
+		return nil, err
+	}
+
+	for n, u := range out {
+		p, err := url.Parse(u.URL)
+		if err != nil {
+			d.log.Printf("error parsing url %v: ", err)
+			continue
+		}
+
+		u.URLobj = p
+		out[n] = u
+	}
+
+	return out, nil
+}
+
+// UpdateManifestStatus updates a manifest's status.
+func (d *Core) UpdateManifestStatus(id int, status string) error {
+	if _, err := d.q.UpdateManifestStatus.Exec(id, status); err != nil {
+		d.log.Printf("error updating manifest status: %v", err)
+		return err
+	}
+
+	return nil
 }

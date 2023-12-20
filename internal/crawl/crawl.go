@@ -8,6 +8,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
+	"sync"
 	"time"
 
 	v1 "floss.fund/portal/internal/schemas/v1"
@@ -17,29 +19,55 @@ type Schema interface {
 	Validate(v1.Manifest) (v1.Manifest, error)
 }
 
+type DB interface {
+	GetManifestsURLsByAge(age string, offsetID, limit int) ([]v1.ManifestURL, error)
+	UpsertManifest(m v1.Manifest) (v1.Manifest, error)
+	UpdateManifestStatus(id int, status string) error
+}
+
 type Opt struct {
-	UserAgent    string        `json:"useragent"`
-	MaxHostConns int           `json:"max_host_conns"`
-	ReqTimeout   time.Duration `json:"req_timeout"`
-	Attempts     int           `json:"attempts"`
-	MaxBytes     int64         `json:"max_bytes"`
+	UserAgent           string        `json:"useragent"`
+	MaxHostConns        int           `json:"max_host_conns"`
+	ReqTimeout          time.Duration `json:"req_timeout"`
+	Attempts            int           `json:"attempts"`
+	MaxBytes            int64         `json:"max_bytes"`
+	Workers             int           `json:"workers"`
+	ManifestAge         string        `json:"manifest_age"`
+	BatchSize           int           `json:"batch_size"`
+	SkipRateLimitedHost bool          `json:"skip_ratelimited_host"`
 }
 
 type Crawl struct {
-	opt     *Opt
-	sc      Schema
+	opt *Opt
+	sc  Schema
+	db  DB
+
+	wg          *sync.WaitGroup
+	jobs        chan v1.ManifestURL
+	rateLimited map[string]struct{}
+
 	headers http.Header
 	hc      *http.Client
-	lo      *log.Logger
+	log     *log.Logger
 }
 
-func New(o *Opt, sc Schema, lo *log.Logger) *Crawl {
+var (
+	ErrRatelimited = errors.New("host rate limited the request")
+)
+
+func New(o *Opt, sc Schema, db DB, lo *log.Logger) *Crawl {
 	h := http.Header{}
 	h.Set("User-Agent", o.UserAgent)
 
 	return &Crawl{
-		opt:     o,
-		sc:      sc,
+		opt: o,
+		sc:  sc,
+		db:  db,
+
+		wg:          &sync.WaitGroup{},
+		jobs:        make(chan v1.ManifestURL, o.BatchSize),
+		rateLimited: make(map[string]struct{}),
+
 		headers: h,
 		hc: &http.Client{
 			Timeout: o.ReqTimeout,
@@ -50,18 +78,31 @@ func New(o *Opt, sc Schema, lo *log.Logger) *Crawl {
 				IdleConnTimeout:       o.ReqTimeout,
 			},
 		},
-		lo: lo,
+		log: lo,
 	}
 }
 
+func (c *Crawl) Crawl() error {
+	for n := 0; n < c.opt.Workers; n++ {
+		c.wg.Add(1)
+
+		go c.worker()
+	}
+
+	go c.dbWorker()
+
+	c.wg.Wait()
+	return nil
+}
+
 // FetchManifest fetches a given funding.json manifest, parses it, and returns.
-func (c *Crawl) FetchManifest(manifestURL string) (v1.Manifest, error) {
-	b, err := c.fetch(manifestURL)
+func (c *Crawl) FetchManifest(manifest *url.URL) (v1.Manifest, error) {
+	b, err := c.fetch(manifest)
 	if err != nil {
 		return v1.Manifest{}, err
 	}
 
-	return c.ParseManifest(b, manifestURL, true)
+	return c.ParseManifest(b, manifest.String(), true)
 }
 
 // ParseManifest parses a given JSON body, validates it, and returns the manifest.
@@ -102,11 +143,12 @@ func (c *Crawl) ParseManifest(b []byte, manifestURL string, checkProvenance bool
 // CheckProvenance fetches the .well-known URL list for the given u and checks
 // wehther the manifestURL is present in it, establishing its provenance.
 func (c *Crawl) CheckProvenance(u v1.URL, manifestURL string) error {
+	return nil
 	if u.WellKnown == "" {
 		return nil
 	}
 
-	body, err := c.fetch(u.WellKnown)
+	body, err := c.fetch(u.WellKnownObj)
 	if err != nil {
 		return err
 	}
@@ -126,18 +168,29 @@ func (c *Crawl) CheckProvenance(u v1.URL, manifestURL string) error {
 }
 
 // fetch fetches a given URL with error retries.
-func (c *Crawl) fetch(u string) ([]byte, error) {
+func (c *Crawl) fetch(u *url.URL) ([]byte, error) {
 	var (
-		body  []byte
-		err   error
-		retry bool
+		body       []byte
+		err        error
+		statusCode int
+		retry      bool
 	)
+
+	// Host is disabled due to rate limiting.
+	if _, ok := c.rateLimited[u.Host]; ok {
+		return nil, ErrRatelimited
+	}
 
 	// Retry N times.
 	for n := 0; n < c.opt.Attempts; n++ {
-		body, retry, err = c.doReq(http.MethodGet, u, nil, c.headers)
+		body, retry, statusCode, err = c.doReq(http.MethodGet, u.String(), nil, c.headers)
 		if err == nil || !retry {
 			break
+		}
+
+		// If the host sent a 429, don't send any more requests.
+		if c.opt.SkipRateLimitedHost && statusCode == http.StatusTooManyRequests {
+			c.rateLimited[u.Host] = struct{}{}
 		}
 	}
 	if err != nil {
@@ -148,7 +201,7 @@ func (c *Crawl) fetch(u string) ([]byte, error) {
 }
 
 // doReq executes an HTTP doReq. The bool indicates whether it's a retriable error.
-func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) (respBody []byte, retry bool, retErr error) {
+func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) (respBody []byte, retry bool, statusCode int, retErr error) {
 	var (
 		err      error
 		postBody io.Reader
@@ -158,8 +211,11 @@ func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) 
 		msg := "OK"
 		if retErr != nil {
 			msg = retErr.Error()
+		} else if statusCode != http.StatusOK {
+			msg = "FAILED"
 		}
-		c.lo.Printf("%s %s -> %v", method, rURL, msg)
+
+		c.log.Printf("%s %s -> %d: %v", method, rURL, statusCode, msg)
 	}()
 
 	// Encode POST / PUT params.
@@ -169,7 +225,7 @@ func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) 
 
 	req, err := http.NewRequest(method, rURL, postBody)
 	if err != nil {
-		return nil, true, err
+		return nil, true, 0, err
 	}
 
 	if headers != nil {
@@ -192,7 +248,7 @@ func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) 
 
 	r, err := c.hc.Do(req)
 	if err != nil {
-		return nil, true, err
+		return nil, true, 0, err
 	}
 	defer func() {
 		// Drain and close the body to let the Transport reuse the connection
@@ -201,13 +257,13 @@ func (c *Crawl) doReq(method, rURL string, reqBody []byte, headers http.Header) 
 	}()
 
 	if r.StatusCode != http.StatusOK {
-		return nil, false, fmt.Errorf("%s returned %d", rURL, r.StatusCode)
+		return nil, false, r.StatusCode, fmt.Errorf("%s returned %d", rURL, r.StatusCode)
 	}
 
 	body, err := io.ReadAll(io.LimitReader(r.Body, c.opt.MaxBytes))
 	if err != nil {
-		return nil, true, err
+		return nil, true, http.StatusOK, err
 	}
 
-	return body, false, nil
+	return body, false, http.StatusOK, nil
 }

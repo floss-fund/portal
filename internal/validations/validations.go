@@ -76,36 +76,37 @@ func IsURL(tag, u string, maxLen int) (*url.URL, error) {
 	return p, nil
 }
 
-// WellKnownURL checks a URL set of main+wellknown URLs and also returns the parsed versions.
-func WellKnownURL(tag string, manifest *url.URL, targetURL, wellKnownURL string, wellKnownPath string, maxLen int) error {
+// WellKnownURL checks a URL set of target and corresponding wellknown URLs.
+// It also returns the parsed versions of the target and corresponding URLs.
+func WellKnownURL(tag string, manifest *url.URL, targetURL, wellKnownURL string, wellKnownPath string, maxLen int) (*url.URL, *url.URL, error) {
 	// Validate the main URL.
 	tg, err := IsURL(tag+".url", targetURL, maxLen)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	if manifest == nil && wellKnownURL == "" {
-		return nil
+		return nil, nil, err
 	}
 
 	// If there's a manifestURL, then targetURL should on the same domain. Otherwise, a well-known URL is mandatory.
 	if manifest.Host != tg.Host && wellKnownURL == "" {
-		return fmt.Errorf("`%s.url` and and manifest hostnames do not match. %s.wellKnown should be %s://%s%s%s", tag, tag, tg.Scheme, tg.Host, tg.Path, wellKnownPath)
+		return nil, nil, fmt.Errorf("`%s.url` and and manifest hostnames do not match. %s.wellKnown should be %s://%s%s%s", tag, tag, tg.Scheme, tg.Host, tg.Path, wellKnownPath)
 	}
 
 	// Validate its corresponding well known URL.
 	wk, err := IsURL(tag+".wellKnown", wellKnownURL, maxLen)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	if !strings.HasSuffix(wk.Path, wellKnownPath) {
-		return fmt.Errorf("`%s.wellKnown` should end in %s", tag, wellKnownPath)
+		return nil, nil, fmt.Errorf("`%s.wellKnown` should end in %s", tag, wellKnownPath)
 	}
 
 	// well-known URL should match the main URL.
 	if wk.Host != tg.Host {
-		return fmt.Errorf("`%s.url` and `%s.wellKnown` hostnames do not match", tag, tag)
+		return nil, nil, fmt.Errorf("`%s.url` and `%s.wellKnown` hostnames do not match", tag, tag)
 	}
 
 	var (
@@ -115,7 +116,7 @@ func WellKnownURL(tag string, manifest *url.URL, targetURL, wellKnownURL string,
 
 	// If the base path is the root of the domain, then .well-known should also be.
 	if tgPath == "" && strings.TrimRight(wkPath, wellKnownPath) != "" {
-		return fmt.Errorf("`%s.url` and `%s.wellKnown` paths do not match. Should be %s://%s%s%s", tag, tag, tg.Scheme, tg.Host, tg.Path, wellKnownPath)
+		return nil, nil, fmt.Errorf("`%s.url` and `%s.wellKnown` paths do not match. Should be %s://%s%s%s", tag, tag, tg.Scheme, tg.Host, tg.Path, wellKnownPath)
 	}
 
 	// If it's not at the root, then basePath should be a suffix of the well known path.
@@ -124,10 +125,10 @@ func WellKnownURL(tag string, manifest *url.URL, targetURL, wellKnownURL string,
 	// github.com/user/project ~= github.com/user/project/blob/main/.well-known/funding-json-urls
 	// github.com/use !~= github.com/user/project/blob/main/.well-known/funding-json-urls
 	if !strings.HasPrefix(wkPath, tgPath) || wkPath[len(tgPath)] != '/' {
-		return fmt.Errorf("`%s.url` and `%s.wellKnown` paths do not match", tag, tag)
+		return nil, nil, fmt.Errorf("`%s.url` and `%s.wellKnown` paths do not match", tag, tag)
 	}
 
-	return nil
+	return tg, wk, nil
 }
 
 func IsRepoURL(tag, u string) error {

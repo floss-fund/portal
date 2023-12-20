@@ -75,7 +75,13 @@ func main() {
 
 	// Initialize queries and data handler.
 	app.core = initCore(app.fs, db, ko)
-	app.crawl = initCrawl(initSchema(ko), ko)
+	app.crawl = initCrawl(initSchema(ko), app.core, ko)
+
+	// Run the crawl mode.
+	if ko.String("mode") == "crawl" {
+		app.crawl.Crawl()
+		return
+	}
 
 	// Initialize the echo HTTP server.
 	srv := initHTTPServer(app, ko)

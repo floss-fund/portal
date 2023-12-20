@@ -175,16 +175,19 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB, ko *koanf.Koanf) *core.Core {
 	return core.New(&q, opt, lo)
 }
 
-func initCrawl(sc *v1.Schema, ko *koanf.Koanf) *crawl.Crawl {
+func initCrawl(sc *v1.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
 	opt := crawl.Opt{
-		UserAgent:    ko.MustString("crawl.useragent"),
+		Workers:      ko.MustInt("crawl.workers"),
+		ManifestAge:  ko.MustString("crawl.manifest_age"),
+		BatchSize:    ko.MustInt("crawl.batch_size"),
 		MaxHostConns: ko.MustInt("crawl.max_host_conns"),
-		ReqTimeout:   ko.MustDuration("crawl.req_timeout"),
 		Attempts:     ko.MustInt("crawl.attempts"),
+		ReqTimeout:   ko.MustDuration("crawl.req_timeout"),
 		MaxBytes:     ko.MustInt64("crawl.max_bytes"),
+		UserAgent:    ko.MustString("crawl.useragent"),
 	}
 
-	return crawl.New(&opt, sc, lo)
+	return crawl.New(&opt, sc, co, lo)
 }
 
 func initSchema(ko *koanf.Koanf) *v1.Schema {
