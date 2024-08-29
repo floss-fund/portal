@@ -14,7 +14,7 @@ import (
 
 	"floss.fund/portal/internal/core"
 	"floss.fund/portal/internal/crawl"
-	v1 "floss.fund/portal/internal/schemas/v1"
+	v1 "floss.fund/portal/pkg/schemas/v1"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/goyesql/v2"
 	goyesqlx "github.com/knadh/goyesql/v2/sqlx"

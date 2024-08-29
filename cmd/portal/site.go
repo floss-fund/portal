@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"floss.fund/portal/internal/validations"
+	"floss.fund/portal/pkg/validations"
 	"github.com/labstack/echo/v4"
 )
 

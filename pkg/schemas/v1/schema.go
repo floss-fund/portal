@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"floss.fund/portal/internal/validations"
+	"floss.fund/portal/pkg/validations"
 )
 
 // Major version of this schema.

@@ -15,10 +15,10 @@ STATIC := config.sample.toml schema.sql queries.sql admin
 
 # EasyJSON model generate.
 EASYJSON_MODELS := $\
-	internal/schemas/v1/models.go $\
+	pkg/schemas/v1/models.go $\
 
 GENERATED_EASYJSON_MODELS := $\
-	internal/schemas/v1/models_easyjson.go $\
+	pkg/schemas/v1/models_easyjson.go $\
 
 $(EASYJSON):
 	go get github.com/zerodha/easyjson && go install github.com/zerodha/easyjson/...@latest
