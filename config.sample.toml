@@ -5,23 +5,44 @@ address = ":9000"
 # Example: portal.site.com
 root_url = "http://localhost:9000"
 
+manifest_uri = "/funding.json"
+wellknown_uri = "/.well-known/funding-json-urls"
+
+[data_files]
+spdx = "data/spdx.json"
+languages = "data/languages.json"
+currencies = "data/currencies.json"
 
 [site]
+enable_captcha = false
+captcha_key = ""
+captcha_secret = ""
 
 
 [crawl]
-# Number of workers (goroutines) to spawn to do HTTP .well-known endpoint verifications.
-max_workers = 100
+# Number of concurrent goroutine workers crawling manifests.
+workers = 100
+
+# The frequency at which an individual manifest should be re-crawled and re-scanned.
+# This is based on the "updated_at" field of a manifest record.
+manifest_age = "5 DAYS"
+
+# Number of records to fetch from the DB in one shot and queue for crawling.
+batch_size = 10000
+
+# If a host returns 429, disable requests to it for the rest of the session.
+skip_ratelimited_host = true
 
 # HTTP requests.
-max_retries = 3
-conn_timeout = "3s"
+max_host_conns = 100
+attempts = 3 # minimum one
+req_timeout = "3s"
+max_bytes = 320000 # bytes
 useragent = "floss-fund-crawler"
-max_file_size = 50 # KBs
 
 [db]
 host = "localhost"
 port = 5432
-db = "dbname"
-user = "username"
-password = "password"
+db = "floss"
+user = "floss"
+password = "floss"
