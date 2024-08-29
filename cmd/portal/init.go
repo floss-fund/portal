@@ -12,9 +12,9 @@ import (
 	"os"
 	"unicode"
 
-	"floss.fund/portal/internal/core"
-	"floss.fund/portal/internal/crawl"
-	v1 "floss.fund/portal/pkg/schemas/v1"
+	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
+	"github.com/floss-fund/portal/internal/core"
+	"github.com/floss-fund/portal/internal/crawl"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/goyesql/v2"
 	goyesqlx "github.com/knadh/goyesql/v2/sqlx"
@@ -233,7 +233,7 @@ func initSchema(ko *koanf.Koanf) *v1.Schema {
 	}
 
 	// Initialize schema.
-	sc := v1.New("v1.0.0", &v1.Opt{
+	sc := v1.New(&v1.Opt{
 		WellKnownURI:         ko.MustString("app.wellknown_uri"),
 		Licenses:             licenses,
 		ProgrammingLanguages: langs,

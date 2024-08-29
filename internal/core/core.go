@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	v1 "floss.fund/portal/pkg/schemas/v1"
+	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/jmoiron/sqlx"
 )
 

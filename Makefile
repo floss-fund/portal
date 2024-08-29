@@ -6,25 +6,11 @@ VERSION := $(or $(shell git describe --tags --abbrev=0 2> /dev/null),$(shell gre
 
 BUILDSTR := ${VERSION} (\#${LAST_COMMIT} $(shell date -u +"%Y-%m-%dT%H:%M:%S%z"))
 
-EASYJSON ?= $(GOPATH)/bin/easyjson
 GOPATH ?= $(HOME)/go
 STUFFBIN ?= $(GOPATH)/bin/stuffbin
 
 BIN := portal
 STATIC := config.sample.toml schema.sql queries.sql admin
-
-# EasyJSON model generate.
-EASYJSON_MODELS := $\
-	pkg/schemas/v1/models.go $\
-
-GENERATED_EASYJSON_MODELS := $\
-	pkg/schemas/v1/models_easyjson.go $\
-
-$(EASYJSON):
-	go get github.com/zerodha/easyjson && go install github.com/zerodha/easyjson/...@latest
-
-$(GENERATED_EASYJSON_MODELS): $(EASYJSON_MODELS)
-	$(EASYJSON) ${EASYJSON_MODELS}
 
 .PHONY: build
 build: $(BIN)
@@ -32,7 +18,7 @@ build: $(BIN)
 $(STUFFBIN):
 	go install github.com/knadh/stuffbin/...
 
-$(BIN): $(GENERATED_EASYJSON_MODELS) $(shell find . -type f -name "*.go")
+$(BIN): $(shell find . -type f -name "*.go")
 	CGO_ENABLED=0 go build -o ${BIN} -ldflags="-s -w -X 'main.buildString=${BUILDSTR}' -X 'main.versionString=${VERSION}'" cmd/${BIN}/*.go
 
 .PHONY: run

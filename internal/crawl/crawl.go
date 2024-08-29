@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	v1 "floss.fund/portal/pkg/schemas/v1"
+	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 )
 
 type Schema interface {

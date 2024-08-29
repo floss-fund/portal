@@ -5,8 +5,8 @@ import (
 	"os"
 	"text/template"
 
-	"floss.fund/portal/internal/core"
-	"floss.fund/portal/internal/crawl"
+	"github.com/floss-fund/portal/internal/core"
+	"github.com/floss-fund/portal/internal/crawl"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/koanf/v2"
 	"github.com/knadh/stuffbin"
