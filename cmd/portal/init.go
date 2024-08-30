@@ -85,8 +85,8 @@ func initConfig() {
 func initConstants(ko *koanf.Koanf) Consts {
 	c := Consts{
 		RootURL:      ko.MustString("app.root_url"),
-		ManifestURI:  ko.MustString("app.manifest_uri"),
-		WellKnownURI: ko.MustString("app.wellknown_uri"),
+		ManifestURI:  ko.MustString("crawl.manifest_uri"),
+		WellKnownURI: ko.MustString("crawl.wellknown_uri"),
 	}
 
 	return c
@@ -178,9 +178,10 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB, ko *koanf.Koanf) *core.Core {
 
 func initCrawl(sc *v1.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
 	opt := crawl.Opt{
-		Workers:     ko.MustInt("crawl.workers"),
-		ManifestAge: ko.MustString("crawl.manifest_age"),
-		BatchSize:   ko.MustInt("crawl.batch_size"),
+		Workers:         ko.MustInt("crawl.workers"),
+		ManifestAge:     ko.MustString("crawl.manifest_age"),
+		BatchSize:       ko.MustInt("crawl.batch_size"),
+		CheckProvenance: ko.Bool("crawl.check_provenance"),
 
 		HTTP: initHTTPOpt(),
 	}
@@ -232,7 +233,7 @@ func initSchema(ko *koanf.Koanf) *v1.Schema {
 
 	// Initialize schema.
 	sc := v1.New(&v1.Opt{
-		WellKnownURI:         ko.MustString("app.wellknown_uri"),
+		WellKnownURI:         ko.MustString("crawl.wellknown_uri"),
 		Licenses:             licenses,
 		ProgrammingLanguages: langs,
 		Currencies:           currencies,
@@ -245,6 +246,7 @@ func initHTTPOpt() common.HTTPOpt {
 	return common.HTTPOpt{
 		MaxHostConns: ko.MustInt("crawl.max_host_conns"),
 		Retries:      ko.MustInt("crawl.retries"),
+		RetryWait:    ko.MustDuration("crawl.retry_wait"),
 		ReqTimeout:   ko.MustDuration("crawl.req_timeout"),
 		MaxBytes:     ko.MustInt64("crawl.max_bytes"),
 		UserAgent:    ko.MustString("crawl.useragent"),

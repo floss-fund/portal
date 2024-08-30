@@ -5,9 +5,6 @@ address = ":9000"
 # Example: portal.site.com
 root_url = "http://localhost:9000"
 
-manifest_uri = "/funding.json"
-wellknown_uri = "/.well-known/funding-json-urls"
-
 [data_files]
 spdx = "data/spdx.json"
 languages = "data/languages.json"
@@ -20,6 +17,9 @@ captcha_secret = ""
 
 
 [crawl]
+manifest_uri = "/funding.json"
+wellknown_uri = "/.well-known/funding-json-urls"
+
 # Number of concurrent goroutine workers crawling manifests.
 workers = 100
 
@@ -33,13 +33,16 @@ batch_size = 10000
 # If a host returns 429, disable requests to it for the rest of the session.
 skip_ratelimited_host = true
 
+# Fetch the .well-known URL and verify provenance of all URLs described in the manifest?
+check_provenance = true
+
 # HTTP requests.
 max_host_conns = 100
 retries = 3 # minimum 1
-retry_interval = "3s" # minimum 1
+retry_wait = "3s" # minimum 1
 req_timeout = "3s"
 max_bytes = 320000 # bytes
-useragent = "floss-fund-crawler"
+useragent = "funding-json-bot"
 
 [db]
 host = "localhost"

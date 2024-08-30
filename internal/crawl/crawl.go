@@ -22,9 +22,10 @@ type DB interface {
 }
 
 type Opt struct {
-	Workers     int    `json:"workers"`
-	ManifestAge string `json:"manifest_age"`
-	BatchSize   int    `json:"batch_size"`
+	Workers         int    `json:"workers"`
+	ManifestAge     string `json:"manifest_age"`
+	BatchSize       int    `json:"batch_size"`
+	CheckProvenance bool   `json:"check_provenance"`
 
 	HTTP common.HTTPOpt
 }
@@ -78,5 +79,5 @@ func (c *Crawl) FetchManifest(manifest *url.URL) (v1.Manifest, error) {
 		return v1.Manifest{}, err
 	}
 
-	return c.sc.ParseManifest(b, manifest.String(), true)
+	return c.sc.ParseManifest(b, manifest.String(), c.opt.CheckProvenance)
 }
