@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/floss-fund/go-funding-json/validations"
+	"github.com/floss-fund/go-funding-json/common"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,7 +29,7 @@ func handleSubmitPage(c echo.Context) error {
 		mURL = c.FormValue("url")
 	)
 
-	u, err := validations.IsURL("url", mURL, 1024)
+	u, err := common.IsURL("url", mURL, 1024)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

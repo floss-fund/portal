@@ -12,6 +12,7 @@ import (
 	"os"
 	"unicode"
 
+	"github.com/floss-fund/go-funding-json/common"
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/core"
 	"github.com/floss-fund/portal/internal/crawl"
@@ -177,14 +178,11 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB, ko *koanf.Koanf) *core.Core {
 
 func initCrawl(sc *v1.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
 	opt := crawl.Opt{
-		Workers:      ko.MustInt("crawl.workers"),
-		ManifestAge:  ko.MustString("crawl.manifest_age"),
-		BatchSize:    ko.MustInt("crawl.batch_size"),
-		MaxHostConns: ko.MustInt("crawl.max_host_conns"),
-		Attempts:     ko.MustInt("crawl.attempts"),
-		ReqTimeout:   ko.MustDuration("crawl.req_timeout"),
-		MaxBytes:     ko.MustInt64("crawl.max_bytes"),
-		UserAgent:    ko.MustString("crawl.useragent"),
+		Workers:     ko.MustInt("crawl.workers"),
+		ManifestAge: ko.MustString("crawl.manifest_age"),
+		BatchSize:   ko.MustInt("crawl.batch_size"),
+
+		HTTP: initHTTPOpt(),
 	}
 
 	return crawl.New(&opt, sc, co, lo)
@@ -238,9 +236,19 @@ func initSchema(ko *koanf.Koanf) *v1.Schema {
 		Licenses:             licenses,
 		ProgrammingLanguages: langs,
 		Currencies:           currencies,
-	})
+	}, initHTTPOpt(), lo)
 
 	return sc
+}
+
+func initHTTPOpt() common.HTTPOpt {
+	return common.HTTPOpt{
+		MaxHostConns: ko.MustInt("crawl.max_host_conns"),
+		Retries:      ko.MustInt("crawl.retries"),
+		ReqTimeout:   ko.MustDuration("crawl.req_timeout"),
+		MaxBytes:     ko.MustInt64("crawl.max_bytes"),
+		UserAgent:    ko.MustString("crawl.useragent"),
+	}
 }
 
 func generateNewFiles() error {

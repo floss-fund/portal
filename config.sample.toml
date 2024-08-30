@@ -35,7 +35,8 @@ skip_ratelimited_host = true
 
 # HTTP requests.
 max_host_conns = 100
-attempts = 3 # minimum one
+retries = 3 # minimum 1
+retry_interval = "3s" # minimum 1
 req_timeout = "3s"
 max_bytes = 320000 # bytes
 useragent = "floss-fund-crawler"
