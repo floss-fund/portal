@@ -38,8 +38,8 @@ check_provenance = true
 
 # HTTP requests.
 max_host_conns = 100
-retries = 3 # minimum 1
-retry_wait = "3s" # minimum 1
+retries = 2 # minimum 1
+retry_wait = "1s" # minimum 1
 req_timeout = "3s"
 max_bytes = 320000 # bytes
 useragent = "funding-json-bot"

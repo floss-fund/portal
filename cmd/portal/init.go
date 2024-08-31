@@ -176,7 +176,7 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB, ko *koanf.Koanf) *core.Core {
 	return core.New(&q, opt, lo)
 }
 
-func initCrawl(sc *v1.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
+func initCrawl(sc crawl.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
 	opt := crawl.Opt{
 		Workers:         ko.MustInt("crawl.workers"),
 		ManifestAge:     ko.MustString("crawl.manifest_age"),

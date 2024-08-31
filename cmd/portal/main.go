@@ -29,6 +29,7 @@ type App struct {
 	siteTpl *template.Template
 	core    *core.Core
 	crawl   *crawl.Crawl
+	schema  crawl.Schema
 
 	db *sqlx.DB
 	fs stuffbin.FileSystem
@@ -75,7 +76,8 @@ func main() {
 
 	// Initialize queries and data handler.
 	app.core = initCore(app.fs, db, ko)
-	app.crawl = initCrawl(initSchema(ko), app.core, ko)
+	app.schema = initSchema(ko)
+	app.crawl = initCrawl(app.schema, app.core, ko)
 
 	// Run the crawl mode.
 	if ko.String("mode") == "crawl" {

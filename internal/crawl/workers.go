@@ -11,7 +11,7 @@ func (c *Crawl) dbWorker() {
 	)
 	for {
 		n++
-		items, err := c.db.GetManifestsURLsByAge(c.opt.ManifestAge, lastID, c.opt.BatchSize)
+		items, err := c.db.GetManifestURLsByAge(c.opt.ManifestAge, lastID, c.opt.BatchSize)
 		if err != nil {
 			time.Sleep(time.Second * 5)
 			continue

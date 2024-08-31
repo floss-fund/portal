@@ -9,6 +9,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type okResp struct {
+	Data interface{} `json:"data"`
+}
+
 type pageTpl struct {
 	PageType string
 	PageID   string
@@ -50,4 +54,18 @@ func handleSubmitPage(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, 200)
+}
+
+func handleValidateManifest(c echo.Context) error {
+	var (
+		app  = c.Get("app").(*App)
+		mUrl = c.FormValue("url")
+		body = c.FormValue("body")
+	)
+
+	if _, err := app.schema.ParseManifest([]byte(body), mUrl, false); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, okResp{true})
 }

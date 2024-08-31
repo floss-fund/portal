@@ -8,6 +8,7 @@ import (
 
 	"github.com/floss-fund/go-funding-json/common"
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
+	"github.com/floss-fund/portal/internal/models"
 )
 
 type Schema interface {
@@ -16,7 +17,7 @@ type Schema interface {
 }
 
 type DB interface {
-	GetManifestsURLsByAge(age string, offsetID, limit int) ([]v1.ManifestURL, error)
+	GetManifestURLsByAge(age string, offsetID, limit int) ([]models.ManifestURL, error)
 	UpsertManifest(m v1.Manifest) (v1.Manifest, error)
 	UpdateManifestStatus(id int, status string) error
 }
@@ -36,7 +37,7 @@ type Crawl struct {
 	db  DB
 
 	wg   *sync.WaitGroup
-	jobs chan v1.ManifestURL
+	jobs chan models.ManifestURL
 
 	hc  *common.HTTPClient
 	log *log.Logger
@@ -54,7 +55,7 @@ func New(o *Opt, sc Schema, db DB, l *log.Logger) *Crawl {
 		hc:  common.NewHTTPClient(o.HTTP, l),
 
 		wg:   &sync.WaitGroup{},
-		jobs: make(chan v1.ManifestURL, o.BatchSize),
+		jobs: make(chan models.ManifestURL, o.BatchSize),
 		log:  l,
 	}
 }

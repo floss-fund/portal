@@ -9,6 +9,7 @@ import (
 func initHandlers(srv *echo.Echo) {
 	g := srv.Group("")
 	g.POST("/submit", handleSubmitPage)
+	g.POST("/api/validate", handleValidateManifest)
 
 	// 404 pages.
 	srv.RouteNotFound("/api/*", func(c echo.Context) error {

@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
+	"github.com/floss-fund/portal/internal/models"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -81,10 +82,10 @@ func (d *Core) UpsertManifest(m v1.Manifest) (v1.Manifest, error) {
 	return m, nil
 }
 
-// GetManifestsURLsByAge retrieves manifest URLs that need to be crawled again. It returns records in batches of limit length,
+// GetManifestURLsByAge retrieves manifest URLs that need to be crawled again. It returns records in batches of limit length,
 // continued from the last processed row ID which is the offsetID.
-func (d *Core) GetManifestsURLsByAge(age string, offsetID, limit int) ([]v1.ManifestURL, error) {
-	var out []v1.ManifestURL
+func (d *Core) GetManifestURLsByAge(age string, offsetID, limit int) ([]models.ManifestURL, error) {
+	var out []models.ManifestURL
 	if err := d.q.GetForCrawling.Select(&out, offsetID, age, limit); err != nil {
 		d.log.Printf("error fetching URLs for crawling: %v", err)
 		return nil, err
