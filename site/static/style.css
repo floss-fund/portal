@@ -174,9 +174,17 @@ button, .button {
 .logo img {
     max-height: 72px;
     transition: transform 0.7s ease-in-out;
+    margin-right: 10px;
+    vertical-align: middle;
 }
     .logo img:hover {
       transform: rotate(30deg); /* Full rotation on hover */
+    }
+    .logo a {
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 1.2rem;
+        color: var(--black);
     }
 
 .intro {
