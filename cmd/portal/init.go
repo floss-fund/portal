@@ -6,12 +6,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	mrand "math/rand"
 	"os"
+	"path"
 	"unicode"
 
+	"github.com/Masterminds/sprig"
 	"github.com/floss-fund/go-funding-json/common"
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/core"
@@ -139,6 +142,9 @@ func initHTTPServer(app *App, ko *koanf.Koanf) *echo.Echo {
 	srv := echo.New()
 	srv.Debug = true
 	srv.HideBanner = true
+	srv.Renderer = &tplRenderer{
+		tpl: initSiteTemplates(ko.MustString("app.template_dir")),
+	}
 
 	// Register app (*App) to be injected into all HTTP handlers.
 	srv.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -148,7 +154,7 @@ func initHTTPServer(app *App, ko *koanf.Koanf) *echo.Echo {
 		}
 	})
 
-	initHandlers(srv)
+	initHandlers(ko, srv)
 
 	return srv
 }
@@ -251,6 +257,22 @@ func initHTTPOpt() common.HTTPOpt {
 		MaxBytes:     ko.MustInt64("crawl.max_bytes"),
 		UserAgent:    ko.MustString("crawl.useragent"),
 	}
+}
+
+func initSiteTemplates(dirPath string) *template.Template {
+	// Create a new template set
+	tmpl := template.New("")
+
+	// Add Sprig functions to the template set
+	tmpl.Funcs(sprig.FuncMap())
+
+	// Parse all HTML files that match the pattern
+	tpl, err := tmpl.ParseGlob(path.Join(dirPath, "*.html"))
+	if err != nil {
+		log.Fatalf("error parsing templates in %s: %v", dirPath, err)
+	}
+
+	return tpl
 }
 
 func generateNewFiles() error {

@@ -1,0 +1,39 @@
+{{ define "header" }}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>{{ .Data.Title }} {{ if .Data.Title }} &mdash; {{ end}} FLOSS/Fund</title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" media="screen" href="{{ .RootURL }}/static/base.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="{{ .RootURL }}/static/style.css" />
+</head>
+
+<body>
+<div class="container-fluid main">
+  <header class="header row">
+    <div class="col-lg-6 col-md-12">
+      <div class="logo"><a href="{{ .RootURL }}"><img src="{{ .RootURL }}/static/logo.svg" alt="" /></a></div>
+    </div>
+    <nav class="col-lg-6 col-md-12">
+      <a href="{{ .RootURL }}">Discover</a>
+      <a href="{{ .RootURL }}/submit">Submit</a>
+      <a href="https://floss.fund">FLOSS/Fund</a>
+    </nav>
+  </header>
+  <section class="section content">
+{{ end }}
+
+{{ define "footer" }}
+  </section>
+  
+  <footer class="footer">&copy; 2024. <a href="https://floss.fund">FLOSS/Fund</a>.</footer>
+</div>
+</body>
+</html>
+{{ end }}

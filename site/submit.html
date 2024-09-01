@@ -1,0 +1,41 @@
+{{ define "submit" }}
+{{ template "header" . }}
+
+<h1>Submit</h1>
+<p>
+    Submitting your funding manifest here makes it publicly discoverable on the portal in addition to applying for funding from FLOSS/Fund.
+    <a href="https://floss.fund/faq">See FAQ.</a>
+</p>
+<hr />
+<form method="post">
+<div>
+  <label for="funding-url"><code>funding.json</code> manifest</label>
+  <p>
+    <input id="funding-url" type="url" name="url" placeholder="https://yoursite.com/funding.json" required autofocus maxlength="300" />
+  </p>
+  <p>
+    <button type="submit">Submit</button>
+  </p>
+</div>
+
+{{ if .Data.ErrMessage }}
+    <div class="message error">{{ .Data.ErrMessage }}</div>
+{{ else if .Data.Message }}
+    <div class="message success">
+        The manifest has been submitted and will appear publicly on the portal after manual review.
+        It will be considered for the FLOSS/Fund grant in the quarterly review. <a href="https://floss.fund/faq">FAQ.</a>
+    </div>
+{{ end }}
+
+<hr />
+<h3>What is funding.json manifest?</h3>
+<p>
+  <code>funding.json</code> is a JSON file that describes the funding requirements and financial needs of a project. <a href="https://floss.fund/funding-manifest">Read the docs</a>.
+</p>
+<p>
+  It can be hosted on a project's or organisation's website, or a repository such as <code>https://github.com/user/project/blob/master/funding.json</code>
+</p>
+</form>
+
+{{ template "footer" .}}
+{{ end }}

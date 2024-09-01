@@ -44,6 +44,12 @@ func New(q *Queries, o Opt, lo *log.Logger) *Core {
 
 // UpsertManifest upserts an entry into the database.
 func (d *Core) UpsertManifest(m v1.Manifest) (v1.Manifest, error) {
+	body, err := m.MarshalJSON()
+	if err != nil {
+		d.log.Printf("error marshalling manifest: %v", err)
+		return m, err
+	}
+
 	entity, err := m.Entity.MarshalJSON()
 	if err != nil {
 		d.log.Printf("error marshalling manifest.entity: %v", err)
@@ -74,7 +80,7 @@ func (d *Core) UpsertManifest(m v1.Manifest) (v1.Manifest, error) {
 		return m, err
 	}
 
-	if _, err := d.q.UpsertManifest.Exec(m.Version, m.URL, m.Body, entity, projects, channels, plans, history, json.RawMessage("{}"), ManifestStatusPending); err != nil {
+	if _, err := d.q.UpsertManifest.Exec(m.Version, m.URL, body, entity, projects, channels, plans, history, json.RawMessage("{}"), ManifestStatusPending); err != nil {
 		d.log.Printf("error upsering manifest: %v", err)
 		return m, err
 	}

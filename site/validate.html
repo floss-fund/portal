@@ -1,0 +1,90 @@
+{{ define "validate" }}
+{{ template "header" . }}
+
+<section class="validate">
+	<h1>Validate funding.json manifest</h1>
+	
+	<form method="post" action="">
+		<div>
+			<p>
+				<label id="validate-url">Where will the manifest be hosted?</label>
+				<input name="url" type="url" placeholder="https://example.com/funding.json" id="validate-url" required autofocus />
+			</p>
+			<p>
+				<label for="validate-name">Manifest JSON body</label>
+				<textarea name="body" id="validate-body" required placeholder="{}"></textarea>
+				<br /><small><a href="https://floss.fund/funding-manifest">View docs and example</a></small>
+			</p>
+			<p>
+				<button type="submit">Validate</button>
+			</p>
+		</div>
+	</form>
+	{{ if .Data.ErrMessage }}
+		<div class="message error">{{ .Data.ErrMessage }}</div>
+	{{ end }}
+	{{ if .Data.Message }}
+		<div class="message success">{{ .Data.Message }}</div>
+	{{ end }}
+
+	<div class="message error"></div>
+	<div class="message success">✓ Manifest is valid</div>
+</section>
+
+<script>
+	// On form submit, send url and body as form encoded POST data to /api/validate.
+	document.querySelector("form").addEventListener("submit", async (e) => {
+		e.preventDefault();
+
+		document.querySelectorAll(".message").forEach((el) => el.style.display = "none");
+
+		const body = document.querySelector("textarea[name=body]");
+
+		// Format body JSON by parsing and stringifying.
+		try {
+			const json = JSON.parse(body.value);
+		} catch (e) {
+			showError(e.toString());
+			return;
+		}
+
+		const data = new URLSearchParams();
+        data.append("url", document.querySelector("input[name=url]").value);
+        data.append("body", body.value);
+
+		let resp;
+		try {
+			const r = await fetch("/api/validate", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: data,
+			});
+
+			resp = await r.json()
+
+			// If response is not 200, read body and show error.
+			if (r.status !== 200) {
+				showError(resp.message);
+				return;
+			}
+		} catch (e) {
+			showError(e.toString());
+			return;
+		}		
+
+		body.value = JSON.stringify(resp.data, null, 2);
+		const err = document.querySelector(".success");
+		err.style.display = 'block';
+	});
+
+	function showError(msg) {
+		const err = document.querySelector(".error");
+		err.style.display = 'block';
+		err.textContent = msg;
+	}
+</script>
+
+{{ template "footer" .}}
+{{ end }}
