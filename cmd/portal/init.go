@@ -143,7 +143,8 @@ func initHTTPServer(app *App, ko *koanf.Koanf) *echo.Echo {
 	srv.Debug = true
 	srv.HideBanner = true
 	srv.Renderer = &tplRenderer{
-		tpl: initSiteTemplates(ko.MustString("app.template_dir")),
+		tpl:     initSiteTemplates(ko.MustString("app.template_dir")),
+		RootURL: ko.MustString("app.root_url"),
 	}
 
 	// Register app (*App) to be injected into all HTTP handlers.

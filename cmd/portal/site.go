@@ -18,10 +18,8 @@ type okResp struct {
 
 // tplRenderer wraps a template.tplRenderer for echo.
 type tplRenderer struct {
-	tpl *template.Template
-
-	SiteName string
-	RootURL  string
+	tpl     *template.Template
+	RootURL string
 }
 
 // tplData is the data container that is injected
