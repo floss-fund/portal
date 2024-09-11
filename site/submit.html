@@ -4,7 +4,7 @@
 <h1>Submit</h1>
 <p>
     Submitting a funding manifest here makes it publicly discoverable on the portal.
-    It also creates an application for a FLOSS/Fund grant which is reviewed quarterly.
+    It also creates an application for a FLOSS/Fund grant.
     <a href="https://floss.fund/faq">See FAQs.</a>
 </p>
 <hr />
@@ -14,9 +14,16 @@
   <p>
     <input id="funding-url" type="url" name="url" placeholder="https://yoursite.com/funding.json" required autofocus maxlength="300" />
   </p>
-  <p>
-    <button type="submit">Submit</button>
-  </p>
+  <div class="row">
+    <div class="col-lg-3">
+      <button type="submit">Submit</button>
+    </div>
+    <div class="col-lg">
+      <a href="{{ .RootURL }}/validate">Validator</a>
+      &nbsp;&nbsp;&nbsp;
+      <a href="https://floss.fund/funding-manifest">Docs</a>
+    </div>
+  </div>
 </div>
 
 {{ if .Data.ErrMessage }}
@@ -35,7 +42,7 @@
   <code>funding.json</code> is a JSON file that describes the funding requirements and financial needs of a project. <a href="https://floss.fund/funding-manifest">Read the docs</a>.
 </p>
 <p>
-  It can be hosted on a project's or organisation's website, or a repository such as <code>https://github.com/user/project/blob/master/funding.json</code>
+  It can be hosted on a project's or organisation's website, or a repository such as <code>https://github.com/user/project/blob/main/funding.json</code>
 </p>
 </form>
 
