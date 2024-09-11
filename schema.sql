@@ -79,7 +79,6 @@ DROP INDEX IF EXISTS idx_entity_webpage; CREATE INDEX idx_entity_webpage ON mani
 DROP INDEX IF EXISTS idx_project_webpage; CREATE INDEX idx_project_webpage ON manifests ((entity ->> 'webpage_url'));
 DROP INDEX IF EXISTS idx_project_repository; CREATE INDEX idx_project_repository ON manifests ((entity ->> 'repository_url'));
 DROP INDEX IF EXISTS idx_project_license; CREATE INDEX idx_project_license ON manifests ((entity ->> 'license'));
-DROP INDEX IF EXISTS idx_project_frameworks; CREATE INDEX idx_project_frameworks ON manifests USING GIN ((entity -> 'frameworks') jsonb_path_ops);
 DROP INDEX IF EXISTS idx_project_tags; CREATE INDEX idx_project_tags ON manifests USING GIN ((entity -> 'tags') jsonb_path_ops);
 
 
