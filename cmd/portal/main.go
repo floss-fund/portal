@@ -63,7 +63,7 @@ func main() {
 
 	// Install or upgrade schema.
 	if ko.Bool("install") {
-		installSchema(migList[len(migList)-1].version, app, !ko.Bool("yes"))
+		installSchema(migrations[len(migrations)-1].version, app, !ko.Bool("yes"))
 		return
 	}
 	if ko.Bool("upgrade") {
