@@ -135,6 +135,9 @@ button, .button {
     .button:hover {
         background: var(--primary);
         color: #fff;
+form {
+    margin-bottom: 30px;
+}
     }
 
 .error {
@@ -216,6 +219,19 @@ button, .button {
         background: none;
     }
 
+.search input {
+    padding: 15px;
+    font-size: 1.3rem;
+}
+
+.home .tags {
+    margin-top: 10vh;
+}
+    .home .tags a {
+        display: inline-block;
+        margin-right: 15px;
+        text-decoration: none;
+    }
 .validate textarea {
     height: 50vh;
 }

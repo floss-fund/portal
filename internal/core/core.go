@@ -26,6 +26,7 @@ type Queries struct {
 	UpsertManifest       *sqlx.Stmt `query:"upsert-manifest"`
 	GetForCrawling       *sqlx.Stmt `query:"get-for-crawling"`
 	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
+	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
 }
 
 type Core struct {
@@ -80,7 +81,7 @@ func (d *Core) UpsertManifest(m v1.Manifest) (v1.Manifest, error) {
 		return m, err
 	}
 
-	if _, err := d.q.UpsertManifest.Exec(m.Version, m.URL, body, entity, projects, channels, plans, history, json.RawMessage("{}"), ManifestStatusPending); err != nil {
+	if _, err := d.q.UpsertManifest.Exec(m.Version, m.URL.URL, body, entity, projects, channels, plans, history, json.RawMessage("{}"), ManifestStatusPending); err != nil {
 		d.log.Printf("error upsering manifest: %v", err)
 		return m, err
 	}
@@ -119,4 +120,22 @@ func (d *Core) UpdateManifestStatus(id int, status string) error {
 	}
 
 	return nil
+}
+
+// GetTopTags returns top N tags referenced across projects.
+func (d *Core) GetTopTags(limit int) ([]string, error) {
+	res := []struct {
+		Tag string `db:"tag"`
+	}{}
+	if err := d.q.GetTopTags.Select(&res, limit); err != nil {
+		d.log.Printf("error fetching top tags: %v", err)
+		return nil, err
+	}
+
+	tags := make([]string, 0, len(res))
+	for _, t := range res {
+		tags = append(tags, t.Tag)
+	}
+
+	return tags, nil
 }

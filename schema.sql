@@ -89,3 +89,15 @@ CREATE TABLE settings (
     updated_at          TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 DROP INDEX IF EXISTS idx_settings_key; CREATE INDEX idx_settings_key ON settings(key);
+
+-- top tags.
+DROP MATERIALIZED VIEW IF EXISTS top_tags;
+CREATE MATERIALIZED VIEW top_tags AS
+WITH tag_counts AS (
+  SELECT t.tag, COUNT(*) AS count
+  FROM manifests,
+       JSONB_ARRAY_ELEMENTS(projects) AS p,
+       JSONB_ARRAY_ELEMENTS_text(p->'tags') AS t(tag)
+  GROUP BY t.tag
+)
+SELECT tag, count, ROW_NUMBER() OVER (ORDER BY count DESC) AS rank FROM tag_counts ORDER BY count DESC LIMIT 1000;

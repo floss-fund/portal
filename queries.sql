@@ -22,3 +22,6 @@ SELECT id, url FROM manifests WHERE id > $1 AND updated_at < NOW() - $2::INTERVA
 
 -- name: update-manifest-status
 UPDATE manifests SET status=$2 WHERE id=$1;
+
+-- name: get-top-tags
+SELECT tag FROM top_tags LIMIT $1;

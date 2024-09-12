@@ -36,10 +36,22 @@ type page struct {
 	Heading     string
 	ErrMessage  string
 	Message     string
+
+	Data interface{}
 }
 
 func handleIndexPage(c echo.Context) error {
-	return c.Render(http.StatusOK, "index", page{Title: "Discover FOSS projects seeking funding"})
+	var (
+		app = c.Get("app").(*App)
+	)
+
+	tags, _ := app.core.GetTopTags(25)
+	out := struct {
+		Tags []string
+	}{tags}
+
+	return c.Render(http.StatusOK, "index", page{Title: "Discover FOSS projects seeking funding", Data: out})
+}
 }
 
 func handleValidatePage(c echo.Context) error {

@@ -1,8 +1,27 @@
 {{ define "index" }}
 {{ template "header" .}}
 
+<section class="home">
+	<div class="intro">
+		<h1 class="title">FLOSS/Funding</h1>
+		<p>A portal to discover Free and Open Source projects looking for funding</p>
+	</div>
 
-<h1>Hello</h1>
+	<form class="search">
+		<p>
+			<input type="text" name="q" maxlength="64" data-autocomp-tags placeholder="eg: developer-tools or Project Name" autofocus />
+		</p>
+	</form>
+
+	{{ if .Data.Data.Tags }}
+		<div class="tags box">
+			<h3>Popular tags</h3>
+			{{ range $t := .Data.Data.Tags }}
+				<a href="{{ $.RootURL }}/tags/{{ $t }}">{{ $t }}</a>
+			{{ end }}
+		</div>
+	{{ end }}
+</section>
 
 {{ template "footer" .}}
 {{ end }}
