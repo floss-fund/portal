@@ -9,22 +9,23 @@
 </p>
 <hr />
 <form method="post">
-<div>
-  <label for="funding-url"><code>funding.json</code> manifest URL</label>
-  <p>
-    <input id="funding-url" type="url" name="url" placeholder="https://yoursite.com/funding.json" required autofocus maxlength="300" />
-  </p>
-  <div class="row">
-    <div class="col-lg-3">
-      <button type="submit">Submit</button>
-    </div>
-    <div class="col-lg">
-      <a href="{{ .RootURL }}/validate">Validator</a>
-      &nbsp;&nbsp;&nbsp;
-      <a href="https://floss.fund/funding-manifest">Docs</a>
+  <div>
+    <label for="funding-url"><code>funding.json</code> manifest URL</label>
+    <p>
+      <input id="funding-url" type="url" name="url" placeholder="https://yoursite.com/funding.json" required autofocus maxlength="300" />
+    </p>
+    <div class="row">
+      <div class="col-lg-3">
+        <button type="submit">Submit</button>
+      </div>
+      <div class="col-lg">
+        <a href="{{ .RootURL }}/validate">Validator</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://floss.fund/funding-manifest">Docs</a>
+      </div>
     </div>
   </div>
-</div>
+</form>
 
 {{ if .Data.ErrMessage }}
     <div class="message error">{{ .Data.ErrMessage }}</div>
@@ -44,7 +45,6 @@
 <p>
   It can be hosted on a project's or organisation's website, or a repository such as <code>https://github.com/user/project/blob/main/funding.json</code>
 </p>
-</form>
 
 {{ template "footer" .}}
 {{ end }}
