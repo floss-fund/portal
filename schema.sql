@@ -71,16 +71,15 @@ CREATE TABLE manifests (
     updated_at           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 DROP INDEX IF EXISTS idx_uuid; CREATE UNIQUE INDEX idx_uuid ON manifests(uuid);
-DROP INDEX IF EXISTS idx_version; CREATE UNIQUE INDEX idx_version ON manifests(version);
-DROP INDEX IF EXISTS idx_status; CREATE UNIQUE INDEX idx_status ON manifests(status);
-DROP INDEX IF EXISTS idx_entity_email; CREATE INDEX idx_entity_email ON manifests USING GIN ((entity ->> 'email'));
-DROP INDEX IF EXISTS idx_entity_name; CREATE INDEX idx_entity_name ON manifests USING GIN (to_tsvector('english', entity ->> 'name'));
-DROP INDEX IF EXISTS idx_entity_webpage; CREATE INDEX idx_entity_webpage ON manifests USING GIN ((entity ->> 'webpage_url'));
-DROP INDEX IF EXISTS idx_project_webpage; CREATE INDEX idx_project_webpage ON manifests ((entity ->> 'webpage_url'));
-DROP INDEX IF EXISTS idx_project_repository; CREATE INDEX idx_project_repository ON manifests ((entity ->> 'repository_url'));
-DROP INDEX IF EXISTS idx_project_license; CREATE INDEX idx_project_license ON manifests ((entity ->> 'license'));
-DROP INDEX IF EXISTS idx_project_tags; CREATE INDEX idx_project_tags ON manifests USING GIN ((entity -> 'tags') jsonb_path_ops);
-
+DROP INDEX IF EXISTS idx_version; CREATE INDEX idx_version ON manifests(version);
+DROP INDEX IF EXISTS idx_status; CREATE INDEX idx_status ON manifests(status);
+DROP INDEX IF EXISTS idx_entity_email; CREATE INDEX idx_entity_email ON manifests ((entity->>'email'));
+DROP INDEX IF EXISTS idx_entity_name; CREATE INDEX idx_entity_name ON manifests USING GIN (to_tsvector('english', entity->>'name'));
+DROP INDEX IF EXISTS idx_entity_webpage; CREATE INDEX idx_entity_webpage ON manifests ((entity->'webpageUrl'->>'url'));
+DROP INDEX IF EXISTS idx_projects_webpage; CREATE INDEX idx_projects_webpage ON manifests USING GIN (jsonb_path_query_array(projects, '$[*].webpageUrl.url'));
+DROP INDEX IF EXISTS idx_projects_repository; CREATE INDEX idx_projects_repository ON manifests USING GIN (jsonb_path_query_array(projects, '$[*].repositoryUrl.url'));
+DROP INDEX IF EXISTS idx_projects_licenses; CREATE INDEX idx_projects_licenses ON manifests USING GIN (jsonb_path_query_array(projects, '$[*].licenses'));
+DROP INDEX IF EXISTS idx_projects_tags; CREATE INDEX idx_projects_tags ON manifests USING GIN (jsonb_path_query_array(projects, '$[*].tags'));
 
 -- settings
 DROP TABLE IF EXISTS settings CASCADE;
