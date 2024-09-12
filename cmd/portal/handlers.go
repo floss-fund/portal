@@ -17,6 +17,7 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	g.POST("/validate", handleValidatePage)
 
 	g.POST("/api/validate", handleValidateManifest)
+	g.GET("/api/tags", handleGetTags)
 
 	// Static files.
 	g.Static("/static", path.Join(ko.MustString("app.template_dir"), "/static"))

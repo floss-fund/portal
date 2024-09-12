@@ -52,6 +52,14 @@ func handleIndexPage(c echo.Context) error {
 
 	return c.Render(http.StatusOK, "index", page{Title: "Discover FOSS projects seeking funding", Data: out})
 }
+
+func handleGetTags(c echo.Context) error {
+	var (
+		app = c.Get("app").(*App)
+	)
+
+	tags, _ := app.core.GetTopTags(500)
+	return c.JSON(http.StatusOK, okResp{tags})
 }
 
 func handleValidatePage(c echo.Context) error {
@@ -106,8 +114,9 @@ func handleSubmitPage(c echo.Context) error {
 
 		// Add it to the database.
 		if _, err := app.core.UpsertManifest(m); err != nil {
-			return c.Render(http.StatusBadRequest, "submit", page{Title: title, Message: "Error saving manifest to database. Retry later."})
+			return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: "Error saving manifest to database. Retry later."})
 		}
+
 		msg = "done"
 	}
 
