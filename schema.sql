@@ -74,12 +74,12 @@ DROP INDEX IF EXISTS idx_uuid; CREATE UNIQUE INDEX idx_uuid ON manifests(uuid);
 DROP INDEX IF EXISTS idx_version; CREATE INDEX idx_version ON manifests(version);
 DROP INDEX IF EXISTS idx_status; CREATE INDEX idx_status ON manifests(status);
 DROP INDEX IF EXISTS idx_entity_email; CREATE INDEX idx_entity_email ON manifests ((entity->>'email'));
-DROP INDEX IF EXISTS idx_entity_name; CREATE INDEX idx_entity_name ON manifests USING GIN (to_tsvector('english', entity->>'name'));
+DROP INDEX IF EXISTS idx_entity_name; CREATE INDEX idx_entity_name ON manifests USING GIN (TO_TSVECTOR('english', entity->>'name'));
 DROP INDEX IF EXISTS idx_entity_webpage; CREATE INDEX idx_entity_webpage ON manifests ((entity->'webpageUrl'->>'url'));
-DROP INDEX IF EXISTS idx_projects_webpage; CREATE INDEX idx_projects_webpage ON manifests USING GIN (jsonb_path_query_array(projects, '$[*].webpageUrl.url'));
-DROP INDEX IF EXISTS idx_projects_repository; CREATE INDEX idx_projects_repository ON manifests USING GIN (jsonb_path_query_array(projects, '$[*].repositoryUrl.url'));
-DROP INDEX IF EXISTS idx_projects_licenses; CREATE INDEX idx_projects_licenses ON manifests USING GIN (jsonb_path_query_array(projects, '$[*].licenses'));
-DROP INDEX IF EXISTS idx_projects_tags; CREATE INDEX idx_projects_tags ON manifests USING GIN (jsonb_path_query_array(projects, '$[*].tags'));
+DROP INDEX IF EXISTS idx_projects_webpage; CREATE INDEX idx_projects_webpage ON manifests USING GIN (JSONB_PATH_QUERY_ARRAY(projects, '$[*].webpageUrl.url'));
+DROP INDEX IF EXISTS idx_projects_repository; CREATE INDEX idx_projects_repository ON manifests USING GIN (JSONB_PATH_QUERY_ARRAY(projects, '$[*].repositoryUrl.url'));
+DROP INDEX IF EXISTS idx_projects_licenses; CREATE INDEX idx_projects_licenses ON manifests USING GIN (JSONB_PATH_QUERY_ARRAY(projects, '$[*].licenses'));
+DROP INDEX IF EXISTS idx_projects_tags; CREATE INDEX idx_projects_tags ON manifests USING GIN (JSONB_PATH_QUERY_ARRAY(projects, '$[*].tags'));
 
 -- settings
 DROP TABLE IF EXISTS settings CASCADE;
