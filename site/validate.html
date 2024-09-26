@@ -4,6 +4,17 @@
 <section class="validate">
 	<h1>Validate funding.json manifest</h1>
 	
+	{{ if .Data.ErrMessage }}
+		<div class="message error">{{ .Data.ErrMessage }}</div>
+	{{ end }}
+	{{ if .Data.Message }}
+		<div class="message success">{{ .Data.Message }}</div>
+	{{ end }}
+
+	<div class="message error"></div>
+	<div class="message success">✓ Manifest is valid</div>
+
+	<br />
 	<form method="post" action="">
 		<div>
 			<p>
@@ -20,15 +31,6 @@
 			</p>
 		</div>
 	</form>
-	{{ if .Data.ErrMessage }}
-		<div class="message error">{{ .Data.ErrMessage }}</div>
-	{{ end }}
-	{{ if .Data.Message }}
-		<div class="message success">{{ .Data.Message }}</div>
-	{{ end }}
-
-	<div class="message error"></div>
-	<div class="message success">✓ Manifest is valid</div>
 </section>
 
 <script>
