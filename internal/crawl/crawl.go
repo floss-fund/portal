@@ -18,7 +18,7 @@ type Schema interface {
 
 type DB interface {
 	GetManifestURLsByAge(age string, offsetID, limit int) ([]models.ManifestURL, error)
-	UpsertManifest(m v1.Manifest) (v1.Manifest, error)
+	UpsertManifest(m v1.Manifest) error
 }
 
 type Opt struct {

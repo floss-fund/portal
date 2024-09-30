@@ -56,7 +56,7 @@ loop:
 			}
 
 			// Add it to the database.
-			if _, err := c.db.UpsertManifest(m); err != nil {
+			if err := c.db.UpsertManifest(m); err != nil {
 				c.log.Printf("error upserting manifest: %v", err)
 				continue
 			}

@@ -113,7 +113,7 @@ func handleSubmitPage(c echo.Context) error {
 		}
 
 		// Add it to the database.
-		if _, err := app.core.UpsertManifest(m); err != nil {
+		if err := app.core.UpsertManifest(m); err != nil {
 			return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: "Error saving manifest to database. Retry later."})
 		}
 

@@ -44,49 +44,19 @@ func New(q *Queries, o Opt, lo *log.Logger) *Core {
 }
 
 // UpsertManifest upserts an entry into the database.
-func (d *Core) UpsertManifest(m v1.Manifest) (v1.Manifest, error) {
+func (d *Core) UpsertManifest(m v1.Manifest) error {
 	body, err := m.MarshalJSON()
 	if err != nil {
 		d.log.Printf("error marshalling manifest: %v", err)
-		return m, err
+		return err
 	}
 
-	entity, err := m.Entity.MarshalJSON()
-	if err != nil {
-		d.log.Printf("error marshalling manifest.entity: %v", err)
-		return m, err
-	}
-
-	projects, err := m.Projects.MarshalJSON()
-	if err != nil {
-		d.log.Printf("error marshalling manifest.projects: %v", err)
-		return m, err
-	}
-
-	channels, err := m.Funding.Channels.MarshalJSON()
-	if err != nil {
-		d.log.Printf("error marshalling manifest.funding.channels: %v", err)
-		return m, err
-	}
-
-	plans, err := m.Funding.Plans.MarshalJSON()
-	if err != nil {
-		d.log.Printf("error marshalling manifest.funding.plans: %v", err)
-		return m, err
-	}
-
-	history, err := m.Funding.History.MarshalJSON()
-	if err != nil {
-		d.log.Printf("error marshalling manifest.funding.plans: %v", err)
-		return m, err
-	}
-
-	if _, err := d.q.UpsertManifest.Exec(m.Version, m.URL.URL, body, entity, projects, channels, plans, history, json.RawMessage("{}"), ManifestStatusPending); err != nil {
+	if _, err := d.q.UpsertManifest.Exec(json.RawMessage(body), m.URL.URL, json.RawMessage("{}"), ManifestStatusPending, ""); err != nil {
 		d.log.Printf("error upsering manifest: %v", err)
-		return m, err
+		return err
 	}
 
-	return m, nil
+	return nil
 }
 
 // GetManifestURLsByAge retrieves manifest URLs that need to be crawled again. It returns records in batches of limit length,
