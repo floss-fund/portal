@@ -1,0 +1,24 @@
+[
+  {
+    "name": "entities",
+    "fields": [
+      {"name": "manifest_id", "type": "int64" },
+      {"name": "name", "type": "string" },
+      {"name": "webpageUrl", "type": "string" },
+      {"name": "type", "type": "string","facet": true},
+      {"name": "role", "type": "string","facet": true}
+    ]
+  },
+  {
+    "name": "projects",
+    "fields": [
+      {"name": "manifest_id", "type": "int64" },
+      {"name": "name", "type": "string" },
+      {"name": "description", "type": "string" },
+      {"name": "webpageUrl", "type": "string" },
+      {"name": "repositoryUrl", "type": "string" },
+      {"name": "licenses", "type": "string[]", "facet": true },
+      {"name": "tags", "type": "string[]"}
+    ]
+  }
+]

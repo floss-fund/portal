@@ -49,7 +49,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 
 -- manifests
-DROP TYPE IF EXISTS entry_status CASCADE; CREATE TYPE entry_status AS ENUM ('pending', 'active', 'expiring', 'disabled');
+DROP TYPE IF EXISTS manifest_status CASCADE; CREATE TYPE manifest_status AS ENUM ('pending', 'active', 'expiring', 'disabled');
 DROP TABLE IF EXISTS manifests CASCADE;
 CREATE TABLE manifests (
     id                   SERIAL PRIMARY KEY,
@@ -64,7 +64,7 @@ CREATE TABLE manifests (
     funding_plans        JSONB NOT NULL DEFAULT '[]',
     funding_history      JSONB NOT NULL DEFAULT '[]',
     meta                 JSONB NOT NULL DEFAULT '{}',
-    status               entry_status NOT NULL DEFAULT 'pending',
+    status               manifest_status NOT NULL DEFAULT 'pending',
     status_message       TEXT NULL,
 
     created_at           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),

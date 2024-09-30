@@ -60,6 +60,10 @@ loop:
 				c.log.Printf("error upserting manifest: %v", err)
 				continue
 			}
+
+			if c.cb.OnManifestUpdate != nil {
+				c.cb.OnManifestUpdate(m)
+			}
 		}
 	}
 

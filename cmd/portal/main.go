@@ -7,6 +7,7 @@ import (
 
 	"github.com/floss-fund/portal/internal/core"
 	"github.com/floss-fund/portal/internal/crawl"
+	"github.com/floss-fund/portal/internal/search"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/koanf/v2"
 	"github.com/knadh/stuffbin"
@@ -28,6 +29,7 @@ type App struct {
 	consts  Consts
 	siteTpl *template.Template
 	core    *core.Core
+	search  *search.Search
 	crawl   *crawl.Crawl
 	schema  crawl.Schema
 
@@ -63,7 +65,7 @@ func main() {
 
 	// Install or upgrade schema.
 	if ko.Bool("install") {
-		installSchema(migrations[len(migrations)-1].version, app, !ko.Bool("yes"))
+		installSchema(migrations[len(migrations)-1].version, app, !ko.Bool("yes"), ko)
 		return
 	}
 	if ko.Bool("upgrade") {
@@ -77,7 +79,8 @@ func main() {
 	// Initialize queries and data handler.
 	app.core = initCore(app.fs, db, ko)
 	app.schema = initSchema(ko)
-	app.crawl = initCrawl(app.schema, app.core, ko)
+	app.search = initSearch(ko)
+	app.crawl = initCrawl(app.schema, app.core, app.search, ko)
 
 	// Run the crawl mode.
 	if ko.String("mode") == "crawl" {

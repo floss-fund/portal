@@ -19,6 +19,7 @@ import (
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/core"
 	"github.com/floss-fund/portal/internal/crawl"
+	"github.com/floss-fund/portal/internal/search"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/goyesql/v2"
 	goyesqlx "github.com/knadh/goyesql/v2/sqlx"
@@ -183,7 +184,7 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB, ko *koanf.Koanf) *core.Core {
 	return core.New(&q, opt, lo)
 }
 
-func initCrawl(sc crawl.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
+func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf) *crawl.Crawl {
 	opt := crawl.Opt{
 		Workers:         ko.MustInt("crawl.workers"),
 		ManifestAge:     ko.MustString("crawl.manifest_age"),
@@ -193,7 +194,23 @@ func initCrawl(sc crawl.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
 		HTTP: initHTTPOpt(),
 	}
 
-	return crawl.New(&opt, sc, co, lo)
+	// When the crawler updates manifests, fire the callback to search results.
+	cb := &crawl.Callbacks{
+		OnManifestUpdate: func(m v1.Manifest) {
+			// Delete all search data (entity, projects) on the manifest.
+			_ = s.Delete(m.ID)
+
+			// If it's active, re-insert it into the search index.
+			_ = s.InsertEntity(search.Entity{
+				ManifestID: m.ID,
+				Name:       m.Entity.Name,
+				Type:       m.Entity.Type,
+				Role:       m.Entity.Role,
+			})
+		},
+	}
+
+	return crawl.New(&opt, sc, cb, co, lo)
 }
 
 func initSchema(ko *koanf.Koanf) *v1.Schema {
@@ -258,6 +275,19 @@ func initHTTPOpt() common.HTTPOpt {
 		MaxBytes:     ko.MustInt64("crawl.max_bytes"),
 		UserAgent:    ko.MustString("crawl.useragent"),
 	}
+}
+
+func initSearch(ko *koanf.Koanf) *search.Search {
+	opt := search.Opt{
+		RootURL:         ko.MustString("search.root_url"),
+		APIKey:          ko.MustString("search.api_key"),
+		MaxGroups:       ko.MustInt("search.max_groups"),
+		ResultsPerGroup: ko.MustInt("search.results_per_group"),
+
+		HTTP: initHTTPOpt(),
+	}
+
+	return search.New(opt, lo)
 }
 
 func initSiteTemplates(dirPath string) *template.Template {

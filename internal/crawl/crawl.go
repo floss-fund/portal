@@ -19,7 +19,6 @@ type Schema interface {
 type DB interface {
 	GetManifestURLsByAge(age string, offsetID, limit int) ([]models.ManifestURL, error)
 	UpsertManifest(m v1.Manifest) (v1.Manifest, error)
-	UpdateManifestStatus(id int, status string) error
 }
 
 type Opt struct {
@@ -34,6 +33,7 @@ type Opt struct {
 type Crawl struct {
 	opt *Opt
 	sc  Schema
+	cb  *Callbacks
 	db  DB
 
 	wg   *sync.WaitGroup
@@ -43,14 +43,19 @@ type Crawl struct {
 	log *log.Logger
 }
 
+type Callbacks struct {
+	OnManifestUpdate func(m v1.Manifest)
+}
+
 var (
 	ErrRatelimited = errors.New("host rate limited the request")
 )
 
-func New(o *Opt, sc Schema, db DB, l *log.Logger) *Crawl {
+func New(o *Opt, sc Schema, cb *Callbacks, db DB, l *log.Logger) *Crawl {
 	return &Crawl{
 		opt: o,
 		sc:  sc,
+		cb:  cb,
 		db:  db,
 		hc:  common.NewHTTPClient(o.HTTP, l),
 

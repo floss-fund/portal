@@ -6,9 +6,10 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/knadh/koanf/v2"
 )
 
-func installSchema(ver string, app *App, prompt bool) {
+func installSchema(ver string, app *App, prompt bool, ko *koanf.Koanf) {
 	if prompt {
 		fmt.Println("")
 		fmt.Println("** first time installation **")
@@ -46,7 +47,17 @@ func installSchema(ver string, app *App, prompt bool) {
 		app.lo.Fatal(err)
 	}
 
-	app.lo.Println("successfully installed schema")
+	app.lo.Println("successfully installed Postgres schema")
+
+	// Install Typesense schema.
+	app.lo.Println("installing Typesense schema")
+
+	s := initSearch(ko)
+	if err := s.InitSchema(); err != nil {
+		app.lo.Fatal(err)
+	}
+
+	app.lo.Println("done")
 }
 
 // recordMigrationVersion inserts the given version (of DB migration) into the

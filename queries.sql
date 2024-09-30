@@ -18,7 +18,7 @@ INSERT INTO manifests (version, url, body, entity, projects, funding_channels, f
 	RETURNING *;
 
 -- name: get-for-crawling
-SELECT id, url FROM manifests WHERE id > $1 AND updated_at < NOW() - $2::INTERVAL AND status != 'disabled' ORDER BY id LIMIT $3;
+SELECT id, uuid, url FROM manifests WHERE id > $1 AND updated_at < NOW() - $2::INTERVAL AND status != 'disabled' ORDER BY id LIMIT $3;
 
 -- name: update-manifest-status
 UPDATE manifests SET status=$2 WHERE id=$1;
