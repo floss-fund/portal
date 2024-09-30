@@ -168,16 +168,20 @@ form {
     padding: 30px;
 }
 
+.message {
+    background: #fffaf0;
+    border: 1px solid #f8c481;
+    color: #ae7a13;
+    padding: 15px;
+}
 .error {
     background: #fbefef;
     color: #b23f3f;
-    padding: 15px;
     border: 1px solid #fecaca;
 }
 .success {
     background: #ecfff4;
     color: var(--primary);
-    padding: 15px;
     border: 1px solid #aee1c3;
 }
 

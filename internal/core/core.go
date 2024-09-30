@@ -1,6 +1,7 @@
 package core
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -15,15 +16,17 @@ type Opt struct {
 }
 
 const (
-	ManifestStatusPending  = "pending"
-	ManifestStatusActive   = "active"
-	ManifestStatusExpiring = "expiring"
-	ManifestStatusDisabled = "disabled"
+	ManifestStatusPending     = "pending"
+	ManifestStatusActive      = "active"
+	ManifestStatusExpiring    = "expiring"
+	ManifestStatusDisabled    = "disabled"
+	ManifestStatusBlocklisted = "blocklisted"
 )
 
 // Queries contains prepared DB queries.
 type Queries struct {
 	UpsertManifest       *sqlx.Stmt `query:"upsert-manifest"`
+	GetManifestStatus    *sqlx.Stmt `query:"get-manifest-status"`
 	GetForCrawling       *sqlx.Stmt `query:"get-for-crawling"`
 	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
@@ -41,6 +44,22 @@ func New(q *Queries, o Opt, lo *log.Logger) *Core {
 		q:   q,
 		log: lo,
 	}
+}
+
+// GetManifestStatus checks whether a given manifest URL exists in the databse.
+// If one exists, its status is returned.
+func (d *Core) GetManifestStatus(url string) (string, error) {
+	var status string
+	if err := d.q.GetManifestStatus.Get(&status, url); err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
+
+		d.log.Printf("error checking manifest status: %v", err)
+		return "", err
+	}
+
+	return status, nil
 }
 
 // UpsertManifest upserts an entry into the database.

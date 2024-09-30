@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- manifests
-DROP TYPE IF EXISTS manifest_status CASCADE; CREATE TYPE manifest_status AS ENUM ('pending', 'active', 'expiring', 'disabled');
+DROP TYPE IF EXISTS manifest_status CASCADE; CREATE TYPE manifest_status AS ENUM ('pending', 'active', 'expiring', 'disabled', 'blocked');
 DROP TABLE IF EXISTS manifests CASCADE;
 CREATE TABLE manifests (
     id                   SERIAL PRIMARY KEY,

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/floss-fund/go-funding-json/common"
+	"github.com/floss-fund/portal/internal/core"
 	"github.com/labstack/echo/v4"
 )
 
@@ -90,36 +91,61 @@ func handleValidatePage(c echo.Context) error {
 func handleSubmitPage(c echo.Context) error {
 	const title = "Submit funding manifest"
 
+	var (
+		app  = c.Get("app").(*App)
+		mURL = c.FormValue("url")
+	)
+
+	// Render the page.
 	msg := ""
-	if c.Request().Method == http.MethodPost {
-		var (
-			app  = c.Get("app").(*App)
-			mURL = c.FormValue("url")
-		)
-
-		u, err := common.IsURL("url", mURL, 1024)
-		if err != nil {
-			return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: err.Error()})
-		}
-
-		if !strings.HasSuffix(u.Path, app.consts.ManifestURI) {
-			return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: fmt.Sprintf("URL must end in %s", app.consts.ManifestURI)})
-		}
-
-		// Fetch and validate the manifest.
-		m, err := app.crawl.FetchManifest(u)
-		if err != nil {
-			return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: err.Error()})
-		}
-
-		// Add it to the database.
-		if err := app.core.UpsertManifest(m); err != nil {
-			return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: "Error saving manifest to database. Retry later."})
-		}
-
-		msg = "done"
+	if c.Request().Method == http.MethodGet {
+		return c.Render(http.StatusOK, "submit", page{Title: title, Message: msg})
 	}
 
+	// Accept submission.
+	u, err := common.IsURL("url", mURL, 1024)
+	if err != nil {
+		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: err.Error()})
+	}
+
+	// Remove any ?query params and #hash fragments
+	u.RawQuery = ""
+	u.RawFragment = ""
+
+	if !strings.HasSuffix(u.Path, app.consts.ManifestURI) {
+		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: fmt.Sprintf("URL must end in %s", app.consts.ManifestURI)})
+	}
+
+	// See if the manifest is already in the database.
+	if status, err := app.core.GetManifestStatus(u.String()); err != nil {
+		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: "Error checking manifest status. Retry later."})
+	} else if status != "" {
+		switch status {
+		case core.ManifestStatusActive:
+			msg = "Manifest is already active."
+		case core.ManifestStatusPending:
+			msg = "Manifest is already submitted and is pending review."
+		case core.ManifestStatusBlocklisted:
+			msg = "Manifest URL is blocked and cannot be submitted at this time."
+		}
+
+		if msg != "" {
+			return c.Render(http.StatusOK, "submit", page{Title: title, Message: msg})
+		}
+	}
+
+	// Fetch and validate the manifest.
+	m, err := app.crawl.FetchManifest(u)
+	if err != nil {
+		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: err.Error()})
+	}
+
+	// Add it to the database.
+	if err := app.core.UpsertManifest(m); err != nil {
+		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: "Error saving manifest to database. Retry later."})
+	}
+
+	msg = "success"
 	return c.Render(http.StatusOK, "submit", page{Title: title, Message: msg})
 }
 

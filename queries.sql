@@ -10,7 +10,12 @@ WITH man AS (
         $5
     )
     ON CONFLICT (url) DO UPDATE
-    SET version = $1->>'version', funding = $1::JSONB->'funding', updated_at = NOW()
+    SET version = $1->>'version',
+        funding = $1::JSONB->'funding',
+        meta = $3,
+        status = $4,
+        status_message = $5,
+        updated_at = NOW()
     RETURNING id
 ),
 entity AS (
@@ -59,8 +64,8 @@ prj AS (
 )
 SELECT (SELECT id FROM man) AS manifest_id;
 
--- name: check-manifest-exists
-SELECT id  FROM manifests WHERE url = $1;
+-- name: get-manifest-status
+SELECT status FROM manifests WHERE url = $1;
 
 -- name: get-for-crawling
 SELECT id, uuid, url FROM manifests WHERE id > $1 AND updated_at < NOW() - $2::INTERVAL AND status != 'disabled' ORDER BY id LIMIT $3;
