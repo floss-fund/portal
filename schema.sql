@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS projects (
     id                   SERIAL PRIMARY KEY,
     uuid                 UUID NOT NULL UNIQUE DEFAULT GEN_RANDOM_UUID(),
 
-    project_id           TEXT NOT NULL,
+    project_id           TEXT NOT NULL UNIQUE,
     name                 TEXT NOT NULL,
     description          TEXT NOT NULL,
     webpage_url          TEXT NOT NULL,

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"net/url"
 
+	"github.com/floss-fund/go-funding-json/common"
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -16,11 +16,11 @@ type Opt struct {
 }
 
 const (
-	ManifestStatusPending     = "pending"
-	ManifestStatusActive      = "active"
-	ManifestStatusExpiring    = "expiring"
-	ManifestStatusDisabled    = "disabled"
-	ManifestStatusBlocklisted = "blocklisted"
+	ManifestStatusPending  = "pending"
+	ManifestStatusActive   = "active"
+	ManifestStatusExpiring = "expiring"
+	ManifestStatusDisabled = "disabled"
+	ManifestStatusBlocked  = "blocked"
 )
 
 // Queries contains prepared DB queries.
@@ -78,23 +78,23 @@ func (d *Core) UpsertManifest(m v1.Manifest) error {
 	return nil
 }
 
-// GetManifestURLsByAge retrieves manifest URLs that need to be crawled again. It returns records in batches of limit length,
+// GetManifestForCrawling retrieves manifest URLs that need to be crawled again. It returns records in batches of limit length,
 // continued from the last processed row ID which is the offsetID.
-func (d *Core) GetManifestURLsByAge(age string, offsetID, limit int) ([]models.ManifestURL, error) {
-	var out []models.ManifestURL
+func (d *Core) GetManifestForCrawling(age string, offsetID, limit int) ([]models.ManifestJob, error) {
+	var out []models.ManifestJob
 	if err := d.q.GetForCrawling.Select(&out, offsetID, age, limit); err != nil {
 		d.log.Printf("error fetching URLs for crawling: %v", err)
 		return nil, err
 	}
 
 	for n, u := range out {
-		p, err := url.Parse(u.URL)
+		url, err := common.IsURL("url", u.URL, 1024)
 		if err != nil {
 			d.log.Printf("error parsing url %v: ", err)
 			continue
 		}
 
-		u.URLobj = p
+		u.URLobj = url
 		out[n] = u
 	}
 

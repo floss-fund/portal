@@ -125,7 +125,7 @@ func handleSubmitPage(c echo.Context) error {
 			msg = "Manifest is already active."
 		case core.ManifestStatusPending:
 			msg = "Manifest is already submitted and is pending review."
-		case core.ManifestStatusBlocklisted:
+		case core.ManifestStatusBlocked:
 			msg = "Manifest URL is blocked and cannot be submitted at this time."
 		}
 

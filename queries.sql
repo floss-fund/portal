@@ -41,8 +41,8 @@ entity AS (
 ),
 delPrj AS (
 	-- Delete project IDs that have disappeared from the manifest.
-	DELETE FROM projects WHERE project_id::text NOT IN (
-	    SELECT p->>'id' FROM JSONB_ARRAY_ELEMENTS($1->'projects') AS p
+	DELETE FROM projects WHERE project_id NOT IN (
+        SELECT p->>'id' FROM JSONB_ARRAY_ELEMENTS($1->'projects') AS p
 	)
 ),
 prj AS (
@@ -61,6 +61,15 @@ prj AS (
         ARRAY(SELECT JSONB_ARRAY_ELEMENTS_TEXT(project->'tags')),
         (SELECT id FROM man) AS manifest_id
     FROM JSONB_ARRAY_ELEMENTS($1->'projects') AS project
+    ON CONFLICT (project_id) DO UPDATE
+    SET name = EXCLUDED.name,
+        description = EXCLUDED.description,
+        webpage_url = EXCLUDED.webpage_url,
+        webpage_wellknown = EXCLUDED.webpage_wellknown,
+        repository_url = EXCLUDED.repository_url,
+        repository_wellknown = EXCLUDED.repository_wellknown,
+        licenses = EXCLUDED.licenses,
+        tags = EXCLUDED.tags
 )
 SELECT (SELECT id FROM man) AS manifest_id;
 
@@ -68,7 +77,12 @@ SELECT (SELECT id FROM man) AS manifest_id;
 SELECT status FROM manifests WHERE url = $1;
 
 -- name: get-for-crawling
-SELECT id, uuid, url FROM manifests WHERE id > $1 AND updated_at < NOW() - $2::INTERVAL AND status != 'disabled' ORDER BY id LIMIT $3;
+SELECT id, uuid, url, updated_at FROM manifests
+    WHERE id > $1
+    AND updated_at < NOW() - $2::INTERVAL
+    AND status != 'disabled'
+    AND status != 'blocked'
+    ORDER BY id LIMIT $3;
 
 -- name: update-manifest-status
 UPDATE manifests SET status=$2 WHERE id=$1;

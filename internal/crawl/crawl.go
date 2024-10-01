@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/floss-fund/go-funding-json/common"
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
@@ -17,7 +18,7 @@ type Schema interface {
 }
 
 type DB interface {
-	GetManifestURLsByAge(age string, offsetID, limit int) ([]models.ManifestURL, error)
+	GetManifestForCrawling(age string, offsetID, limit int) ([]models.ManifestJob, error)
 	UpsertManifest(m v1.Manifest) error
 }
 
@@ -37,7 +38,7 @@ type Crawl struct {
 	db  DB
 
 	wg   *sync.WaitGroup
-	jobs chan models.ManifestURL
+	jobs chan models.ManifestJob
 
 	hc  *common.HTTPClient
 	log *log.Logger
@@ -60,7 +61,7 @@ func New(o *Opt, sc Schema, cb *Callbacks, db DB, l *log.Logger) *Crawl {
 		hc:  common.NewHTTPClient(o.HTTP, l),
 
 		wg:   &sync.WaitGroup{},
-		jobs: make(chan models.ManifestURL, o.BatchSize),
+		jobs: make(chan models.ManifestJob, o.BatchSize),
 		log:  l,
 	}
 }
@@ -76,6 +77,29 @@ func (c *Crawl) Crawl() error {
 
 	c.wg.Wait()
 	return nil
+}
+
+// IsManifestModified sends a head request to a manifest URL and
+// indicates whether it's been updated (true=needs re-crawling).
+func (c *Crawl) IsManifestModified(manifest *url.URL, lastModified time.Time) (bool, error) {
+	hdr, err := c.hc.Head(manifest)
+	if err != nil {
+		return false, err
+	}
+
+	last := hdr.Get("Last-Modified")
+
+	// Header doesn't exist. Re-crawl.
+	if last == "" {
+		return true, nil
+	}
+
+	t, err := time.Parse(time.RFC1123, last)
+	if err != nil {
+		return false, err
+	}
+
+	return lastModified.Before(t), nil
 }
 
 // FetchManifest fetches a given funding.json manifest, parses it, and returns.

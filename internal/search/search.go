@@ -254,7 +254,7 @@ func (o *Search) do(method, uri string, body []byte) ([]byte, int, error) {
 	headers := http.Header{}
 	headers.Add("X-TYPESENSE-API-KEY", o.opt.APIKey)
 
-	body, _, statusCode, err := o.hc.DoReq(method, o.opt.RootURL+uri, body, headers)
+	body, _, _, statusCode, err := o.hc.DoReq(method, o.opt.RootURL+uri, body, headers)
 	if err != nil {
 		return body, statusCode, err
 	}

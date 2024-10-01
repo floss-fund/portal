@@ -11,7 +11,7 @@ func (c *Crawl) dbWorker() {
 	)
 	for {
 		n++
-		items, err := c.db.GetManifestURLsByAge(c.opt.ManifestAge, lastID, c.opt.BatchSize)
+		items, err := c.db.GetManifestForCrawling(c.opt.ManifestAge, lastID, c.opt.BatchSize)
 		if err != nil {
 			time.Sleep(time.Second * 5)
 			continue
@@ -43,21 +43,33 @@ func (c *Crawl) worker() {
 loop:
 	for {
 		select {
-		case mURL, ok := <-c.jobs:
+		case j, ok := <-c.jobs:
 			if !ok {
 				break loop
 			}
 
 			// Fetch and validate the manifest.
-			m, err := c.FetchManifest(mURL.URLobj)
+			reCrawl, err := c.IsManifestModified(j.URLobj, j.LastModified)
 			if err != nil {
-				c.log.Printf("error crawling: %v", err)
+				c.log.Printf("error fetching modified date: %s: %v", j.URL, err)
+				continue
+			}
+
+			if !reCrawl {
+				c.log.Printf("no modification. Skipping: %s", j.URL)
+				continue
+			}
+
+			// Fetch and validate the manifest.
+			m, err := c.FetchManifest(j.URLobj)
+			if err != nil {
+				c.log.Printf("error crawling: %s: %v", j.URL, err)
 				continue
 			}
 
 			// Add it to the database.
 			if err := c.db.UpsertManifest(m); err != nil {
-				c.log.Printf("error upserting manifest: %v", err)
+				c.log.Printf("error upserting manifest: %s: %v", j.URL, err)
 				continue
 			}
 
