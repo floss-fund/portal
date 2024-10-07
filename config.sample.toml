@@ -38,6 +38,9 @@ skip_ratelimited_host = true
 # Fetch the .well-known URL and verify provenance of all URLs described in the manifest?
 check_provenance = true
 
+# Maximum crawl errors after which a manifest is set to "disabled"
+max_crawl_errors = 5
+
 # HTTP requests.
 max_host_conns = 100
 retries = 2 # minimum 1

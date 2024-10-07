@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/floss-fund/go-funding-json/common"
-	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -26,9 +25,11 @@ const (
 // Queries contains prepared DB queries.
 type Queries struct {
 	UpsertManifest       *sqlx.Stmt `query:"upsert-manifest"`
+	GetManifest          *sqlx.Stmt `query:"get-manifest-status"`
 	GetManifestStatus    *sqlx.Stmt `query:"get-manifest-status"`
 	GetForCrawling       *sqlx.Stmt `query:"get-for-crawling"`
 	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
+	UpdateCrawlError     *sqlx.Stmt `query:"update-crawl-error"`
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
 }
 
@@ -55,7 +56,7 @@ func (d *Core) GetManifestStatus(url string) (string, error) {
 			return "", nil
 		}
 
-		d.log.Printf("error checking manifest status: %v", err)
+		d.log.Printf("error checking manifest status: %s: %v", url, err)
 		return "", err
 	}
 
@@ -63,10 +64,10 @@ func (d *Core) GetManifestStatus(url string) (string, error) {
 }
 
 // UpsertManifest upserts an entry into the database.
-func (d *Core) UpsertManifest(m v1.Manifest) error {
+func (d *Core) UpsertManifest(m models.Manifest) error {
 	body, err := m.MarshalJSON()
 	if err != nil {
-		d.log.Printf("error marshalling manifest: %v", err)
+		d.log.Printf("error marshalling manifest: %s: %v", m.URL, err)
 		return err
 	}
 
@@ -90,7 +91,7 @@ func (d *Core) GetManifestForCrawling(age string, offsetID, limit int) ([]models
 	for n, u := range out {
 		url, err := common.IsURL("url", u.URL, 1024)
 		if err != nil {
-			d.log.Printf("error parsing url %v: ", err)
+			d.log.Printf("error parsing url: %s: %v: ", u.URL, err)
 			continue
 		}
 
@@ -104,11 +105,23 @@ func (d *Core) GetManifestForCrawling(age string, offsetID, limit int) ([]models
 // UpdateManifestStatus updates a manifest's status.
 func (d *Core) UpdateManifestStatus(id int, status string) error {
 	if _, err := d.q.UpdateManifestStatus.Exec(id, status); err != nil {
-		d.log.Printf("error updating manifest status: %v", err)
+		d.log.Printf("error updating manifest status: %d: %v", id, err)
 		return err
 	}
 
 	return nil
+}
+
+// UpdateManifestCrawlError updates a manifest's crawl error count and sets
+// it to 'disabled' if it exceeds the given limit.
+func (d *Core) UpdateManifestCrawlError(id int, message string, maxErrors int) (string, error) {
+	var status string
+	if err := d.q.UpdateCrawlError.Get(&status, id, message, maxErrors); err != nil {
+		d.log.Printf("error updating manifest crawl error status: %d: %v", id, err)
+		return "", err
+	}
+
+	return status, nil
 }
 
 // GetTopTags returns top N tags referenced across projects.

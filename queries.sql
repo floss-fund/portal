@@ -79,7 +79,7 @@ SELECT status FROM manifests WHERE url = $1;
 -- name: get-for-crawling
 SELECT id, uuid, url, updated_at FROM manifests
     WHERE id > $1
-    AND updated_at < NOW() - $2::INTERVAL
+    AND updated_at > NOW() - $2::INTERVAL
     AND status != 'disabled'
     AND status != 'blocked'
     ORDER BY id LIMIT $3;
@@ -89,3 +89,11 @@ UPDATE manifests SET status=$2 WHERE id=$1;
 
 -- name: get-top-tags
 SELECT tag FROM top_tags LIMIT $1;
+
+-- name: update-crawl-error
+UPDATE manifests SET
+    crawl_errors = crawl_errors + 1,
+    crawl_message = $2,
+    status = (CASE WHEN crawl_errors + 1 >= $3 THEN 'disabled' ELSE status END)
+    WHERE id = $1
+    RETURNING status;

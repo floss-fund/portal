@@ -2,6 +2,8 @@ package crawl
 
 import (
 	"time"
+
+	"github.com/floss-fund/portal/internal/core"
 )
 
 func (c *Crawl) dbWorker() {
@@ -61,9 +63,19 @@ loop:
 			}
 
 			// Fetch and validate the manifest.
+			status := ""
 			m, err := c.FetchManifest(j.URLobj)
+			m.ID = j.ID
+			m.UUID = j.UUID
 			if err != nil {
 				c.log.Printf("error crawling: %s: %v", j.URL, err)
+
+				// Record the error.
+				status, _ = c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors)
+				if c.cb.OnManifestUpdate != nil {
+					c.cb.OnManifestUpdate(m, status)
+				}
+
 				continue
 			}
 
@@ -74,7 +86,7 @@ loop:
 			}
 
 			if c.cb.OnManifestUpdate != nil {
-				c.cb.OnManifestUpdate(m)
+				c.cb.OnManifestUpdate(m, core.ManifestStatusActive)
 			}
 		}
 	}

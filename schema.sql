@@ -14,6 +14,8 @@ CREATE TABLE manifests (
     meta                 JSONB NOT NULL DEFAULT '{}',
     status               manifest_status NOT NULL DEFAULT 'pending',
     status_message       TEXT NULL,
+    crawl_errors         INT NOT NULL DEFAULT 0,
+    crawl_message        TEXT NULL,
 
     created_at           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()

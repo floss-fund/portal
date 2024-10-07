@@ -14,9 +14,11 @@ BIN := portal
 STATIC := config.sample.toml schema.sql queries.sql admin
 
 EASYJSON_MODELS := $\
+	internal/models/models.go \
 	internal/search/models.go
 
 GENERATED_EASYJSON_MODELS := $\
+	internal/models/models_easyjson.go \
 	internal/search/models_easyjson.go
 
 $(EASYJSON):

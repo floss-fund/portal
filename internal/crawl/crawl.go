@@ -8,18 +8,18 @@ import (
 	"time"
 
 	"github.com/floss-fund/go-funding-json/common"
-	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/models"
 )
 
 type Schema interface {
-	Validate(v1.Manifest) (v1.Manifest, error)
-	ParseManifest(b []byte, manifestURL string, checkProvenance bool) (v1.Manifest, error)
+	Validate(models.Manifest) (models.Manifest, error)
+	ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.Manifest, error)
 }
 
 type DB interface {
 	GetManifestForCrawling(age string, offsetID, limit int) ([]models.ManifestJob, error)
-	UpsertManifest(m v1.Manifest) error
+	UpsertManifest(m models.Manifest) error
+	UpdateManifestCrawlError(id int, message string, maxErrors int) (string, error)
 }
 
 type Opt struct {
@@ -27,6 +27,7 @@ type Opt struct {
 	ManifestAge     string `json:"manifest_age"`
 	BatchSize       int    `json:"batch_size"`
 	CheckProvenance bool   `json:"check_provenance"`
+	MaxCrawlErrors  int    `json:"max_crawl_errors"`
 
 	HTTP common.HTTPOpt
 }
@@ -45,7 +46,7 @@ type Crawl struct {
 }
 
 type Callbacks struct {
-	OnManifestUpdate func(m v1.Manifest)
+	OnManifestUpdate func(m models.Manifest, status string)
 }
 
 var (
@@ -103,10 +104,10 @@ func (c *Crawl) IsManifestModified(manifest *url.URL, lastModified time.Time) (b
 }
 
 // FetchManifest fetches a given funding.json manifest, parses it, and returns.
-func (c *Crawl) FetchManifest(manifest *url.URL) (v1.Manifest, error) {
+func (c *Crawl) FetchManifest(manifest *url.URL) (models.Manifest, error) {
 	b, err := c.hc.Get(manifest)
 	if err != nil {
-		return v1.Manifest{}, err
+		return models.Manifest{}, err
 	}
 
 	return c.sc.ParseManifest(b, manifest.String(), c.opt.CheckProvenance)

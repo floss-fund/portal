@@ -19,6 +19,7 @@ import (
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/core"
 	"github.com/floss-fund/portal/internal/crawl"
+	"github.com/floss-fund/portal/internal/models"
 	"github.com/floss-fund/portal/internal/search"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/goyesql/v2"
@@ -31,6 +32,10 @@ import (
 	"github.com/labstack/echo/v4"
 	flag "github.com/spf13/pflag"
 )
+
+type Schema struct {
+	schema *v1.Schema
+}
 
 func initConfig() {
 	// Commandline flags.
@@ -88,9 +93,11 @@ func initConfig() {
 
 func initConstants(ko *koanf.Koanf) Consts {
 	c := Consts{
-		RootURL:      ko.MustString("app.root_url"),
-		ManifestURI:  ko.MustString("crawl.manifest_uri"),
-		WellKnownURI: ko.MustString("crawl.wellknown_uri"),
+		RootURL:       ko.MustString("app.root_url"),
+		ManifestURI:   ko.MustString("crawl.manifest_uri"),
+		WellKnownURI:  ko.MustString("crawl.wellknown_uri"),
+		AdminUsername: ko.MustBytes("crawl.admin_username"),
+		AdminPassword: ko.MustBytes("crawl.admin_password"),
 	}
 
 	return c
@@ -190,30 +197,43 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 		ManifestAge:     ko.MustString("crawl.manifest_age"),
 		BatchSize:       ko.MustInt("crawl.batch_size"),
 		CheckProvenance: ko.Bool("crawl.check_provenance"),
+		MaxCrawlErrors:  ko.MustInt("crawl.max_crawl_errors"),
 
 		HTTP: initHTTPOpt(),
 	}
 
 	// When the crawler updates manifests, fire the callback to search results.
 	cb := &crawl.Callbacks{
-		OnManifestUpdate: func(m v1.Manifest) {
+		OnManifestUpdate: func(m models.Manifest, status string) {
 			// Delete all search data (entity, projects) on the manifest.
 			_ = s.Delete(m.ID)
 
 			// If it's active, re-insert it into the search index.
-			_ = s.InsertEntity(search.Entity{
-				ManifestID: m.ID,
-				Name:       m.Entity.Name,
-				Type:       m.Entity.Type,
-				Role:       m.Entity.Role,
-			})
+			if status == core.ManifestStatusActive {
+				_ = s.InsertEntity(search.Entity{
+					ManifestID: m.ID,
+					Name:       m.Entity.Name,
+					Type:       m.Entity.Type,
+					Role:       m.Entity.Role,
+				})
+
+				for _, p := range m.Projects {
+					_ = s.InsertProject(search.Project{
+						ManifestID:  m.ID,
+						Name:        p.Name,
+						Description: p.Description,
+						Licenses:    p.Licenses,
+						Tags:        p.Tags,
+					})
+				}
+			}
 		},
 	}
 
 	return crawl.New(&opt, sc, cb, co, lo)
 }
 
-func initSchema(ko *koanf.Koanf) *v1.Schema {
+func initSchema(ko *koanf.Koanf) crawl.Schema {
 	// SPDX license index.
 	licenses := make(map[string]string)
 	if b, err := os.ReadFile(ko.MustString("data_files.spdx")); err != nil {
@@ -263,7 +283,10 @@ func initSchema(ko *koanf.Koanf) *v1.Schema {
 		Currencies:           currencies,
 	}, initHTTPOpt(), lo)
 
-	return sc
+	// Since the portal has it's own models.Manifest (with additional fields),
+	// have to use a simple abstraction to pass the underlying v1 schema to the
+	// schema validator.
+	return &Schema{schema: sc}
 }
 
 func initHTTPOpt() common.HTTPOpt {
@@ -339,4 +362,21 @@ func generateNewFiles() error {
 	}
 
 	return nil
+}
+
+func (s *Schema) Validate(m models.Manifest) (models.Manifest, error) {
+	schemaManifest, err := s.schema.Validate(m.Manifest)
+	if err != nil {
+		return m, err
+	}
+	m.Manifest = schemaManifest
+	return m, nil
+}
+
+func (s *Schema) ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.Manifest, error) {
+	schemaManifest, err := s.schema.ParseManifest(b, manifestURL, checkProvenance)
+	if err != nil {
+		return models.Manifest{}, err
+	}
+	return models.Manifest{Manifest: schemaManifest}, nil
 }
