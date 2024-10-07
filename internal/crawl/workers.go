@@ -66,7 +66,6 @@ loop:
 			status := ""
 			m, err := c.FetchManifest(j.URLobj)
 			m.ID = j.ID
-			m.UUID = j.UUID
 			if err != nil {
 				c.log.Printf("error crawling: %s: %v", j.URL, err)
 

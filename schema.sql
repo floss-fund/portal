@@ -6,7 +6,7 @@ DROP TYPE IF EXISTS manifest_status CASCADE; CREATE TYPE manifest_status AS ENUM
 DROP TABLE IF EXISTS manifests CASCADE;
 CREATE TABLE manifests (
     id                   SERIAL PRIMARY KEY,
-    uuid                 UUID NOT NULL UNIQUE DEFAULT GEN_RANDOM_UUID(),
+    guid                 TEXT NOT NULL UNIQUE,
 
     version              TEXT NOT NULL,
     url                  TEXT NOT NULL UNIQUE,
@@ -30,7 +30,6 @@ DROP TYPE IF EXISTS entity_role CASCADE; CREATE TYPE entity_role AS ENUM ('owner
 DROP TABLE IF EXISTS entities CASCADE;
 CREATE TABLE IF NOT EXISTS entities (
     id                  SERIAL PRIMARY KEY,
-    uuid                UUID NOT NULL UNIQUE DEFAULT GEN_RANDOM_UUID(),
 
     type                entity_type NOT NULL,
     role                entity_role NOT NULL,
@@ -53,9 +52,8 @@ DROP INDEX IF EXISTS idx_entity_email; CREATE INDEX idx_entity_email ON entities
 DROP TABLE IF EXISTS projects CASCADE;
 CREATE TABLE IF NOT EXISTS projects (
     id                   SERIAL PRIMARY KEY,
-    uuid                 UUID NOT NULL UNIQUE DEFAULT GEN_RANDOM_UUID(),
 
-    project_id           TEXT NOT NULL UNIQUE,
+    guid                 TEXT NOT NULL,
     name                 TEXT NOT NULL,
     description          TEXT NOT NULL,
     webpage_url          TEXT NOT NULL,
@@ -70,7 +68,7 @@ CREATE TABLE IF NOT EXISTS projects (
     created_at           TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at           TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-DROP INDEX IF EXISTS project_id; CREATE INDEX project_id ON projects(project_id);
+DROP INDEX IF EXISTS idx_project_guid; CREATE UNIQUE INDEX idx_project_guid ON projects(manifest_id, guid);
 DROP INDEX IF EXISTS idx_project_manifest; CREATE INDEX idx_project_manifest ON projects(manifest_id);
 DROP INDEX IF EXISTS idx_project_name; CREATE INDEX idx_project_name ON projects USING GIN (LOWER(name) gin_trgm_ops);
 DROP INDEX IF EXISTS idx_project_licenses; CREATE INDEX idx_project_licenses ON projects USING GIN (licenses);

@@ -25,7 +25,7 @@ const (
 // Queries contains prepared DB queries.
 type Queries struct {
 	UpsertManifest       *sqlx.Stmt `query:"upsert-manifest"`
-	GetManifest          *sqlx.Stmt `query:"get-manifest-status"`
+	GetManifest          *sqlx.Stmt `query:"get-manifest"`
 	GetManifestStatus    *sqlx.Stmt `query:"get-manifest-status"`
 	GetForCrawling       *sqlx.Stmt `query:"get-for-crawling"`
 	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
@@ -47,6 +47,36 @@ func New(q *Queries, o Opt, lo *log.Logger) *Core {
 	}
 }
 
+// GetManifest retrieves a manifest.
+func (d *Core) GetManifest(id int) (models.ManifestDB, error) {
+	var (
+		out models.ManifestDB
+	)
+
+	// Get the manifest. entity{} and projects[{}] are retrieved
+	// as JSON fields that need to be manually unmarshalled.
+	if err := d.q.GetManifest.Get(&out, id); err != nil {
+		if err == sql.ErrNoRows {
+			return out, nil
+		}
+
+		d.log.Printf("error fetching manifest: %d: %v", id, err)
+		return out, err
+	}
+
+	if err := out.Entity.UnmarshalJSON(out.EntityRaw); err != nil {
+		d.log.Printf("error unmarshalling entity: %d: %v", id, err)
+		return out, err
+	}
+
+	if err := out.Projects.UnmarshalJSON(out.ProjectsRaw); err != nil {
+		d.log.Printf("error unmarshalling projects: %d: %v", id, err)
+		return out, err
+	}
+
+	return out, nil
+}
+
 // GetManifestStatus checks whether a given manifest URL exists in the databse.
 // If one exists, its status is returned.
 func (d *Core) GetManifestStatus(url string) (string, error) {
@@ -64,14 +94,14 @@ func (d *Core) GetManifestStatus(url string) (string, error) {
 }
 
 // UpsertManifest upserts an entry into the database.
-func (d *Core) UpsertManifest(m models.Manifest) error {
-	body, err := m.MarshalJSON()
+func (d *Core) UpsertManifest(m models.ManifestDB) error {
+	body, err := m.Manifest.MarshalJSON()
 	if err != nil {
 		d.log.Printf("error marshalling manifest: %s: %v", m.URL, err)
 		return err
 	}
 
-	if _, err := d.q.UpsertManifest.Exec(json.RawMessage(body), m.URL.URL, json.RawMessage("{}"), ManifestStatusPending, ""); err != nil {
+	if _, err := d.q.UpsertManifest.Exec(json.RawMessage(body), m.Manifest.URL.URL, m.GUID, json.RawMessage("{}"), ManifestStatusPending, ""); err != nil {
 		d.log.Printf("error upsering manifest: %v", err)
 		return err
 	}

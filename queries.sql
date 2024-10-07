@@ -1,20 +1,21 @@
 -- name: upsert-manifest
 WITH man AS (
-    INSERT INTO manifests (version, url, funding, meta, status, status_message)
+    INSERT INTO manifests (version, url, guid, funding, meta, status, status_message)
     VALUES (
         $1::JSONB->>'version',
         $2,
-        $1::JSONB->'funding',
         $3,
+        $1::JSONB->'funding',
         $4,
-        $5
+        $5,
+        $6
     )
     ON CONFLICT (url) DO UPDATE
     SET version = $1->>'version',
         funding = $1::JSONB->'funding',
-        meta = $3,
-        status = $4,
-        status_message = $5,
+        meta = $4,
+        status = $5,
+        status_message = $6,
         updated_at = NOW()
     RETURNING id
 ),
@@ -40,17 +41,17 @@ entity AS (
     RETURNING id
 ),
 delPrj AS (
-	-- Delete project IDs that have disappeared from the manifest.
-	DELETE FROM projects WHERE project_id NOT IN (
-        SELECT p->>'id' FROM JSONB_ARRAY_ELEMENTS($1->'projects') AS p
-	)
+    -- Delete project IDs that have disappeared from the manifest.
+    DELETE FROM projects WHERE guid NOT IN (
+        SELECT p->>'guid' FROM JSONB_ARRAY_ELEMENTS($1->'projects') AS p
+    )
 ),
 prj AS (
     INSERT INTO projects (
-        project_id, name, description, webpage_url, webpage_wellknown, repository_url, repository_wellknown, licenses, tags, manifest_id
+        guid, name, description, webpage_url, webpage_wellknown, repository_url, repository_wellknown, licenses, tags, manifest_id
     )
     SELECT
-        project->>'id',
+        project->>'guid',
         project->>'name',
         project->>'description',
         project->'webpageUrl'->>'url',
@@ -61,7 +62,7 @@ prj AS (
         ARRAY(SELECT JSONB_ARRAY_ELEMENTS_TEXT(project->'tags')),
         (SELECT id FROM man) AS manifest_id
     FROM JSONB_ARRAY_ELEMENTS($1->'projects') AS project
-    ON CONFLICT (project_id) DO UPDATE
+    ON CONFLICT (manifest_id, guid) DO UPDATE
     SET name = EXCLUDED.name,
         description = EXCLUDED.description,
         webpage_url = EXCLUDED.webpage_url,
@@ -73,11 +74,26 @@ prj AS (
 )
 SELECT (SELECT id FROM man) AS manifest_id;
 
+-- name: get-manifest
+WITH man AS (
+    SELECT * FROM manifests WHERE id = $1
+),
+entity AS (
+    SELECT TO_JSON(e) AS entity_raw FROM entities e WHERE e.manifest_id = $1
+),
+prj AS (
+    SELECT COALESCE(JSON_AGG(TO_JSON(p)), '[]'::json) AS projects_raw
+    FROM projects p WHERE p.manifest_id = $1
+)
+SELECT m.*, e.entity_raw, p.projects_raw FROM man m
+    LEFT JOIN entity e ON true
+    LEFT JOIN prj p ON true;
+
 -- name: get-manifest-status
 SELECT status FROM manifests WHERE url = $1;
 
 -- name: get-for-crawling
-SELECT id, uuid, url, updated_at FROM manifests
+SELECT id, url, updated_at FROM manifests
     WHERE id > $1
     AND updated_at > NOW() - $2::INTERVAL
     AND status != 'disabled'

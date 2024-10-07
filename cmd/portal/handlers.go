@@ -26,6 +26,7 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 
 	// Authenticated endpoints.
 	a := srv.Group("", middleware.BasicAuth(basicAuth))
+	a.GET("/api/manifests/:id", handleGetManifest)
 	a.PUT("/api/manifests/:id/status", handleUpdateManifestStatus)
 
 	// Static files.
@@ -44,6 +45,20 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 
 }
 
+func handleGetManifest(c echo.Context) error {
+	var (
+		app   = c.Get("app").(*App)
+		id, _ = strconv.Atoi(c.Param("id"))
+	)
+
+	out, err := app.core.GetManifest(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, okResp{out})
+}
+
 func handleUpdateManifestStatus(c echo.Context) error {
 	var (
 		app   = c.Get("app").(*App)
@@ -51,7 +66,7 @@ func handleUpdateManifestStatus(c echo.Context) error {
 	)
 
 	if err := app.core.UpdateManifestStatus(id, c.FormValue("status")); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, okResp{})

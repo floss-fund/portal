@@ -12,13 +12,13 @@ import (
 )
 
 type Schema interface {
-	Validate(models.Manifest) (models.Manifest, error)
-	ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.Manifest, error)
+	Validate(models.ManifestDB) (models.ManifestDB, error)
+	ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.ManifestDB, error)
 }
 
 type DB interface {
 	GetManifestForCrawling(age string, offsetID, limit int) ([]models.ManifestJob, error)
-	UpsertManifest(m models.Manifest) error
+	UpsertManifest(m models.ManifestDB) error
 	UpdateManifestCrawlError(id int, message string, maxErrors int) (string, error)
 }
 
@@ -46,7 +46,7 @@ type Crawl struct {
 }
 
 type Callbacks struct {
-	OnManifestUpdate func(m models.Manifest, status string)
+	OnManifestUpdate func(m models.ManifestDB, status string)
 }
 
 var (
@@ -104,10 +104,10 @@ func (c *Crawl) IsManifestModified(manifest *url.URL, lastModified time.Time) (b
 }
 
 // FetchManifest fetches a given funding.json manifest, parses it, and returns.
-func (c *Crawl) FetchManifest(manifest *url.URL) (models.Manifest, error) {
+func (c *Crawl) FetchManifest(manifest *url.URL) (models.ManifestDB, error) {
 	b, err := c.hc.Get(manifest)
 	if err != nil {
-		return models.Manifest{}, err
+		return models.ManifestDB{}, err
 	}
 
 	return c.sc.ParseManifest(b, manifest.String(), c.opt.CheckProvenance)

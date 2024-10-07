@@ -7,6 +7,9 @@ root_url = "http://localhost:9000"
 
 template_dir = "site"
 
+admin_username = ""
+admin_password = ""
+
 [data_files]
 spdx = "data/spdx.json"
 languages = "data/languages.json"

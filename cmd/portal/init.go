@@ -94,10 +94,10 @@ func initConfig() {
 func initConstants(ko *koanf.Koanf) Consts {
 	c := Consts{
 		RootURL:       ko.MustString("app.root_url"),
+		AdminUsername: ko.MustBytes("app.admin_username"),
+		AdminPassword: ko.MustBytes("app.admin_password"),
 		ManifestURI:   ko.MustString("crawl.manifest_uri"),
 		WellKnownURI:  ko.MustString("crawl.wellknown_uri"),
-		AdminUsername: ko.MustBytes("crawl.admin_username"),
-		AdminPassword: ko.MustBytes("crawl.admin_password"),
 	}
 
 	return c
@@ -204,7 +204,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 
 	// When the crawler updates manifests, fire the callback to search results.
 	cb := &crawl.Callbacks{
-		OnManifestUpdate: func(m models.Manifest, status string) {
+		OnManifestUpdate: func(m models.ManifestDB, status string) {
 			// Delete all search data (entity, projects) on the manifest.
 			_ = s.Delete(m.ID)
 
@@ -212,12 +212,12 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 			if status == core.ManifestStatusActive {
 				_ = s.InsertEntity(search.Entity{
 					ManifestID: m.ID,
-					Name:       m.Entity.Name,
-					Type:       m.Entity.Type,
-					Role:       m.Entity.Role,
+					Name:       m.Manifest.Entity.Name,
+					Type:       m.Manifest.Entity.Type,
+					Role:       m.Manifest.Entity.Role,
 				})
 
-				for _, p := range m.Projects {
+				for _, p := range m.Manifest.Projects {
 					_ = s.InsertProject(search.Project{
 						ManifestID:  m.ID,
 						Name:        p.Name,
@@ -364,7 +364,7 @@ func generateNewFiles() error {
 	return nil
 }
 
-func (s *Schema) Validate(m models.Manifest) (models.Manifest, error) {
+func (s *Schema) Validate(m models.ManifestDB) (models.ManifestDB, error) {
 	schemaManifest, err := s.schema.Validate(m.Manifest)
 	if err != nil {
 		return m, err
@@ -373,10 +373,10 @@ func (s *Schema) Validate(m models.Manifest) (models.Manifest, error) {
 	return m, nil
 }
 
-func (s *Schema) ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.Manifest, error) {
+func (s *Schema) ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.ManifestDB, error) {
 	schemaManifest, err := s.schema.ParseManifest(b, manifestURL, checkProvenance)
 	if err != nil {
-		return models.Manifest{}, err
+		return models.ManifestDB{}, err
 	}
-	return models.Manifest{Manifest: schemaManifest}, nil
+	return models.ManifestDB{Manifest: schemaManifest}, nil
 }

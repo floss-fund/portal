@@ -141,6 +141,9 @@ func handleSubmitPage(c echo.Context) error {
 	}
 
 	// Add it to the database.
+	m.GUID = fmt.Sprintf("%s%s", m.Manifest.URL.URLobj.Host, m.Manifest.URL.URLobj.Path)
+	m.GUID = strings.TrimRight(m.GUID, app.consts.ManifestURI)
+
 	if err := app.core.UpsertManifest(m); err != nil {
 		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: "Error saving manifest to database. Retry later."})
 	}
