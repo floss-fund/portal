@@ -204,7 +204,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 
 	// When the crawler updates manifests, fire the callback to search results.
 	cb := &crawl.Callbacks{
-		OnManifestUpdate: func(m models.ManifestDB, status string) {
+		OnManifestUpdate: func(m models.ManifestData, status string) {
 			// Delete all search data (entity, projects) on the manifest.
 			_ = s.Delete(m.ID)
 
@@ -364,7 +364,7 @@ func generateNewFiles() error {
 	return nil
 }
 
-func (s *Schema) Validate(m models.ManifestDB) (models.ManifestDB, error) {
+func (s *Schema) Validate(m models.ManifestData) (models.ManifestData, error) {
 	schemaManifest, err := s.schema.Validate(m.Manifest)
 	if err != nil {
 		return m, err
@@ -373,10 +373,10 @@ func (s *Schema) Validate(m models.ManifestDB) (models.ManifestDB, error) {
 	return m, nil
 }
 
-func (s *Schema) ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.ManifestDB, error) {
+func (s *Schema) ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.ManifestData, error) {
 	schemaManifest, err := s.schema.ParseManifest(b, manifestURL, checkProvenance)
 	if err != nil {
-		return models.ManifestDB{}, err
+		return models.ManifestData{}, err
 	}
-	return models.ManifestDB{Manifest: schemaManifest}, nil
+	return models.ManifestData{Manifest: schemaManifest}, nil
 }

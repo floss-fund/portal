@@ -348,10 +348,10 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch2(in *jlexer.Le
 		switch key {
 		case "q":
 			out.Query = string(in.String())
-		case "manifest_id":
-			out.ManifestID = int(in.Int())
 		case "id":
 			out.ID = string(in.String())
+		case "manifest_id":
+			out.ManifestID = int(in.Int())
 		case "name":
 			out.Name = string(in.String())
 		case "description":
@@ -421,15 +421,15 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch2(out *jwriter.
 		out.RawString(prefix[1:])
 		out.String(string(in.Query))
 	}
-	if in.ManifestID != 0 {
-		const prefix string = ",\"manifest_id\":"
-		out.RawString(prefix)
-		out.Int(int(in.ManifestID))
-	}
 	{
 		const prefix string = ",\"id\":"
 		out.RawString(prefix)
 		out.String(string(in.ID))
+	}
+	if in.ManifestID != 0 {
+		const prefix string = ",\"manifest_id\":"
+		out.RawString(prefix)
+		out.Int(int(in.ManifestID))
 	}
 	{
 		const prefix string = ",\"name\":"
@@ -518,10 +518,10 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch3(in *jlexer.Le
 			continue
 		}
 		switch key {
-		case "manifest_id":
-			out.ManifestID = int(in.Int())
 		case "id":
 			out.ID = string(in.String())
+		case "manifest_id":
+			out.ManifestID = int(in.Int())
 		case "name":
 			out.Name = string(in.String())
 		case "description":
@@ -586,21 +586,15 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch3(out *jwriter.
 	out.RawByte('{')
 	first := true
 	_ = first
-	if in.ManifestID != 0 {
-		const prefix string = ",\"manifest_id\":"
-		first = false
-		out.RawString(prefix[1:])
-		out.Int(int(in.ManifestID))
-	}
 	{
 		const prefix string = ",\"id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.ID))
+	}
+	if in.ManifestID != 0 {
+		const prefix string = ",\"manifest_id\":"
+		out.RawString(prefix)
+		out.Int(int(in.ManifestID))
 	}
 	{
 		const prefix string = ",\"name\":"
@@ -691,10 +685,10 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch4(in *jlexer.Le
 		switch key {
 		case "q":
 			out.Query = string(in.String())
-		case "manifest_id":
-			out.ManifestID = int(in.Int())
 		case "id":
 			out.ID = string(in.String())
+		case "manifest_id":
+			out.ManifestID = int(in.Int())
 		case "name":
 			out.Name = string(in.String())
 		case "type":
@@ -720,15 +714,15 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch4(out *jwriter.
 		out.RawString(prefix[1:])
 		out.String(string(in.Query))
 	}
-	if in.ManifestID != 0 {
-		const prefix string = ",\"manifest_id\":"
-		out.RawString(prefix)
-		out.Int(int(in.ManifestID))
-	}
 	{
 		const prefix string = ",\"id\":"
 		out.RawString(prefix)
 		out.String(string(in.ID))
+	}
+	if in.ManifestID != 0 {
+		const prefix string = ",\"manifest_id\":"
+		out.RawString(prefix)
+		out.Int(int(in.ManifestID))
 	}
 	{
 		const prefix string = ",\"name\":"
@@ -790,10 +784,10 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch5(in *jlexer.Le
 			continue
 		}
 		switch key {
-		case "manifest_id":
-			out.ManifestID = int(in.Int())
 		case "id":
 			out.ID = string(in.String())
+		case "manifest_id":
+			out.ManifestID = int(in.Int())
 		case "name":
 			out.Name = string(in.String())
 		case "type":
@@ -814,21 +808,15 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch5(out *jwriter.
 	out.RawByte('{')
 	first := true
 	_ = first
-	if in.ManifestID != 0 {
-		const prefix string = ",\"manifest_id\":"
-		first = false
-		out.RawString(prefix[1:])
-		out.Int(int(in.ManifestID))
-	}
 	{
 		const prefix string = ",\"id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.ID))
+	}
+	if in.ManifestID != 0 {
+		const prefix string = ",\"manifest_id\":"
+		out.RawString(prefix)
+		out.Int(int(in.ManifestID))
 	}
 	{
 		const prefix string = ",\"name\":"

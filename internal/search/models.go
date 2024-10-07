@@ -2,12 +2,11 @@ package search
 
 //easyjson:json
 type Entity struct {
-	ManifestID int `json:"manifest_id,omitempty"`
-
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
-	Role string `json:"role"`
+	ID         string `json:"id"`
+	ManifestID int    `json:"manifest_id,omitempty"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	Role       string `json:"role"`
 }
 
 //easyjson:json
@@ -21,9 +20,8 @@ type EntityQuery struct {
 
 //easyjson:json
 type Project struct {
-	ManifestID int `json:"manifest_id,omitempty"`
-
 	ID          string   `json:"id"`
+	ManifestID  int      `json:"manifest_id,omitempty"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Licenses    []string `json:"licenses"`

@@ -48,9 +48,9 @@ func New(q *Queries, o Opt, lo *log.Logger) *Core {
 }
 
 // GetManifest retrieves a manifest.
-func (d *Core) GetManifest(id int) (models.ManifestDB, error) {
+func (d *Core) GetManifest(id int) (models.ManifestData, error) {
 	var (
-		out models.ManifestDB
+		out models.ManifestData
 	)
 
 	// Get the manifest. entity{} and projects[{}] are retrieved
@@ -94,7 +94,7 @@ func (d *Core) GetManifestStatus(url string) (string, error) {
 }
 
 // UpsertManifest upserts an entry into the database.
-func (d *Core) UpsertManifest(m models.ManifestDB) error {
+func (d *Core) UpsertManifest(m models.ManifestData) error {
 	body, err := m.Manifest.MarshalJSON()
 	if err != nil {
 		d.log.Printf("error marshalling manifest: %s: %v", m.URL, err)

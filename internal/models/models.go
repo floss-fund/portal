@@ -17,7 +17,7 @@ type ManifestJob struct {
 }
 
 //easyjson:json
-type ManifestDB struct {
+type ManifestData struct {
 	v1.Manifest
 
 	// These are not in the table and are added by the get-manifest query.
