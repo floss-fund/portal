@@ -79,7 +79,7 @@ func main() {
 	checkUpgrade(db)
 
 	// Initialize queries and data handler.
-	app.core = initCore(app.fs, db, ko)
+	app.core = initCore(app.fs, db)
 	app.schema = initSchema(ko)
 	app.search = initSearch(ko)
 	app.crawl = initCrawl(app.schema, app.core, app.search, ko)

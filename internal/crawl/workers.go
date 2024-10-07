@@ -71,8 +71,8 @@ loop:
 
 				// Record the error.
 				status, _ = c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors)
-				if c.cb.OnManifestUpdate != nil {
-					c.cb.OnManifestUpdate(m, status)
+				if c.Callbacks.OnManifestUpdate != nil {
+					c.Callbacks.OnManifestUpdate(m, status)
 				}
 
 				continue
@@ -84,8 +84,8 @@ loop:
 				continue
 			}
 
-			if c.cb.OnManifestUpdate != nil {
-				c.cb.OnManifestUpdate(m, core.ManifestStatusActive)
+			if c.Callbacks.OnManifestUpdate != nil {
+				c.Callbacks.OnManifestUpdate(m, core.ManifestStatusActive)
 			}
 		}
 	}

@@ -33,10 +33,10 @@ type Opt struct {
 }
 
 type Crawl struct {
-	opt *Opt
-	sc  Schema
-	cb  *Callbacks
-	db  DB
+	opt       *Opt
+	sc        Schema
+	Callbacks *Callbacks
+	db        DB
 
 	wg   *sync.WaitGroup
 	jobs chan models.ManifestJob
@@ -55,11 +55,11 @@ var (
 
 func New(o *Opt, sc Schema, cb *Callbacks, db DB, l *log.Logger) *Crawl {
 	return &Crawl{
-		opt: o,
-		sc:  sc,
-		cb:  cb,
-		db:  db,
-		hc:  common.NewHTTPClient(o.HTTP, l),
+		opt:       o,
+		sc:        sc,
+		Callbacks: cb,
+		db:        db,
+		hc:        common.NewHTTPClient(o.HTTP, l),
 
 		wg:   &sync.WaitGroup{},
 		jobs: make(chan models.ManifestJob, o.BatchSize),

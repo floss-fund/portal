@@ -6,8 +6,6 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/floss-fund/portal/internal/core"
-	"github.com/floss-fund/portal/internal/search"
 	"github.com/knadh/koanf/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -74,29 +72,8 @@ func handleUpdateManifestStatus(c echo.Context) error {
 	}
 
 	// Delete it from search if the status isn't active.
-	if status != core.ManifestStatusActive {
-		_ = app.search.Delete(id)
-	} else {
-		if m, err := app.core.GetManifest(id); err == nil {
-			_ = app.search.InsertEntity(search.Entity{
-				ID:         m.GUID,
-				ManifestID: m.ID,
-				Name:       m.Manifest.Entity.Name,
-				Type:       m.Manifest.Entity.Type,
-				Role:       m.Manifest.Entity.Role,
-			})
-
-			for _, p := range m.Manifest.Projects {
-				_ = app.search.InsertProject(search.Project{
-					ID:          m.GUID + "/" + p.GUID,
-					ManifestID:  m.ID,
-					Name:        p.Name,
-					Description: p.Description,
-					Licenses:    p.Licenses,
-					Tags:        p.Tags,
-				})
-			}
-		}
+	if m, err := app.core.GetManifest(id); err == nil {
+		app.crawl.Callbacks.OnManifestUpdate(m, status)
 	}
 
 	return c.JSON(http.StatusOK, okResp{true})

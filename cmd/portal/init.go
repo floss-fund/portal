@@ -168,7 +168,7 @@ func initHTTPServer(app *App, ko *koanf.Koanf) *echo.Echo {
 	return srv
 }
 
-func initCore(fs stuffbin.FileSystem, db *sqlx.DB, ko *koanf.Koanf) *core.Core {
+func initCore(fs stuffbin.FileSystem, db *sqlx.DB) *core.Core {
 	// Load SQL queries.
 	qB, err := fs.Read("/queries.sql")
 	if err != nil {
@@ -211,6 +211,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 			// If it's active, re-insert it into the search index.
 			if status == core.ManifestStatusActive {
 				_ = s.InsertEntity(search.Entity{
+					ID:         m.GUID,
 					ManifestID: m.ID,
 					Name:       m.Manifest.Entity.Name,
 					Type:       m.Manifest.Entity.Type,
@@ -219,6 +220,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 
 				for _, p := range m.Manifest.Projects {
 					_ = s.InsertProject(search.Project{
+						ID:          m.GUID + "/" + p.GUID,
 						ManifestID:  m.ID,
 						Name:        p.Name,
 						Description: p.Description,
