@@ -32,8 +32,7 @@ type Opt struct {
 	Collection string
 	Groups     []string
 
-	MaxGroups       int
-	ResultsPerGroup int
+	PerPage int
 
 	HTTP common.HTTPOpt
 }
@@ -41,8 +40,8 @@ type Opt struct {
 type Search struct {
 	opt Opt
 
-	maxGroups, resultsPerGroup string
-	groups                     map[string]bool
+	perPage string
+	groups  map[string]bool
 
 	hc  *common.HTTPClient
 	log *log.Logger
@@ -55,17 +54,16 @@ var (
 
 // New returns a new instance of Omnisearch.
 func New(o Opt, l *log.Logger) *Search {
-	if o.ResultsPerGroup == 0 {
-		o.ResultsPerGroup = 5
+	if o.PerPage == 0 {
+		o.PerPage = 50
 	}
 
 	return &Search{
-		opt:             o,
-		maxGroups:       strconv.Itoa(o.MaxGroups),
-		resultsPerGroup: strconv.Itoa(o.ResultsPerGroup),
-		hc:              common.NewHTTPClient(o.HTTP, l),
-		groups:          maps.StringSliceToLookupMap(o.Groups),
-		log:             l,
+		opt:     o,
+		perPage: strconv.Itoa(o.PerPage),
+		hc:      common.NewHTTPClient(o.HTTP, l),
+		groups:  maps.StringSliceToLookupMap(o.Groups),
+		log:     l,
 	}
 }
 
@@ -73,7 +71,7 @@ func New(o Opt, l *log.Logger) *Search {
 func (o *Search) SearchEntities(q EntityQuery) (Entities, error) {
 	p := url.Values{}
 	p.Set("q", q.Query)
-	p.Set("query_by", "name,webpageUrl")
+	p.Set("query_by", "name")
 
 	if q.Type != "" {
 		p.Set("filter_by", "type:="+q.Type)
@@ -82,8 +80,7 @@ func (o *Search) SearchEntities(q EntityQuery) (Entities, error) {
 		p.Set("filter_by", "role:="+q.Type)
 	}
 
-	p.Set("per_page", o.maxGroups)
-	p.Set("group_limit", o.resultsPerGroup)
+	p.Set("per_page", o.perPage)
 
 	// Search.
 	b, _, err := o.do(http.MethodGet, fmt.Sprintf(searchURI, collEntities), []byte(p.Encode()))
@@ -98,13 +95,11 @@ func (o *Search) SearchEntities(q EntityQuery) (Entities, error) {
 
 	// Iterate through the raw results and replace the Title and Description
 	// fields with their <mark> highlighted equivalents, if any.
-	out := make(Entities, 0, len(res.GroupedHits))
-	for _, gh := range res.GroupedHits {
-		for _, h := range gh.Hits {
-			d := h.Entity
+	out := make(Entities, 0, len(res.Hits))
+	for _, h := range res.Hits {
+		d := h.Entity
 
-			out = append(out, d)
-		}
+		out = append(out, d)
 	}
 
 	return out, nil
@@ -144,8 +139,7 @@ func (o *Search) SearchProjects(q ProjectQuery) (Projects, error) {
 		p.Set("filter_by", "licenses="+strings.Join(q.Licenses, ","))
 	}
 
-	p.Set("per_page", o.maxGroups)
-	p.Set("group_limit", o.resultsPerGroup)
+	p.Set("per_page", o.perPage)
 
 	// Search.
 	b, _, err := o.do(http.MethodGet, fmt.Sprintf(searchURI, collProjects), []byte(p.Encode()))
@@ -160,13 +154,11 @@ func (o *Search) SearchProjects(q ProjectQuery) (Projects, error) {
 
 	// Iterate through the raw results and replace the Title and Description
 	// fields with their <mark> highlighted equivalents, if any.
-	out := make(Projects, 0, len(res.GroupedHits))
-	for _, gh := range res.GroupedHits {
-		for _, h := range gh.Hits {
-			d := h.Project
+	out := make(Projects, 0, len(res.Hits))
+	for _, h := range res.Hits {
+		d := h.Project
 
-			out = append(out, d)
-		}
+		out = append(out, d)
 	}
 
 	return out, nil

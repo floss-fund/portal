@@ -3,20 +3,21 @@
 
 <section class="home">
 	<div class="intro">
-		<h1 class="title">FLOSS/Funding</h1>
-		<p>A portal to discover Free and Open Source projects looking for funding</p>
+		<h1 class="title">FLOSS/Fund portal</h1>
+		<p>A directory for discovering Free and Open Source projects looking for financial support.</p>
 	</div>
 
-	<form class="search">
+	<form action="{{ $.RootURL }}/search" class="search">
 		<p>
+			<input type="hidden" name="type" value="project" />
 			<input type="text" name="q" maxlength="64" data-autocomp-tags placeholder="eg: developer-tools or Project Name" autofocus />
 		</p>
 	</form>
 
-	{{ if .Data.Data.Tags }}
+	{{ if .Data.Tags }}
 		<div class="tags box">
 			<h3>Popular tags</h3>
-			{{ range $t := .Data.Data.Tags }}
+			{{ range $t := .Data.Tags }}
 				<a href="{{ $.RootURL }}/tags/{{ $t }}">{{ $t }}</a>
 			{{ end }}
 		</div>

@@ -3,10 +3,12 @@ package core
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/floss-fund/go-funding-json/common"
+	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -69,9 +71,52 @@ func (d *Core) GetManifest(id int) (models.ManifestData, error) {
 		return out, err
 	}
 
+	// Unmarshal the entity URL. DB names and local names don't match,
+	// and it's a nested structure. Sucks.
+	{
+		var ug models.EntityURL
+		if err := ug.UnmarshalJSON(out.EntityRaw); err != nil {
+			d.log.Printf("error unmarshalling entity URL: %d: %v", id, err)
+			return out, err
+		}
+		fmt.Println(ug)
+		if u, err := common.IsURL("url", ug.WebpageURL, 1024); err != nil {
+			d.log.Printf("error parsing entity URL: %d: %s: %v", id, ug.WebpageURL, err)
+			return out, err
+		} else {
+			out.Entity.WebpageURL = v1.URL{URL: ug.WebpageURL, URLobj: u}
+		}
+	}
+
 	if err := out.Projects.UnmarshalJSON(out.ProjectsRaw); err != nil {
 		d.log.Printf("error unmarshalling projects: %d: %v", id, err)
 		return out, err
+	}
+
+	// Unmarshal project URLs. DB names and local names don't match,
+	// and it's a nested structure. This sucks.
+	{
+		var ug models.ProjectURLs
+		if err := ug.UnmarshalJSON(out.ProjectsRaw); err != nil {
+			d.log.Printf("error unmarshalling project URLs: %d: %v", id, err)
+			return out, err
+		}
+
+		for n, p := range ug {
+			if u, err := common.IsURL("url", p.WebpageURL, 1024); err != nil {
+				d.log.Printf("error parsing entity URL: %d: %s: %v", id, p.WebpageURL, err)
+				return out, err
+			} else {
+				out.Projects[n].WebpageURL = v1.URL{URL: p.WebpageURL, URLobj: u}
+			}
+
+			if u, err := common.IsURL("url", p.RepositoryURL, 1024); err != nil {
+				d.log.Printf("error parsing entity URL: %d: %s: %v", id, p.RepositoryURL, err)
+				return out, err
+			} else {
+				out.Projects[n].RepositoryURL = v1.URL{URL: p.RepositoryURL, URLobj: u}
+			}
+		}
 	}
 
 	return out, nil

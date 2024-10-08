@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/floss-fund/go-funding-json/common"
 	"github.com/floss-fund/portal/internal/core"
+	"github.com/floss-fund/portal/internal/search"
 	"github.com/labstack/echo/v4"
 )
 
@@ -37,8 +39,6 @@ type page struct {
 	Heading     string
 	ErrMessage  string
 	Message     string
-
-	Data interface{}
 }
 
 func handleIndexPage(c echo.Context) error {
@@ -47,11 +47,15 @@ func handleIndexPage(c echo.Context) error {
 	)
 
 	tags, _ := app.core.GetTopTags(25)
-	out := struct {
-		Tags []string
-	}{tags}
 
-	return c.Render(http.StatusOK, "index", page{Title: "Discover FOSS projects seeking funding", Data: out})
+	out := struct {
+		page
+		Tags []string
+	}{}
+	out.Title = "Discover FOSS projects seeking funding"
+	out.Tags = tags
+
+	return c.Render(http.StatusOK, "index", out)
 }
 
 func handleGetTags(c echo.Context) error {
@@ -170,6 +174,62 @@ func handleValidateManifest(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, okResp{json.RawMessage(b)})
+}
+
+func handleSearchPage(c echo.Context) error {
+	const title = "Search"
+
+	var (
+		app = c.Get("app").(*App)
+		q   = strings.TrimSpace(c.FormValue("q"))
+		typ = c.FormValue("type")
+	)
+
+	if q == "" || len(q) > 128 {
+		return c.Redirect(http.StatusTemporaryRedirect, app.consts.RootURL)
+	}
+
+	var results interface{}
+	switch typ {
+	case "entity":
+		query := search.EntityQuery{Query: q}
+		query.Type = c.FormValue("entity_type")
+
+		o, err := app.search.SearchEntities(query)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New("error searching"))
+		}
+		results = o
+	case "project":
+		query := search.ProjectQuery{Query: q}
+		query.Licenses = []string{}
+
+		for _, l := range c.QueryParams()["license"] {
+			query.Licenses = append(query.Licenses, l)
+		}
+
+		o, err := app.search.SearchProjects(query)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New("error searching"))
+		}
+		results = o
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("unknown `type`"))
+	}
+
+	out := struct {
+		page
+		Query   string
+		Type    string
+		Results interface{}
+	}{}
+
+	out.Title = "Search"
+	out.Query = q
+	out.Type = typ
+	out.Results = results
+
+	return c.Render(http.StatusOK, "search", out)
 }
 
 // Render executes and renders a template for echo.

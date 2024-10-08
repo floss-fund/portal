@@ -20,6 +20,7 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	g.POST("/submit", handleSubmitPage)
 	g.GET("/validate", handleValidatePage)
 	g.POST("/validate", handleValidatePage)
+	g.GET("/search", handleSearchPage)
 
 	g.POST("/api/validate", handleValidateManifest)
 	g.GET("/api/tags", handleGetTags)

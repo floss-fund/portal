@@ -1,0 +1,19 @@
+{{ define "entity-results" }}
+<section class="results results-{{ .Data.Type }}">
+    <ul>
+        {{ range $r := .Data.Results }}
+        <li class="result">
+          <h3><a href="">{{ .Name }}</a></h3>
+          <header>
+            <a href="{{ $r.WebpageURL }}" class="external-link webpage-url">
+                {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL) }}
+            </a>
+            <span class="num-projects">{{ $r.NumProjects }} projects</span>
+            <span class="role">{{ $r.Role }}</span>
+            <span class="type">{{ $r.Type }}</span>
+          </header>
+        </li>
+        {{ end }}
+    </ul>
+</section>
+{{ end }}

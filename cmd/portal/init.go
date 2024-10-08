@@ -211,21 +211,30 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 			// If it's active, re-insert it into the search index.
 			if status == core.ManifestStatusActive {
 				_ = s.InsertEntity(search.Entity{
-					ID:         m.GUID,
-					ManifestID: m.ID,
-					Name:       m.Manifest.Entity.Name,
-					Type:       m.Manifest.Entity.Type,
-					Role:       m.Manifest.Entity.Role,
+					ID:           m.GUID,
+					ManifestID:   m.ID,
+					ManifestGUID: m.GUID,
+					Type:         m.Manifest.Entity.Type,
+					Role:         m.Manifest.Entity.Role,
+					Name:         m.Manifest.Entity.Name,
+					WebpageURL:   m.Manifest.Entity.WebpageURL.URL,
+					NumProjects:  len(m.Manifest.Projects),
 				})
 
 				for _, p := range m.Manifest.Projects {
 					_ = s.InsertProject(search.Project{
-						ID:          m.GUID + "/" + p.GUID,
-						ManifestID:  m.ID,
-						Name:        p.Name,
-						Description: p.Description,
-						Licenses:    p.Licenses,
-						Tags:        p.Tags,
+						ID:                m.GUID + "/" + p.GUID,
+						ManifestID:        m.ID,
+						ManifestGUID:      m.GUID,
+						EntityType:        m.Manifest.Entity.Type,
+						EntityName:        m.Manifest.Entity.Name,
+						EntityNumProjects: len(m.Manifest.Projects),
+						Name:              p.Name,
+						WebpageURL:        p.WebpageURL.URL,
+						RepositoryURL:     p.RepositoryURL.URL,
+						Description:       p.Description,
+						Licenses:          p.Licenses,
+						Tags:              p.Tags,
 					})
 				}
 			}
@@ -304,10 +313,9 @@ func initHTTPOpt() common.HTTPOpt {
 
 func initSearch(ko *koanf.Koanf) *search.Search {
 	opt := search.Opt{
-		RootURL:         ko.MustString("search.root_url"),
-		APIKey:          ko.MustString("search.api_key"),
-		MaxGroups:       ko.MustInt("search.max_groups"),
-		ResultsPerGroup: ko.MustInt("search.results_per_group"),
+		RootURL: ko.MustString("search.root_url"),
+		APIKey:  ko.MustString("search.api_key"),
+		PerPage: ko.MustInt("search.per_page"),
 
 		HTTP: initHTTPOpt(),
 	}

@@ -22,12 +22,12 @@ body {
 
 a {
     color: var(--primary);
-    text-decoration: underline;
-    text-decoration-thickness: 2.5px;
-    text-underline-offset: 5px;
+    text-decoration: none;
 }
     a:hover {
-        color: #000;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 5px;
     }
 
 h1, h2, h3, h4, h5, h6 {
@@ -267,6 +267,62 @@ form {
     display: none;
 }
 
+/* Search results */
+.results ul {
+    list-style-type: none;
+    padding: 0;
+}
+    .results .result {
+        margin-bottom: 30px;
+        padding: 20px 30px;
+        border: 1px solid #ddd;
+    }
+    .results .tags a {
+        background-color: #e1fdec;
+        display: inline-block;
+        margin: 0 5px 5px 0;
+        text-decoration: none;
+        border-radius: 30px;
+        padding: 3px 15px;
+        font-size: 0.875rem;
+    }
+    .results .tags a:hover {
+        background-color: var(--primary);
+        color: #fff;
+    }
+    .results .title {
+        margin: 0;
+    }
+    .results .props {
+        text-align: right;
+        font-size: 0.875rem;
+        color: #888;
+    }
+        .results .props .license {
+            vertical-align: top;
+            line-height: 1;
+        }
+        .results .props img {
+            max-width: 20px;
+        }
+        .results .props a {
+            display: inline-block;
+            margin-left: 15px;
+            opacity: 0.4;
+        }
+        .results .props a:hover {
+            opacity: 1;
+        }
+        .results .entity {
+            font-size: 0.875rem;
+            color: #888;
+        }
+        .results .entity img {
+            max-width: 18px;
+            vertical-align: middle;
+            opacity: 0.5;
+        }
+
 
 .footer {
     margin: 120px 0 15px 0;
@@ -318,5 +374,11 @@ form {
     .row {
         margin-right: 0;
         margin-left: 0;
+    }
+    .results .result {
+        padding: 15px;
+    }
+    .results .props {
+        text-align: left;
     }
 }

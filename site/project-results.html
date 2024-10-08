@@ -1,0 +1,43 @@
+{{ define "project-results" }}
+<section class="results {{ .Data.Type }}-results">
+    <ul>
+        {{ range $r := .Data.Results }}
+        <li class="result">
+          <header>
+            <div class="row">
+              <div class="col-xs-9">
+                <h3 class="title"><a href="{{ $.RootURL }}/view/{{ $r.ID }}">{{ .Name }}</a></h3>
+                  <a href="{{ $.RootURL }}/view/{{ $r.ManifestGUID }}" class="entity">
+                    <img src="{{ $.RootURL }}/static/ico-{{ $r.EntityType }}.svg" /> {{ $r.EntityName }}
+                    {{ if $r.EntityNumProjects }}<span class="num-projects">({{ $r.EntityNumProjects }} projects</span>){{ end }}
+                  </a>
+              </div>
+              <div class="col-xs props">
+                <span class="col-xs license">
+                    {{ $len := sub (len .Licenses) 1 }}
+                    {{ trimPrefix "spdx:" (index .Licenses 0) }} {{ if (gt $len 0) }} +{{ $len }}{{ end }}
+                </span>
+                <a href="{{ $r.WebpageURL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL) }}">
+                  <img src="/static/ico-link.svg" />
+                </a>  
+                <a href="{{ $r.RepositoryURL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL) }}">
+                  <img src="/static/ico-repo.svg" />
+                </a>  
+              </div>
+            </div>
+          </header>
+
+          <p class="description">{{ .Description }}</p>
+
+          <footer class="meta">
+            <div class="tags">
+              {{ range $v := .Tags }}
+                <a href="/search?tag={{ $v }}&type=project" class="tag">{{ $v }}</a>
+              {{ end }}
+            </div>
+          </footer>
+        </li>
+        {{ end }}
+    </ul>
+</section>
+{{ end }}

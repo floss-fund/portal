@@ -1,0 +1,13 @@
+{{ define "search" }}
+  {{ template "header" . }}
+
+  <h3>Search "{{ .Data.Query }}"</h3>
+
+  {{ if eq .Data.Type "project" }}
+    {{ template "project-results" . }}
+  {{ else if eq .Data.Type "entity" }}
+    {{ template "entity-results" . }}
+  {{ end }}
+
+  {{ template "footer" .}}
+{{ end }}

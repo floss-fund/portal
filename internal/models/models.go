@@ -37,3 +37,17 @@ type ManifestData struct {
 	CreatedAt     time.Time      `db:"created_at" json:"created_at"`
 	UpdatedAt     time.Time      `db:"updated_at" json:"updated_at"`
 }
+
+//easyjson:json
+type EntityURL struct {
+	WebpageURL string `json:"webpage_url"`
+}
+
+//easyjson:json
+type ProjectURL struct {
+	WebpageURL    string `json:"webpage_url"`
+	RepositoryURL string `json:"repository_url"`
+}
+
+//easyjson:json
+type ProjectURLs []ProjectURL

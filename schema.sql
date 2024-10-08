@@ -30,6 +30,7 @@ DROP TYPE IF EXISTS entity_role CASCADE; CREATE TYPE entity_role AS ENUM ('owner
 DROP TABLE IF EXISTS entities CASCADE;
 CREATE TABLE IF NOT EXISTS entities (
     id                  SERIAL PRIMARY KEY,
+    manifest_id         INTEGER UNIQUE REFERENCES manifests(id) ON DELETE CASCADE ON UPDATE CASCADE,
 
     type                entity_type NOT NULL,
     role                entity_role NOT NULL,
@@ -39,7 +40,6 @@ CREATE TABLE IF NOT EXISTS entities (
     webpage_url         TEXT NOT NULL,
     webpage_wellknown   TEXT NULL,
     meta                JSONB NOT NULL DEFAULT '{}',
-    manifest_id         INTEGER UNIQUE REFERENCES manifests(id) ON DELETE CASCADE ON UPDATE CASCADE,
 
     created_at          TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at          TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -52,6 +52,7 @@ DROP INDEX IF EXISTS idx_entity_email; CREATE INDEX idx_entity_email ON entities
 DROP TABLE IF EXISTS projects CASCADE;
 CREATE TABLE IF NOT EXISTS projects (
     id                   SERIAL PRIMARY KEY,
+    manifest_id          INTEGER REFERENCES manifests(id) ON DELETE CASCADE ON UPDATE CASCADE,
 
     guid                 TEXT NOT NULL,
     name                 TEXT NOT NULL,
@@ -63,7 +64,6 @@ CREATE TABLE IF NOT EXISTS projects (
     licenses             TEXT[] NOT NULL,
     tags                 TEXT[] NOT NULL,
     meta                 JSONB NOT NULL DEFAULT '{}',
-    manifest_id          INTEGER REFERENCES manifests(id) ON DELETE CASCADE ON UPDATE CASCADE,
 
     created_at           TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at           TIMESTAMP WITH TIME ZONE DEFAULT NOW()
