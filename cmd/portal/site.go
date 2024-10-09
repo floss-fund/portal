@@ -25,6 +25,13 @@ type tplRenderer struct {
 	RootURL string
 }
 
+type Query struct {
+	Query   string   `query:"q"`
+	Type    string   `query:"type"`
+	Tag     string   `query:"tag"`
+	License []string `query:"license"`
+}
+
 // tplData is the data container that is injected
 // into public templates for accessing data.
 type tplData struct {
@@ -181,18 +188,22 @@ func handleSearchPage(c echo.Context) error {
 
 	var (
 		app = c.Get("app").(*App)
-		q   = strings.TrimSpace(c.FormValue("q"))
-		typ = c.FormValue("type")
 	)
 
-	if q == "" || len(q) > 128 {
+	var q Query
+	if err := c.Bind(&q); err != nil {
+		return c.String(http.StatusBadRequest, "invalid requets.")
+	}
+	q.Query = strings.TrimSpace(q.Query)
+
+	if q.Query == "" || len(q.Query) > 128 {
 		return c.Redirect(http.StatusTemporaryRedirect, app.consts.RootURL)
 	}
 
 	var results interface{}
-	switch typ {
+	switch q.Type {
 	case "entity":
-		query := search.EntityQuery{Query: q}
+		query := search.EntityQuery{Query: q.Query}
 		query.Type = c.FormValue("entity_type")
 
 		o, err := app.search.SearchEntities(query)
@@ -201,7 +212,7 @@ func handleSearchPage(c echo.Context) error {
 		}
 		results = o
 	case "project":
-		query := search.ProjectQuery{Query: q}
+		query := search.ProjectQuery{Query: q.Query}
 		query.Licenses = []string{}
 
 		for _, l := range c.QueryParams()["license"] {
@@ -219,14 +230,12 @@ func handleSearchPage(c echo.Context) error {
 
 	out := struct {
 		page
-		Query   string
-		Type    string
+		Q       Query
 		Results interface{}
 	}{}
 
 	out.Title = "Search"
-	out.Query = q
-	out.Type = typ
+	out.Q = q
 	out.Results = results
 
 	return c.Render(http.StatusOK, "search", out)

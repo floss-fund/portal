@@ -1,9 +1,9 @@
 {{ define "search" }}
   {{ template "header" . }}
 
-  <h3>Search "{{ .Data.Query }}"</h3>
+  <h3>Search "{{ .Data.Q.Query }}"</h3>
 
-  {{ if eq .Data.Type "project" }}
+  {{ if eq .Data.Q.Type "project" }}
     {{ template "project-results" . }}
   {{ else if eq .Data.Type "entity" }}
     {{ template "entity-results" . }}

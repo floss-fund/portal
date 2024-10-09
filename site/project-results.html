@@ -1,5 +1,5 @@
 {{ define "project-results" }}
-<section class="results {{ .Data.Type }}-results">
+<section class="results {{ .Data.Q.Type }}-results">
     <ul>
         {{ range $r := .Data.Results }}
         <li class="result">
