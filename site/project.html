@@ -1,0 +1,54 @@
+{{ define "project" }}
+{{ template "header" . }}
+
+<section class="project">
+  {{ $r := .Data.Project }}
+    <div class="row">
+      <div class="col-lg-7">
+        <div class="description">{{ $r.Description }}</div>
+      </div>
+      <div class="col-lg-4 col-lg-offset-1">
+        <div class="props">
+          <div class="block licenses">
+            <h4 class="title">Links</h4>
+            <div class="meta">
+              <a href="{{ $r.WebpageURL.URL }}" rel="noreferer nofollow" class="ellip">
+                <img src="/static/ico-link.svg" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL.URL) }}
+              </a>
+              <br />
+              <a href="{{ $r.RepositoryURL.URL }}" rel="noreferer nofollow" class="ellip">
+                <img src="/static/ico-repo.svg" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL.URL) }}
+              </a>
+            </div>
+          </div><!-- licenses -->
+
+          <div class="block licenses">
+            <h4 class="title">License</h4>
+            <ul class="flat">
+            {{ range $l := $r.Licenses }}
+              <li class="text-grey">
+                  {{ trimPrefix "spdx:" $l }}
+              </li>
+            {{ end }}
+            </ul>
+          </div><!-- licenses -->
+
+          <div class="block tags">
+            <h4 class="title">Tags</h4>
+            {{ range $v := $r.Tags }}
+              <a href="/search?tag={{ $v }}&type=project" class="tag">{{ $v }}</a>
+            {{ end }}
+          </div><!-- tags -->
+        </div><!-- props -->
+      </div>
+    </div>
+
+
+
+    {{ if .Data.ErrMessage }}
+        <div class="message error">{{ .Data.ErrMessage }}</div>
+    {{ end }}
+</section>
+
+{{ template "footer" .}}
+{{ end }}

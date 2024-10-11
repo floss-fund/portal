@@ -28,6 +28,7 @@ a {
         text-decoration: underline;
         text-decoration-thickness: 2px;
         text-underline-offset: 5px;
+        color: var(--black);
     }
 
 h1, h2, h3, h4, h5, h6 {
@@ -45,10 +46,12 @@ h2 {
 
 h3 {
     font-size: 1.3rem;
+    margin-bottom: 10px;
 }
 
 h4 {
     font-size: 1.1rem;
+    margin-bottom: 10px;
 }
 
 p {
@@ -119,6 +122,7 @@ button {
 ul.flat {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 button, .button {
@@ -165,6 +169,13 @@ button, .button {
     font-weight: bold;
 }
 
+.ellip {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+    text-overflow: ellipsis;
+}
 .box {
     box-shadow: 1px 1px 4px #eee;
     border-radius: 5px;
@@ -176,6 +187,21 @@ button, .button {
     }
     .text-grey {
         color: #888;
+    }
+
+.tags a {
+    background-color: #e1fdec;
+    color: var(--primary) !important;
+    display: inline-block;
+    margin: 0 5px 10px 0;
+    text-decoration: none;
+    border-radius: 30px;
+    padding: 3px 15px;
+    font-size: 0.875rem;
+}
+    .tags a:hover {
+        background-color: var(--primary);
+        color: #fff !important;
     }
 
 .align-right {
@@ -250,6 +276,14 @@ header.wrap {
     .header .title {
         margin: 0 0 30px 0;
     }
+    .page-manifest .header .title,
+    .page-project .header .title {
+        margin: 0;
+    }
+    .page-manifest .header .entity,
+    .page-project .header .entity {
+        margin-bottom: 30px;
+    }
 
 .logo img {
     max-height: 32px;
@@ -302,11 +336,7 @@ header.wrap {
 .home .tags {
     margin-top: 10vh;
 }
-    .home .tags a {
-        display: inline-block;
-        margin-right: 15px;
-        text-decoration: none;
-    }
+
 
 
 .validate textarea {
@@ -325,20 +355,6 @@ header.wrap {
         margin-bottom: 30px;
         padding: 20px 30px;
         border: 1px solid #ddd;
-    }
-    .results .tags a {
-        background-color: #e1fdec;
-        color: var(--primary);
-        display: inline-block;
-        margin: 0 5px 5px 0;
-        text-decoration: none;
-        border-radius: 30px;
-        padding: 3px 15px;
-        font-size: 0.875rem;
-    }
-    .results .tags a:hover {
-        background-color: var(--primary);
-        color: #fff;
     }
     .results .title {
         margin: 0;
@@ -363,7 +379,6 @@ header.wrap {
             opacity: 1;
         }
 .meta {
-    text-transform: title;
 }
     .meta a {
         color: #888;
@@ -390,6 +405,19 @@ header.wrap {
     }
     .manifest .hero .button {
         margin-right: 15px;
+    }
+
+.project .props .block {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+}
+    .project .props .block:last-child {
+        border: 0;
+        margin-bottom: 0;
+    }
+    .project .block .title {
+        margin: 0 0 15px 0;
     }
 
 .plans {

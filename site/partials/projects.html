@@ -7,11 +7,11 @@
       <li class="result">
         <header>
           <div class="row">
-            <div class="col-xs-9">
+            <div class="col-lg-9">
               <h3 class="title"><a href="{{ $.RootURL }}/view/projects/{{ $.Data.Manifest.GUID }}/{{ $r.GUID }}">{{ .Name }}</a></h3>
             </div>
-            <div class="col-xs props">
-              <span class="col-xs license text-small text-grey">
+            <div class="col-lg-3 props">
+              <span class="col-lg license text-small text-grey">
                   {{ $len := sub (len .Licenses) 1 }}
                   {{ trimPrefix "spdx:" (index .Licenses 0) }} {{ if (gt $len 0) }} +{{ $len }}{{ end }}
               </span>

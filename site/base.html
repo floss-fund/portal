@@ -14,7 +14,7 @@
   <link rel="stylesheet" type="text/css" media="screen" href="{{ .RootURL }}/static/style.css" />
 </head>
 
-<body>
+<body class="page-{{ .Data.Page }}">
 <header class="wrap">
   <header class="header">
     <div class="container-fluid">
@@ -37,6 +37,18 @@
       </form>
 
       <h1 class="title">{{ .Data.Heading }}</h1>
+      {{ if eq .Data.Page "manifest" }}
+        <div class="meta entity text-grey text-small">
+          <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" /> {{ title .Data.Manifest.Entity.Type }}
+        </div>
+      {{ end }}
+      {{ if eq .Data.Page "project" }}
+        <div class="meta entity text-grey text-small">
+          <a href="{{ .RootURL }}/view/{{ .Data.Manifest.GUID }}">
+            by <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" /> {{ title .Data.Manifest.Entity.Name }}
+          </a>
+        </div>
+      {{ end }}
 
       {{ if .Data.Tabs }}
         <nav class="tabs">

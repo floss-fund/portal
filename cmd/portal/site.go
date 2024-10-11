@@ -267,6 +267,8 @@ func handleManifestPage(c echo.Context) error {
 		Manifest models.ManifestData
 		Project  v1.Project
 	}{}
+
+	out.Page = "manifest"
 	out.Tab = tab
 	out.Manifest = m
 	out.Project = prj
@@ -282,7 +284,7 @@ func handleManifestPage(c echo.Context) error {
 		{
 			ID:       "funding",
 			Selected: tab == "funding",
-			Label:    fmt.Sprintf("Funding (%d)", len(m.Manifest.Funding.Plans)),
+			Label:    fmt.Sprintf("Funding plans (%d)", len(m.Manifest.Funding.Plans)),
 			URL:      fmt.Sprintf("%s/view/funding/%s", app.consts.RootURL, m.GUID),
 		},
 		{
@@ -295,6 +297,7 @@ func handleManifestPage(c echo.Context) error {
 
 	// If the view is for a single project, add a tab for that too.
 	if pGuid != "" {
+		out.Page = "project"
 		out.Title = fmt.Sprintf("%s (%s) funding", prj.Name, m.Entity.Name)
 		out.Heading = prj.Name
 		out.Tabs = append(out.Tabs, Tab{
@@ -303,6 +306,8 @@ func handleManifestPage(c echo.Context) error {
 			Label:    prj.Name,
 			URL:      fmt.Sprintf("%s/view/projects/%s/%s", app.consts.RootURL, m.GUID, prj.GUID),
 		})
+
+		return c.Render(http.StatusOK, "project", out)
 	}
 
 	return c.Render(http.StatusOK, "manifest", out)
