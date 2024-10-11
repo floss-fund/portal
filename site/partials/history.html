@@ -1,0 +1,39 @@
+{{ define "history" }}
+
+<section class="channels">
+	<h2>History ({{ len .Data.Manifest.Funding.History }})</h2>
+
+	{{ if gt (len .Data.Manifest.Funding.History) 0 }}
+		<table>
+			<thead>
+				<tr>
+					<th>Year</th>
+					<th>Income</th>
+					<th>Expenses</th>
+					<th>Taxes</th>
+					<th>Currency</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ range $p := .Data.Manifest.Funding.History }}
+					<tr id="history-{{ $p.Year }}">
+						<td>{{ $p.Year }}</td>
+						<td>{{ $p.Income }}</td>
+						<td>{{ $p.Expenses }}</td>
+						<td>{{ $p.Taxes }}</td>
+						<td>{{ $p.Currency }}</td>
+					</tr>
+					{{ if $p.Description }}
+					<tr>
+						<td colspan="6" class="text-grey text-small">{{ $p.Description }}</td>
+					</tr>
+					{{ end }}
+				{{ end }}
+			</tbody>
+		</table>
+	{{ else }}
+		<p>No financial history available.</p>
+	{{ end }}
+</section>
+
+{{ end }}

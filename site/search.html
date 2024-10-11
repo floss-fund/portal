@@ -1,10 +1,12 @@
 {{ define "search" }}
   {{ template "header" . }}
 
-  <h3>Search "{{ .Data.Q.Query }}"</h3>
+  {{ if not .Data.Results }}
+    No results found
+  {{ end }}
 
   {{ if eq .Data.Q.Type "project" }}
-    {{ template "project-results" . }}
+    {{ template "project-search" . }}
   {{ else if eq .Data.Type "entity" }}
     {{ template "entity-results" . }}
   {{ end }}

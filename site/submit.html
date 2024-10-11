@@ -1,16 +1,15 @@
 {{ define "submit" }}
 {{ template "header" . }}
 
-<h1>Submit</h1>
 <p>
     Submitting a funding manifest here makes it publicly discoverable on the portal.
     It also creates an application for a FLOSS/Fund grant.
     <a href="https://floss.fund/faq">See FAQs.</a>
 </p>
 <hr />
-<form method="post">
+<form method="post" class="submit">
   <div>
-    <label for="funding-url"><code>funding.json</code> manifest URL</label>
+    <label for="funding-url">funding.json manifest URL</label>
     <p>
       <input id="funding-url" type="url" name="url" placeholder="https://yoursite.com/funding.json" required autofocus maxlength="300" />
     </p>
@@ -44,10 +43,10 @@
 <hr />
 <h3>What is funding.json manifest?</h3>
 <p>
-  <code>funding.json</code> is a JSON file that describes the funding requirements and financial needs of a project. <a href="https://floss.fund/funding-manifest">Read the docs</a>.
+  funding.json manifest is a JSON file that describes the funding requirements and financial needs of a project. <a href="https://floss.fund/funding-manifest">Read the docs</a>.
 </p>
 <p>
-  It can be hosted on a project's or organisation's website, or a repository such as <code>https://github.com/user/project/blob/main/funding.json</code>
+  It can be hosted on a project's or organisation's website, or a repository such as https://github.com/user/project/blob/main/funding.json
 </p>
 
 {{ template "footer" .}}

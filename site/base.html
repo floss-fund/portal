@@ -9,31 +9,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,400..500;1,400..500&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" media="screen" href="{{ .RootURL }}/static/base.css" />
   <link rel="stylesheet" type="text/css" media="screen" href="{{ .RootURL }}/static/style.css" />
 </head>
 
 <body>
-<div class="container-fluid main">
-  <header class="header row">
-    <div class="col-lg-6 col-md-12">
-      <div class="logo"><a href="{{ .RootURL }}"><img src="{{ .RootURL }}/static/logo.svg" alt="" /> Discover</a></div>
+<header class="wrap">
+  <header class="header">
+    <div class="container-fluid">
+      <header class="row top">
+        <div class="col-lg-6 col-md-12">
+          <div class="logo"><a href="{{ .RootURL }}"><img src="{{ .RootURL }}/static/logo.svg" alt="" /> Discover</a></div>
+        </div>
+        <nav class="col-lg-6 col-md-12 nav">
+          <a href="{{ .RootURL }}/submit">Submit</a>
+          <a href="https://floss.fund">FLOSS/Fund</a>
+        </nav>
+      </header>
+
+      <form action="{{ $.RootURL }}/search" class="search">
+        <p>
+          <input type="hidden" name="type" value="project" />
+          <input type="text" name="q" maxlength="128" value="{{ if eq .Data.Page "search" }}{{ .Data.Q.Query }}{{ end }}" 
+            data-autocomp-tags placeholder="eg: developer-tools / project name / author name" autofocus />
+        </p>
+      </form>
+
+      <h1 class="title">{{ .Data.Heading }}</h1>
+
+      {{ if .Data.Tabs }}
+        <nav class="tabs">
+        {{ range $t := .Data.Tabs }}
+          <a href="{{ $t.URL }}" class="{{ if $t.Selected }}sel{{ end }}"><span>{{ $t.Label }}</span></a>
+        {{ end }}
+        </nav>
+      {{ end }}
     </div>
-    <nav class="col-lg-6 col-md-12">
-      <a href="{{ .RootURL }}/submit">Submit</a>
-      <a href="https://floss.fund">FLOSS/Fund</a>
-    </nav>
   </header>
-  <section class="section content">
+</header>
+  <div class="container-fluid main">
+    <section class="section content">
 {{ end }}
 
 {{ define "footer" }}
-  </section>
-  
-  <footer class="footer">&copy; 2024. <a href="https://floss.fund">FLOSS/Fund</a>.</footer>
+    </section>
+  </div>
+
+  <footer class="container-fluid footer">
+    &copy; 2024. <a href="https://floss.fund">FLOSS/Fund</a>
+  </footer>
   <script type="module" src="{{ .RootURL }}/static/main.js"></script>
-</div>
 </body>
 </html>
 {{ end }}
