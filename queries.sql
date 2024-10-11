@@ -82,6 +82,7 @@ WITH man AS (
         WHEN $1 > 0 THEN id = $1
         WHEN $2 != '' THEN guid = $2
     END
+    AND status = 'active'
 ),
 entity AS (
     SELECT TO_JSON(e) AS entity_raw FROM entities e

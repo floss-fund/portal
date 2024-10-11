@@ -5,7 +5,7 @@
   {{ $r := .Data.Project }}
     <div class="row">
       <div class="col-7">
-        <div class="description">{{ $r.Description }}</div>
+        <div class="description">{{ Nl2br $r.Description }}</div>
       </div>
       <div class="col-4 col-end">
         <div class="props">

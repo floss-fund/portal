@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"html/template"
 	"io/ioutil"
 	"log"
 	mrand "math/rand"
 	"os"
 	"path"
+	"strings"
 	"unicode"
 
 	"github.com/Masterminds/sprig"
@@ -330,6 +332,13 @@ func initSiteTemplates(dirPath string) *template.Template {
 
 	// Add Sprig functions to the template set
 	tmpl.Funcs(sprig.FuncMap())
+	tmpl.Funcs(template.FuncMap{
+		"Nl2br": func(input string) template.HTML {
+			input = reMultiLines.ReplaceAllString(html.EscapeString(input), "\n\n")
+			input = strings.Replace(input, "\n", "<br />", -1)
+			return template.HTML(input)
+		},
+	})
 
 	// Parse all HTML files that match the pattern
 	tpl, err := tmpl.ParseGlob(path.Join(dirPath, "*.html"))

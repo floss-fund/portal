@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -59,6 +60,10 @@ type page struct {
 	ErrMessage  string
 	Message     string
 }
+
+var (
+	reMultiLines = regexp.MustCompile(`\n\n+`)
+)
 
 func handleIndexPage(c echo.Context) error {
 	var (
