@@ -3,15 +3,20 @@ package core
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"log"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/floss-fund/go-funding-json/common"
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/models"
 	"github.com/jmoiron/sqlx"
 )
+
+const maxURISize = 40
+const maxURLLen = 40
 
 type Opt struct {
 }
@@ -42,6 +47,10 @@ type Core struct {
 	log *log.Logger
 }
 
+var (
+	ErrNotFound = errors.New("not found")
+)
+
 func New(q *Queries, o Opt, lo *log.Logger) *Core {
 	return &Core{
 		q:   q,
@@ -50,25 +59,38 @@ func New(q *Queries, o Opt, lo *log.Logger) *Core {
 }
 
 // GetManifest retrieves a manifest.
-func (d *Core) GetManifest(id int) (models.ManifestData, error) {
+func (d *Core) GetManifest(id int, guid string) (models.ManifestData, error) {
 	var (
 		out models.ManifestData
 	)
 
 	// Get the manifest. entity{} and projects[{}] are retrieved
 	// as JSON fields that need to be manually unmarshalled.
-	if err := d.q.GetManifest.Get(&out, id); err != nil {
+	if err := d.q.GetManifest.Get(&out, id, guid); err != nil {
 		if err == sql.ErrNoRows {
-			return out, nil
+			return out, ErrNotFound
 		}
 
 		d.log.Printf("error fetching manifest: %d: %v", id, err)
 		return out, err
 	}
 
+	// Entity.
 	if err := out.Entity.UnmarshalJSON(out.EntityRaw); err != nil {
 		d.log.Printf("error unmarshalling entity: %d: %v", id, err)
 		return out, err
+	}
+
+	// Funding.
+	if err := out.Funding.UnmarshalJSON(out.FundingRaw); err != nil {
+		d.log.Printf("error unmarshalling funding: %d: %v", id, err)
+		return out, err
+	}
+
+	// Create a funding map channel for easy lookups.
+	out.Channels = make(map[string]v1.Channel)
+	for _, c := range out.Funding.Channels {
+		out.Channels[c.GUID] = c
 	}
 
 	// Unmarshal the entity URL. DB names and local names don't match,
@@ -79,8 +101,8 @@ func (d *Core) GetManifest(id int) (models.ManifestData, error) {
 			d.log.Printf("error unmarshalling entity URL: %d: %v", id, err)
 			return out, err
 		}
-		fmt.Println(ug)
-		if u, err := common.IsURL("url", ug.WebpageURL, 1024); err != nil {
+
+		if u, err := common.IsURL("url", ug.WebpageURL, maxURLLen); err != nil {
 			d.log.Printf("error parsing entity URL: %d: %s: %v", id, ug.WebpageURL, err)
 			return out, err
 		} else {
@@ -103,14 +125,14 @@ func (d *Core) GetManifest(id int) (models.ManifestData, error) {
 		}
 
 		for n, p := range ug {
-			if u, err := common.IsURL("url", p.WebpageURL, 1024); err != nil {
+			if u, err := common.IsURL("url", p.WebpageURL, maxURLLen); err != nil {
 				d.log.Printf("error parsing entity URL: %d: %s: %v", id, p.WebpageURL, err)
 				return out, err
 			} else {
 				out.Projects[n].WebpageURL = v1.URL{URL: p.WebpageURL, URLobj: u}
 			}
 
-			if u, err := common.IsURL("url", p.RepositoryURL, 1024); err != nil {
+			if u, err := common.IsURL("url", p.RepositoryURL, maxURLLen); err != nil {
 				d.log.Printf("error parsing entity URL: %d: %s: %v", id, p.RepositoryURL, err)
 				return out, err
 			} else {
@@ -164,7 +186,7 @@ func (d *Core) GetManifestForCrawling(age string, offsetID, limit int) ([]models
 	}
 
 	for n, u := range out {
-		url, err := common.IsURL("url", u.URL, 1024)
+		url, err := common.IsURL("url", u.URL, maxURLLen)
 		if err != nil {
 			d.log.Printf("error parsing url: %s: %v: ", u.URL, err)
 			continue
@@ -215,4 +237,27 @@ func (d *Core) GetTopTags(limit int) ([]string, error) {
 	}
 
 	return tags, nil
+}
+
+// MakeGUID takes a URL and creates a string "guid" in the form of
+// @$host/$uri (last 3 parts, if there are, capped at 40 chars).
+func MakeGUID(u *url.URL) string {
+	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
+
+	// Get the last 3 parts (or fewer if there aren't 3).
+	last := parts
+	if len(parts) > 3 {
+		last = parts[len(parts)-3:]
+	}
+
+	// Join the last parts.
+	uri := strings.Join(last, "/")
+
+	// If the URI is long, cut it to size from the start.
+	if len(uri) > 40 {
+		uri = "--" + uri[len(uri)-40:]
+	}
+
+	guid := "@" + u.Host + "/" + uri
+	return guid
 }
