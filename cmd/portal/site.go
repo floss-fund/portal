@@ -7,10 +7,13 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/floss-fund/go-funding-json/common"
+	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/core"
+	"github.com/floss-fund/portal/internal/models"
 	"github.com/floss-fund/portal/internal/search"
 	"github.com/labstack/echo/v4"
 )
@@ -39,11 +42,20 @@ type tplData struct {
 	Data    interface{}
 }
 
+type Tab struct {
+	ID       string
+	URL      string
+	Label    string
+	Selected bool
+}
+
 type page struct {
+	Page        string
 	Title       string
 	Description string
 	MetaTags    string
 	Heading     string
+	Tabs        []Tab
 	ErrMessage  string
 	Message     string
 }
@@ -86,7 +98,7 @@ func handleValidatePage(c echo.Context) error {
 		)
 
 		// Validate the URL.
-		_, err := common.IsURL("url", mUrl, 1024)
+		_, err := common.IsURL("url", mUrl, v1.MaxURLLen)
 		if err != nil {
 			return c.Render(http.StatusBadRequest, "validate", page{Title: title, ErrMessage: err.Error()})
 		}
@@ -100,23 +112,23 @@ func handleValidatePage(c echo.Context) error {
 }
 
 func handleSubmitPage(c echo.Context) error {
-	const title = "Submit funding manifest"
-
 	var (
 		app  = c.Get("app").(*App)
 		mURL = c.FormValue("url")
 	)
 
+	out := page{Title: "Submit funding manifest", Heading: "Submit"}
+
 	// Render the page.
-	msg := ""
 	if c.Request().Method == http.MethodGet {
-		return c.Render(http.StatusOK, "submit", page{Title: title, Message: msg})
+		return c.Render(http.StatusOK, "submit", out)
 	}
 
 	// Accept submission.
-	u, err := common.IsURL("url", mURL, 1024)
+	u, err := common.IsURL("url", mURL, v1.MaxURLLen)
 	if err != nil {
-		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: err.Error()})
+		out.ErrMessage = err.Error()
+		return c.Render(http.StatusBadRequest, "submit", out)
 	}
 
 	// Remove any ?query params and #hash fragments
@@ -124,43 +136,47 @@ func handleSubmitPage(c echo.Context) error {
 	u.RawFragment = ""
 
 	if !strings.HasSuffix(u.Path, app.consts.ManifestURI) {
-		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: fmt.Sprintf("URL must end in %s", app.consts.ManifestURI)})
+		out.ErrMessage = fmt.Sprintf("URL must end in %s", app.consts.ManifestURI)
+		return c.Render(http.StatusBadRequest, "submit", out)
 	}
 
 	// See if the manifest is already in the database.
 	if status, err := app.core.GetManifestStatus(u.String()); err != nil {
-		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: "Error checking manifest status. Retry later."})
+		out.ErrMessage = "Error checking manifest status. Retry later."
+		return c.Render(http.StatusBadRequest, "submit", out)
 	} else if status != "" {
 		switch status {
 		case core.ManifestStatusActive:
-			msg = "Manifest is already active."
+			out.ErrMessage = "Manifest is already active."
 		case core.ManifestStatusPending:
-			msg = "Manifest is already submitted and is pending review."
+			out.ErrMessage = "Manifest is already submitted and is pending review."
 		case core.ManifestStatusBlocked:
-			msg = "Manifest URL is blocked and cannot be submitted at this time."
+			out.ErrMessage = "Manifest URL is blocked and cannot be submitted at this time."
 		}
 
-		if msg != "" {
-			return c.Render(http.StatusOK, "submit", page{Title: title, Message: msg})
+		if out.ErrMessage != "" {
+			return c.Render(http.StatusOK, "submit", out)
 		}
 	}
 
 	// Fetch and validate the manifest.
 	m, err := app.crawl.FetchManifest(u)
 	if err != nil {
-		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: err.Error()})
+		out.ErrMessage = err.Error()
+		return c.Render(http.StatusBadRequest, "submit", out)
 	}
 
 	// Add it to the database.
-	m.GUID = fmt.Sprintf("%s%s", m.Manifest.URL.URLobj.Host, m.Manifest.URL.URLobj.Path)
+	m.GUID = core.MakeGUID(m.Manifest.URL.URLobj)
 	m.GUID = strings.TrimRight(m.GUID, app.consts.ManifestURI)
 
 	if err := app.core.UpsertManifest(m); err != nil {
-		return c.Render(http.StatusBadRequest, "submit", page{Title: title, ErrMessage: "Error saving manifest to database. Retry later."})
+		out.ErrMessage = "Error saving manifest to database. Retry later."
+		return c.Render(http.StatusBadRequest, "submit", out)
 	}
 
-	msg = "success"
-	return c.Render(http.StatusOK, "submit", page{Title: title, Message: msg})
+	out.Message = "success"
+	return c.Render(http.StatusOK, "submit", out)
 }
 
 func handleValidateManifest(c echo.Context) error {
@@ -183,6 +199,115 @@ func handleValidateManifest(c echo.Context) error {
 	return c.JSON(http.StatusOK, okResp{json.RawMessage(b)})
 }
 
+func handleManifestPage(c echo.Context) error {
+	var (
+		app = c.Get("app").(*App)
+	)
+
+	// Depending on whether the page (tab) is the main landing page of
+	// a manifest (entity/projects) or funding, get the manifest GUID
+	// by strips parts off the URI.
+	var (
+		tab = "projects"
+
+		// Manifest guid.
+		mGuid = c.Request().URL.Path
+
+		// Project guid.
+		pGuid = ""
+	)
+	if strings.HasPrefix(mGuid, "/view/funding") {
+		mGuid = strings.TrimLeft(mGuid, "/view/funding")
+		tab = "funding"
+	} else if strings.HasPrefix(mGuid, "/view/projects") {
+		path := strings.TrimLeft(mGuid, "/view/projects")
+		i := strings.LastIndex(path, "/")
+		if i == -1 {
+			return c.Render(http.StatusBadRequest, "message",
+				page{Title: "Manifest not found", ErrMessage: "Invalid project guid."})
+		}
+		mGuid = path[:i]
+		pGuid = path[i+1:]
+
+		tab = "project"
+	} else if strings.HasPrefix(mGuid, "/view/history") {
+		mGuid = strings.TrimLeft(mGuid, "/view/history")
+		tab = "history"
+	} else {
+		mGuid = strings.TrimLeft(mGuid, "/view")
+	}
+
+	// Get the manifest.
+	m, err := app.core.GetManifest(0, mGuid)
+	if err != nil {
+		if err == core.ErrNotFound {
+			return c.Render(http.StatusNotFound, "message",
+				page{Title: "Manifest not found", ErrMessage: err.Error()})
+		}
+		return c.Render(http.StatusBadRequest, "message",
+			page{Title: "Error", ErrMessage: "Error fetching manifest."})
+	}
+
+	// If it's a single project's page, get the project.
+	var prj v1.Project
+	if pGuid != "" {
+		idx := slices.IndexFunc(m.Manifest.Projects, func(o v1.Project) bool {
+			return o.GUID == pGuid
+		})
+		if idx < 0 {
+			return c.Render(http.StatusNotFound, "message",
+				page{Title: "Project not found", ErrMessage: "Project not found."})
+		}
+		prj = m.Manifest.Projects[idx]
+	}
+
+	out := struct {
+		page
+		Tab      string
+		Manifest models.ManifestData
+		Project  v1.Project
+	}{}
+	out.Tab = tab
+	out.Manifest = m
+	out.Project = prj
+	out.Title = m.Manifest.Entity.Name
+	out.Heading = m.Manifest.Entity.Name
+	out.Tabs = []Tab{
+		{
+			ID:       "projects",
+			Label:    fmt.Sprintf("Projects (%d)", len(m.Manifest.Projects)),
+			Selected: tab == "projects",
+			URL:      fmt.Sprintf("%s/view/%s", app.consts.RootURL, m.GUID),
+		},
+		{
+			ID:       "funding",
+			Selected: tab == "funding",
+			Label:    fmt.Sprintf("Funding (%d)", len(m.Manifest.Funding.Plans)),
+			URL:      fmt.Sprintf("%s/view/funding/%s", app.consts.RootURL, m.GUID),
+		},
+		{
+			ID:       "history",
+			Selected: tab == "history",
+			Label:    fmt.Sprintf("History (%d)", len(m.Manifest.Funding.History)),
+			URL:      fmt.Sprintf("%s/view/history/%s", app.consts.RootURL, m.GUID),
+		},
+	}
+
+	// If the view is for a single project, add a tab for that too.
+	if pGuid != "" {
+		out.Title = fmt.Sprintf("%s (%s) funding", prj.Name, m.Entity.Name)
+		out.Heading = prj.Name
+		out.Tabs = append(out.Tabs, Tab{
+			ID:       "project",
+			Selected: true,
+			Label:    prj.Name,
+			URL:      fmt.Sprintf("%s/view/projects/%s/%s", app.consts.RootURL, m.GUID, prj.GUID),
+		})
+	}
+
+	return c.Render(http.StatusOK, "manifest", out)
+}
+
 func handleSearchPage(c echo.Context) error {
 	const title = "Search"
 
@@ -192,7 +317,7 @@ func handleSearchPage(c echo.Context) error {
 
 	var q Query
 	if err := c.Bind(&q); err != nil {
-		return c.String(http.StatusBadRequest, "invalid requets.")
+		return c.String(http.StatusBadRequest, "invalid request.")
 	}
 	q.Query = strings.TrimSpace(q.Query)
 
@@ -233,8 +358,9 @@ func handleSearchPage(c echo.Context) error {
 		Q       Query
 		Results interface{}
 	}{}
-
+	out.Page = "search"
 	out.Title = "Search"
+	out.Heading = fmt.Sprintf(`Search "%s"`, q.Query)
 	out.Q = q
 	out.Results = results
 

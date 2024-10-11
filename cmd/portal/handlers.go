@@ -21,17 +21,20 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	g.GET("/validate", handleValidatePage)
 	g.POST("/validate", handleValidatePage)
 	g.GET("/search", handleSearchPage)
+	g.GET("/view/funding", handleManifestPage)
+	g.GET("/view/projects", handleManifestPage)
+	g.GET("/view/*", handleManifestPage)
 
 	g.POST("/api/validate", handleValidateManifest)
 	g.GET("/api/tags", handleGetTags)
 
-	// Authenticated endpoints.
+	// Static files.
+	g.Static("/static", path.Join(ko.MustString("app.template_dir"), "/static"))
+
+	// Private, authenticated endpoints.
 	a := srv.Group("", middleware.BasicAuth(basicAuth))
 	a.GET("/api/manifests/:id", handleGetManifest)
 	a.PUT("/api/manifests/:id/status", handleUpdateManifestStatus)
-
-	// Static files.
-	g.Static("/static", path.Join(ko.MustString("app.template_dir"), "/static"))
 
 	// 404 pages.
 	srv.RouteNotFound("/api/*", func(c echo.Context) error {
@@ -52,7 +55,7 @@ func handleGetManifest(c echo.Context) error {
 		id, _ = strconv.Atoi(c.Param("id"))
 	)
 
-	out, err := app.core.GetManifest(id)
+	out, err := app.core.GetManifest(id, "")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -73,7 +76,7 @@ func handleUpdateManifestStatus(c echo.Context) error {
 	}
 
 	// Delete it from search if the status isn't active.
-	if m, err := app.core.GetManifest(id); err == nil {
+	if m, err := app.core.GetManifest(id, ""); err == nil {
 		app.crawl.Callbacks.OnManifestUpdate(m, status)
 	}
 

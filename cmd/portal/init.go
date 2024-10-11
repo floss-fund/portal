@@ -335,6 +335,10 @@ func initSiteTemplates(dirPath string) *template.Template {
 	if err != nil {
 		log.Fatalf("error parsing templates in %s: %v", dirPath, err)
 	}
+	tpl, err = tmpl.ParseGlob(path.Join(dirPath, "partials/*.html"))
+	if err != nil {
+		log.Fatalf("error parsing templates in %s: %v", dirPath, err)
+	}
 
 	return tpl
 }
