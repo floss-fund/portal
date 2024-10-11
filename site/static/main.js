@@ -1,4 +1,4 @@
-import { autocomp } from './lib.js';
+import { autocomp } from "./lib.js";
 
 let TAGS = []
 if (!localStorage.tags) {
@@ -25,3 +25,12 @@ if (qInput) {
         }
     });
 }
+
+document.addEventListener("keydown", function(event) {
+  if (event.key === "`") {
+    event.preventDefault();
+    const q = document.querySelector("form.search input[name=q]");
+    q.focus();
+    q.select();
+  }
+});

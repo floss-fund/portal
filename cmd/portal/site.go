@@ -71,6 +71,7 @@ func handleIndexPage(c echo.Context) error {
 		page
 		Tags []string
 	}{}
+	out.Page = "/"
 	out.Title = "Discover FOSS projects seeking funding"
 	out.Tags = tags
 

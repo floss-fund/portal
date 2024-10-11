@@ -32,7 +32,7 @@
         <p>
           <input type="hidden" name="type" value="project" />
           <input type="text" name="q" maxlength="128" value="{{ if eq .Data.Page "search" }}{{ .Data.Q.Query }}{{ end }}" 
-            data-autocomp-tags placeholder="eg: developer-tools / project name / author name" autofocus />
+            data-autocomp-tags placeholder="eg: developer-tools / project name / author name" {{ if eq .Data.Page "/"  }}autofocus{{ end }} />
         </p>
       </form>
 
