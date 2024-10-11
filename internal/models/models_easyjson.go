@@ -183,10 +183,6 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(in *jlexer.Le
 			out.Version = string(in.String())
 		case "url":
 			out.URL = string(in.String())
-		case "funding":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Funding).UnmarshalJSON(data))
-			}
 		case "meta":
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.Meta).UnmarshalJSON(data))
@@ -227,6 +223,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(in *jlexer.Le
 			(out.Entity).UnmarshalEasyJSON(in)
 		case "projects":
 			(out.Projects).UnmarshalEasyJSON(in)
+		case "funding":
+			(out.Funding).UnmarshalEasyJSON(in)
 		default:
 			in.SkipRecursive()
 		}
@@ -265,11 +263,6 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(out *jwriter.
 		const prefix string = ",\"url\":"
 		out.RawString(prefix)
 		out.String(string(in.URL))
-	}
-	{
-		const prefix string = ",\"funding\":"
-		out.RawString(prefix)
-		out.Raw((in.Funding).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"meta\":"
@@ -323,6 +316,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(out *jwriter.
 		const prefix string = ",\"projects\":"
 		out.RawString(prefix)
 		(in.Projects).MarshalEasyJSON(out)
+	}
+	{
+		const prefix string = ",\"funding\":"
+		out.RawString(prefix)
+		(in.Funding).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }

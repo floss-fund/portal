@@ -8,6 +8,7 @@ type Entity struct {
 	Type         string `json:"type"`
 	Role         string `json:"role"`
 	Name         string `json:"name"`
+	Description  string `json:"description"`
 	WebpageURL   string `json:"webpage_url"`
 	NumProjects  int    `json:"num_projects"`
 }

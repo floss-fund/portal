@@ -687,6 +687,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch4(in *jlexer.Le
 			out.Role = string(in.String())
 		case "name":
 			out.Name = string(in.String())
+		case "description":
+			out.Description = string(in.String())
 		case "webpage_url":
 			out.WebpageURL = string(in.String())
 		case "num_projects":
@@ -739,6 +741,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch4(out *jwriter.
 		const prefix string = ",\"name\":"
 		out.RawString(prefix)
 		out.String(string(in.Name))
+	}
+	{
+		const prefix string = ",\"description\":"
+		out.RawString(prefix)
+		out.String(string(in.Description))
 	}
 	{
 		const prefix string = ",\"webpage_url\":"
@@ -807,6 +814,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch5(in *jlexer.Le
 			out.Role = string(in.String())
 		case "name":
 			out.Name = string(in.String())
+		case "description":
+			out.Description = string(in.String())
 		case "webpage_url":
 			out.WebpageURL = string(in.String())
 		case "num_projects":
@@ -854,6 +863,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch5(out *jwriter.
 		const prefix string = ",\"name\":"
 		out.RawString(prefix)
 		out.String(string(in.Name))
+	}
+	{
+		const prefix string = ",\"description\":"
+		out.RawString(prefix)
+		out.String(string(in.Description))
 	}
 	{
 		const prefix string = ",\"webpage_url\":"

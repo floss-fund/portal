@@ -23,12 +23,14 @@ type ManifestData struct {
 	// These are not in the table and are added by the get-manifest query.
 	EntityRaw   types.JSONText `db:"entity_raw" json:"-"`
 	ProjectsRaw types.JSONText `db:"projects_raw" json:"-"`
+	FundingRaw  types.JSONText `db:"funding_raw" json:"-"`
+
+	Channels map[string]v1.Channel `db:"-" json:"-"`
 
 	ID            int            `db:"id" json:"id"`
 	GUID          string         `db:"guid" json:"guid"`
 	Version       string         `db:"version" json:"version"`
 	URL           string         `db:"url" json:"url"`
-	Funding       types.JSONText `db:"funding" json:"funding"`
 	Meta          types.JSONText `db:"meta" json:"meta"`
 	Status        string         `db:"status" json:"status"`
 	StatusMessage *string        `db:"status_message" json:"status_message"`
