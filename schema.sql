@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS entities (
     name                TEXT NOT NULL,
     email               TEXT NOT NULL,
     phone               TEXT NULL,
+    description         TEXT NULL,
     webpage_url         TEXT NOT NULL,
     webpage_wellknown   TEXT NULL,
     meta                JSONB NOT NULL DEFAULT '{}',

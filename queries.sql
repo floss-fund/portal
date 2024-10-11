@@ -20,13 +20,14 @@ WITH man AS (
     RETURNING id
 ),
 entity AS (
-    INSERT INTO entities (type, role, name, email, phone, webpage_url, webpage_wellknown, manifest_id)
+    INSERT INTO entities (type, role, name, email, phone, description, webpage_url, webpage_wellknown, manifest_id)
     SELECT
         ($1->'entity'->>'type')::entity_type,
         ($1->'entity'->>'role')::entity_role,
         $1->'entity'->>'name',
         $1->'entity'->>'email',
         $1->'entity'->>'phone',
+        $1->'entity'->>'description',
         $1->'entity'->'webpageUrl'->>'url',
         $1->'entity'->'webpageUrl'->>'wellKnown',
         (SELECT id FROM man)
@@ -76,16 +77,23 @@ SELECT (SELECT id FROM man) AS manifest_id;
 
 -- name: get-manifest
 WITH man AS (
-    SELECT * FROM manifests WHERE id = $1
+    SELECT * FROM manifests WHERE
+    CASE
+        WHEN $1 > 0 THEN id = $1
+        WHEN $2 != '' THEN guid = $2
+    END
 ),
 entity AS (
-    SELECT TO_JSON(e) AS entity_raw FROM entities e WHERE e.manifest_id = $1
+    SELECT TO_JSON(e) AS entity_raw FROM entities e
+    WHERE e.manifest_id = (SELECT id FROM man)
 ),
 prj AS (
     SELECT COALESCE(JSON_AGG(TO_JSON(p)), '[]'::json) AS projects_raw
-    FROM projects p WHERE p.manifest_id = $1
+    FROM projects p WHERE p.manifest_id = (SELECT id FROM man)
 )
-SELECT m.*, e.entity_raw, p.projects_raw FROM man m
+SELECT m.id, m.guid, m.version, m.url, m.funding AS funding_raw, m.status,
+        m.status_message, m.crawl_errors, m.crawl_message, m.created_at, m.updated_at,
+        e.entity_raw, p.projects_raw FROM man m
     LEFT JOIN entity e ON true
     LEFT JOIN prj p ON true;
 
