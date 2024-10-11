@@ -7,7 +7,7 @@
 
   {{ if eq .Data.Q.Type "project" }}
     {{ template "project-search" . }}
-  {{ else if eq .Data.Type "entity" }}
+  {{ else if eq .Data.Q.Type "entity" }}
     {{ template "entity-results" . }}
   {{ end }}
 

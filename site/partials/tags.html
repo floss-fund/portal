@@ -1,0 +1,5 @@
+{{ define "tags" }}
+{{ range $t := . }}
+  <a href="/search?q={{ $t }}&type=project&field=tags" class="tag">{{ $t }}</a>
+{{ end }}
+{{ end }}

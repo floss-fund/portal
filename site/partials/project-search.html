@@ -33,9 +33,7 @@
 
         <footer class="meta">
           <div class="tags">
-            {{ range $v := .Tags }}
-              <a href="/search?tag={{ $v }}&type=project" class="tag">{{ $v }}</a>
-            {{ end }}
+            {{ template "tags" .Tags }}
           </div>
         </footer>
       </li>

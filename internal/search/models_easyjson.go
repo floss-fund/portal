@@ -254,6 +254,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch2(in *jlexer.Le
 		switch key {
 		case "q":
 			out.Query = string(in.String())
+		case "field":
+			out.Field = string(in.String())
 		case "id":
 			out.ID = string(in.String())
 		case "manifest_id":
@@ -338,6 +340,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch2(out *jwriter.
 		const prefix string = ",\"q\":"
 		out.RawString(prefix[1:])
 		out.String(string(in.Query))
+	}
+	{
+		const prefix string = ",\"field\":"
+		out.RawString(prefix)
+		out.String(string(in.Field))
 	}
 	{
 		const prefix string = ",\"id\":"
@@ -675,6 +682,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch4(in *jlexer.Le
 		switch key {
 		case "q":
 			out.Query = string(in.String())
+		case "field":
+			out.Field = string(in.String())
 		case "id":
 			out.ID = string(in.String())
 		case "manifest_id":
@@ -711,6 +720,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch4(out *jwriter.
 		const prefix string = ",\"q\":"
 		out.RawString(prefix[1:])
 		out.String(string(in.Query))
+	}
+	{
+		const prefix string = ",\"field\":"
+		out.RawString(prefix)
+		out.String(string(in.Field))
 	}
 	{
 		const prefix string = ",\"id\":"

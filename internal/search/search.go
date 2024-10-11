@@ -133,7 +133,12 @@ func (s *Search) DeleteEntity(id string) error {
 func (o *Search) SearchProjects(q ProjectQuery) (Projects, error) {
 	p := url.Values{}
 	p.Set("q", q.Query)
-	p.Set("query_by", "name,tags,description")
+
+	if q.Field == "tags" {
+		p.Set("query_by", "tags")
+	} else {
+		p.Set("query_by", "name,tags,description")
+	}
 
 	if len(q.Licenses) > 0 {
 		p.Set("filter_by", "licenses="+strings.Join(q.Licenses, ","))

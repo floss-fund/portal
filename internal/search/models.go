@@ -19,6 +19,7 @@ type Entities []Entity
 //easyjson:json
 type EntityQuery struct {
 	Query string `json:"q"`
+	Field string `json:"field"`
 	Entity
 }
 
@@ -45,6 +46,7 @@ type Projects []Project
 //easyjson:json
 type ProjectQuery struct {
 	Query string `json:"q"`
+	Field string `json:"field"`
 	Project
 }
 

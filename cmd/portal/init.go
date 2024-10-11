@@ -217,6 +217,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 					Type:         m.Manifest.Entity.Type,
 					Role:         m.Manifest.Entity.Role,
 					Name:         m.Manifest.Entity.Name,
+					Description:  m.Manifest.Entity.Description,
 					WebpageURL:   m.Manifest.Entity.WebpageURL.URL,
 					NumProjects:  len(m.Manifest.Projects),
 				})

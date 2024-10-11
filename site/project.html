@@ -35,9 +35,7 @@
 
           <div class="block tags">
             <h4 class="title">Tags</h4>
-            {{ range $v := $r.Tags }}
-              <a href="/search?tag={{ $v }}&type=project" class="tag">{{ $v }}</a>
-            {{ end }}
+            {{ template "tags" $r.Tags }}
           </div><!-- tags -->
         </div><!-- props -->
       </div>

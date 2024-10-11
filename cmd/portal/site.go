@@ -31,7 +31,7 @@ type tplRenderer struct {
 type Query struct {
 	Query   string   `query:"q"`
 	Type    string   `query:"type"`
-	Tag     string   `query:"tag"`
+	Field   string   `query:"field"`
 	License []string `query:"license"`
 }
 
@@ -314,8 +314,6 @@ func handleManifestPage(c echo.Context) error {
 }
 
 func handleSearchPage(c echo.Context) error {
-	const title = "Search"
-
 	var (
 		app = c.Get("app").(*App)
 	)
@@ -333,8 +331,7 @@ func handleSearchPage(c echo.Context) error {
 	var results interface{}
 	switch q.Type {
 	case "entity":
-		query := search.EntityQuery{Query: q.Query}
-		query.Type = c.FormValue("entity_type")
+		query := search.EntityQuery{Query: q.Query, Field: q.Field}
 
 		o, err := app.search.SearchEntities(query)
 		if err != nil {
@@ -342,7 +339,7 @@ func handleSearchPage(c echo.Context) error {
 		}
 		results = o
 	case "project":
-		query := search.ProjectQuery{Query: q.Query}
+		query := search.ProjectQuery{Query: q.Query, Field: q.Field}
 		query.Licenses = []string{}
 
 		for _, l := range c.QueryParams()["license"] {
