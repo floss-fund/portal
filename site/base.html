@@ -17,12 +17,12 @@
 <body class="page-{{ .Data.Page }}">
 <header class="wrap">
   <header class="header">
-    <div class="container-fluid">
+    <div class="container">
       <header class="row top">
-        <div class="col-lg-6 col-md-12">
-          <div class="logo"><a href="{{ .RootURL }}"><img src="{{ .RootURL }}/static/logo.svg" alt="" /> Discover</a></div>
+        <div class="col-6">
+          <div class="logo"><a href="{{ .RootURL }}"><img src="{{ .RootURL }}/static/logo.svg" alt="" /></a></div>
         </div>
-        <nav class="col-lg-6 col-md-12 nav">
+        <nav class="col-end nav">
           <a href="{{ .RootURL }}/submit">Submit</a>
           <a href="https://floss.fund">FLOSS/Fund</a>
         </nav>
@@ -53,14 +53,14 @@
       {{ if .Data.Tabs }}
         <nav class="tabs">
         {{ range $t := .Data.Tabs }}
-          <a href="{{ $t.URL }}" class="{{ if $t.Selected }}sel{{ end }}"><span>{{ $t.Label }}</span></a>
+          <a href="{{ $t.URL }}" class="tab {{ if $t.Selected }}sel{{ end }}"><span>{{ $t.Label }}</span></a>
         {{ end }}
         </nav>
       {{ end }}
     </div>
   </header>
 </header>
-  <div class="container-fluid main">
+  <div class="container main">
     <section class="section content">
 {{ end }}
 
@@ -68,7 +68,7 @@
     </section>
   </div>
 
-  <footer class="container-fluid footer">
+  <footer class="container footer">
     &copy; 2024. <a href="https://floss.fund">FLOSS/Fund</a>
   </footer>
   <script type="module" src="{{ .RootURL }}/static/main.js"></script>

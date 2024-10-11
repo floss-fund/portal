@@ -3,16 +3,9 @@
 
 <section class="home">
 	<div class="intro">
-		<h1 class="title">FLOSS/Fund portal</h1>
-		<p>A directory for discovering Free and Open Source projects looking for financial support.</p>
+		<h1 class="title">Funding for FOSS projects</h1>
+		<p>Discover Free and Open Source projects looking for funding and financial assistance.</p>
 	</div>
-
-	<form action="{{ $.RootURL }}/search" class="search">
-		<p>
-			<input type="hidden" name="type" value="project" />
-			<input type="text" name="q" maxlength="64" data-autocomp-tags placeholder="eg: developer-tools or Project Name" autofocus />
-		</p>
-	</form>
 
 	{{ if .Data.Tags }}
 		<div class="tags box">

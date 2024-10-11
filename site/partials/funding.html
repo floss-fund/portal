@@ -2,78 +2,82 @@
 
 <section class="plans">
 	<h2>Plans ({{ len .Data.Manifest.Funding.Plans }})</h2>
-	<table>
-		<thead>
-			<tr>
-				<th>Plan</th>
-				<th class="amount">Amount</th>
-				<th>Frequency</th>
-				<th>Channel</th>
-			</tr>
-		</thead>
-		<tbody>
-			{{ range $p := .Data.Manifest.Funding.Plans }}
-				<tr id="plan-{{ $p.GUID }}">
-					<td>
-						{{ $p.Name }}
-						<p class="description text-small text-grey">{{ $p.Description }}</p>
-					</td>
-					<td class="amount">
-						{{ $p.Amount }} <span class="text-grey">{{ $p.Currency }}</span>
-					</td>
-					<td>
-						<span class="text-grey">{{ title $p.Frequency }}</span>
-					</td>
-					<td class="channel-type">
-						{{ if gt (len $p.Channels) 1 }}
-							<ul>
-							{{ range $c := $p.Channels }}
-								{{- $ch := index $.Data.Manifest.Channels $c -}}
-								<li><a href="#channel-{{ $ch.GUID }}">{{ title $ch.Type }}</a></li>
-							{{ end }}
-							</ul>
-						{{ else }}
-							{{- $ch := (index $.Data.Manifest.Channels (index $p.Channels 0)) -}}
-							<a href="#channel-{{ $ch.GUID }}">{{ title $ch.Type }}</a>
-						{{ end }}
-					</td>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Plan</th>
+					<th class="amount">Amount</th>
+					<th>Frequency</th>
+					<th>Channel</th>
 				</tr>
-			{{ end }}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				{{ range $p := .Data.Manifest.Funding.Plans }}
+					<tr id="plan-{{ $p.GUID }}">
+						<td>
+							{{ $p.Name }}
+							<p class="description text-small text-grey">{{ $p.Description }}</p>
+						</td>
+						<td class="amount">
+							{{ $p.Amount }} <span class="text-grey">{{ $p.Currency }}</span>
+						</td>
+						<td>
+							<span class="text-grey">{{ title $p.Frequency }}</span>
+						</td>
+						<td class="channel-type">
+							{{ if gt (len $p.Channels) 1 }}
+								<ul>
+								{{ range $c := $p.Channels }}
+									{{- $ch := index $.Data.Manifest.Channels $c -}}
+									<li><a href="#channel-{{ $ch.GUID }}">{{ title $ch.Type }}</a></li>
+								{{ end }}
+								</ul>
+							{{ else }}
+								{{- $ch := (index $.Data.Manifest.Channels (index $p.Channels 0)) -}}
+								<a href="#channel-{{ $ch.GUID }}">{{ title $ch.Type }}</a>
+							{{ end }}
+						</td>
+					</tr>
+				{{ end }}
+			</tbody>
+		</table>
+	</div>
 </section>
 
 <section class="channels">
 	<h2>Payment channels ({{ len .Data.Manifest.Funding.Channels }})</h2>
-	<table>
-		<thead>
-			<tr>
-				<th>Channel</th>
-				<th>Address</th>
-			</tr>
-		</thead>
-		<tbody>
-			{{ range $p := .Data.Manifest.Funding.Channels }}
-				<tr id="channel-{{ $p.GUID }}">
-					<td>
-						{{ title $p.Type }}
-						<p class="description text-small text-grey">{{ $p.Description }}</p>
-					</td>
-					<td>
-						{{ if not $p.Address }}
-							&mdash;
-						{{ else }}
-							{{ if hasPrefix "http" $p.Address }}
-								<a href="{{ $p.Address }}" title="{{ $p.Address }}" rel="noreferer nofollow">Visit</a>
-							{{ else }}
-								<span class="text-small text-grey">{{ $p.Address }}</span>
-							{{ end }}
-						{{ end }}
-					</td>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Channel</th>
+					<th>Address</th>
 				</tr>
-			{{ end }}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				{{ range $p := .Data.Manifest.Funding.Channels }}
+					<tr id="channel-{{ $p.GUID }}">
+						<td>
+							{{ title $p.Type }}
+							<p class="description text-small text-grey">{{ $p.Description }}</p>
+						</td>
+						<td>
+							{{ if not $p.Address }}
+								&mdash;
+							{{ else }}
+								{{ if hasPrefix "http" $p.Address }}
+									<a href="{{ $p.Address }}" title="{{ $p.Address }}" rel="noreferer nofollow">Visit</a>
+								{{ else }}
+									<span class="text-small text-grey">{{ $p.Address }}</span>
+								{{ end }}
+							{{ end }}
+						</td>
+					</tr>
+				{{ end }}
+			</tbody>
+		</table>
+	</div>
 </section>
 
 {{ end }}

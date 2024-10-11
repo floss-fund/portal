@@ -4,10 +4,10 @@
 <section class="manifest">
     <header class="hero">
       <div class="meta row text-small">
-        <div class="entity col-lg-8">
+        <div class="entity col-8">
           <div class="text-small text-grey">{{ $.Data.Manifest.Entity.Description }}</div>
         </div>
-        <div class="entity col-lg-3 col-lg-offset-1">
+        <div class="entity col-3 col-end">
           {{ if .Data.Manifest.Entity.Phone }}
             <div class="item">
               <a href="tel:{{ .Data.Manifest.Entity.Phone }}"><img src="{{ .RootURL }}/static/ico-phone.svg" /> {{ .Data.Manifest.Entity.Phone }}</a>

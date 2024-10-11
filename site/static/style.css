@@ -82,6 +82,12 @@ table {
         background: #fff;
     }
 
+.table-wrap {
+    max-width: 100%;
+    overflow-x: scroll;
+    overflow-y: auto;
+}
+
 code {
     padding: 0 10px;
     border-radius: 10px;
@@ -228,19 +234,19 @@ button, .button {
 header.wrap {
     background: #f4f4f4;
 }
-    header.wrap .tabs a {
+    header.wrap .tabs .tab {
         background: #eee;
         display: inline-block;
         margin-right: 5px;
         max-width: 225px;
     }
-    header.wrap .tabs a:hover span {
+    header.wrap .tabs .tab:hover span {
         text-decoration: underline;
     }
-    header.wrap .tabs a.sel {
+    header.wrap .tabs .tab.sel {
         background: #fff;
     }
-    header.wrap .tabs a span {
+    header.wrap .tabs .tab span {
         padding: 10px 30px 4px 30px;
         display: inline-block;
         max-width: 100%;
@@ -360,7 +366,7 @@ header.wrap {
         margin: 0;
     }
     .results .props {
-        text-align: right;
+/*        text-align: right;*/
     }
         .results .props .license {
             vertical-align: top;
@@ -436,60 +442,50 @@ header.wrap {
 }
 
 .footer {
-    margin: 120px 0 15px 0;
     color: var(--secondary);
     font-size: 0.875rem;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
     .footer a {
         text-decoration: none;
     }
 
-.avatar {
-    font-size: 0.875rem;
-}
-    .avatar img {
-        border-radius: 100%;
-        max-width: 52px;
-    }
-    .avatar div:first-child {
-        flex-basis: 75px;
-        flex-grow: 0;
-    }
-    .avatar div:last-child {
-        flex-grow: 1;
-    }
-    .avatar .title {
-        color: #888;
-        display: block;
-    }
-    .avatar .links {
-        margin-top: 10px;
-    }
-    .avatar .links img {
-        opacity: 0.4;
-        max-height: 20px;
-        margin-right: 5px;
-    }
-
-    .main-post .avatar {
-        margin-top: 85px;
-        position: sticky;
-        top: 30px;
-    }
 
 @media (max-width: 500px) {
-    .main {
-        padding: 20px;
+    .container-fluid {
+        padding: 15px;
         margin: 0;
     }
     .row {
         margin-right: 0;
         margin-left: 0;
     }
+    .header {
+        padding: 10px 0 0 0;
+    }
+    .search {
+        margin-bottom: 15px;
+    }
     .results .result {
         padding: 15px;
     }
-    .results .props {
-        text-align: left;
+    header.wrap .tabs .tab {
+        display: block;
+        width: 100%;
+        max-width: none;
+        border-bottom: 1px solid #ccc;
     }
-}
+    header.wrap .tabs .tab:last-child {
+        border-bottom: 0;
+    }
+
+    .results .props {
+      display: flex;
+      align-items: center;
+    }
+
+    .results .props > *:first-child {
+      flex-grow: 1;
+    }
+ }

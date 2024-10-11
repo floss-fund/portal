@@ -4,6 +4,7 @@
 	<h2>History ({{ len .Data.Manifest.Funding.History }})</h2>
 
 	{{ if gt (len .Data.Manifest.Funding.History) 0 }}
+	<div class="table-wrap">
 		<table>
 			<thead>
 				<tr>
@@ -31,6 +32,7 @@
 				{{ end }}
 			</tbody>
 		</table>
+	</div>
 	{{ else }}
 		<p>No financial history available.</p>
 	{{ end }}

@@ -5,14 +5,14 @@
         <li class="result">
           <header>
             <div class="row">
-                <div class="col-lg-9">
+                <div class="col-9">
                     <h3 class="title"><a href="{{ $.RootURL }}/view/{{ $r.ManifestGUID }}">{{ .Name }}</a></h3>
                     <div class="meta text-grey">
                         <img src="{{ $.RootURL }}/static/ico-{{ $r.Type }}.svg" /> {{ title $r.Type }} ({{ $r.NumProjects }} projects)
                     </div>
                     <p>{{ abbrev 200 $r.Description }}</p>
                 </div>
-                <div class="col-lg-3 align-right">
+                <div class="col-3 col-end">
                     <div class="meta">
                       <a href="{{ $r.WebpageURL }}" rel="noreferer nofollow" class="ellip">
                         <img src="/static/ico-link.svg" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL) }}
