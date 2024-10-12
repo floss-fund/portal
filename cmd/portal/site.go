@@ -93,12 +93,26 @@ func handleGetTags(c echo.Context) error {
 }
 
 func handleValidatePage(c echo.Context) error {
-	const title = "Validate funding.json manifest"
+	var app = c.Get("app").(*App)
+
+	out := page{Title: "Validate funding manifest", Heading: "Validate"}
+	out.Tabs = []Tab{
+		{
+			ID:    "submit",
+			Label: "Submit",
+			URL:   fmt.Sprintf("%s/submit", app.consts.RootURL),
+		},
+		{
+			ID:       "validate",
+			Label:    "Validate",
+			Selected: true,
+			URL:      fmt.Sprintf("%s/validate", app.consts.RootURL),
+		},
+	}
 
 	// Post request with body to validate.
 	if c.Request().Method == http.MethodPost {
 		var (
-			app  = c.Get("app").(*App)
 			mUrl = c.FormValue("url")
 			body = c.FormValue("body")
 		)
@@ -106,15 +120,18 @@ func handleValidatePage(c echo.Context) error {
 		// Validate the URL.
 		_, err := common.IsURL("url", mUrl, v1.MaxURLLen)
 		if err != nil {
-			return errPage(c, http.StatusBadRequest, "validate", title, err.Error())
+			out.ErrMessage = err.Error()
+			return c.Render(http.StatusBadRequest, "validate", out)
 		}
 
 		if _, err := app.schema.ParseManifest([]byte(body), mUrl, false); err != nil {
-			return errPage(c, http.StatusBadRequest, "validate", title, err.Error())
+			out.ErrMessage = err.Error()
+			return c.Render(http.StatusBadRequest, "validate", out)
 		}
 	}
 
-	return c.Render(http.StatusOK, "validate", page{Title: title, Message: "Manifest is valid."})
+	out.Message = "Manifest is valid"
+	return c.Render(http.StatusOK, "validate", out)
 }
 
 func handleSubmitPage(c echo.Context) error {
@@ -124,6 +141,19 @@ func handleSubmitPage(c echo.Context) error {
 	)
 
 	out := page{Title: "Submit funding manifest", Heading: "Submit"}
+	out.Tabs = []Tab{
+		{
+			ID:       "submit",
+			Label:    "Submit",
+			Selected: true,
+			URL:      fmt.Sprintf("%s/submit", app.consts.RootURL),
+		},
+		{
+			ID:    "validate",
+			Label: "Validate",
+			URL:   fmt.Sprintf("%s/validate", app.consts.RootURL),
+		},
+	}
 
 	// Render the page.
 	if c.Request().Method == http.MethodGet {

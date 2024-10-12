@@ -2,7 +2,7 @@
 {{ template "header" . }}
 
 <section class="validate">
-	<h1>Validate funding.json manifest</h1>
+	<p>Validate your funding.json manifest by pasting the contents here.</p>
 	
 	{{ if .Data.ErrMessage }}
 		<div class="message error">{{ .Data.ErrMessage }}</div>
