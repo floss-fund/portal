@@ -2,7 +2,10 @@
 {{ template "header" . }}
 
 <section class="validate">
-	<p>Validate your funding.json manifest by pasting the contents here.</p>
+	<p class="text-grey">
+		Validate your funding.json manifest by pasting the contents here.
+		<a href="https://floss.fund/funding-manifest">View docs and example</a>.
+	</p>
 	
 	{{ if .Data.ErrMessage }}
 		<div class="message error">{{ .Data.ErrMessage }}</div>
@@ -15,7 +18,7 @@
 	<div class="message success">✓ Manifest is valid</div>
 
 	<br />
-	<form method="post" action="">
+	<form method="post" action="" class="validate">
 		<div>
 			<p>
 				<label id="validate-url">Where will the manifest be hosted?</label>
@@ -24,7 +27,6 @@
 			<p>
 				<label for="validate-name">Manifest JSON body</label>
 				<textarea name="body" id="validate-body" required placeholder="{}"></textarea>
-				<br /><small><a href="https://floss.fund/funding-manifest">View docs and example</a></small>
 			</p>
 			<p>
 				<button type="submit">Validate</button>
@@ -35,7 +37,7 @@
 
 <script>
 	// On form submit, send url and body as form encoded POST data to /api/validate.
-	document.querySelector("form").addEventListener("submit", async (e) => {
+	document.querySelector("form.validate").addEventListener("submit", async (e) => {
 		e.preventDefault();
 
 		document.querySelectorAll(".message").forEach((el) => el.style.display = "none");

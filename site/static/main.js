@@ -26,6 +26,7 @@ if (qInput) {
     });
 }
 
+// Listen for ~ key and focus on the search bar.
 document.addEventListener("keydown", function(event) {
   if (event.key === "`") {
     event.preventDefault();
