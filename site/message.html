@@ -2,8 +2,11 @@
     {{ template "header" .}}
 
     <h2>{{ .Data.Title }}</h2>
-    <div>
-        {{ .Data.Message }}
-    </div>
+    {{ if .Data.ErrMessage }}
+        <div class="message error">{{ .Data.ErrMessage }}</div>
+    {{ else if .Data.Message }}
+        <p>{{ .Data.Message }}</p>
+    {{ end }}
+
     {{ template "footer" .}}
 {{ end }}

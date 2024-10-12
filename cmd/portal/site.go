@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -50,11 +49,9 @@ type Tab struct {
 	Selected bool
 }
 
-type page struct {
-	ID          string
+type Page struct {
 	Title       string
 	Description string
-	MetaTags    string
 	Heading     string
 	Tabs        []Tab
 	ErrMessage  string
@@ -73,10 +70,11 @@ func handleIndexPage(c echo.Context) error {
 	tags, _ := app.core.GetTopTags(25)
 
 	out := struct {
-		page
-		Tags []string
+		Page
+		Index bool
+		Tags  []string
 	}{}
-	out.ID = "/"
+	out.Index = true
 	out.Title = "Discover FOSS projects seeking funding"
 	out.Tags = tags
 
@@ -95,7 +93,7 @@ func handleGetTags(c echo.Context) error {
 func handleValidatePage(c echo.Context) error {
 	var app = c.Get("app").(*App)
 
-	out := page{Title: "Validate funding manifest", Heading: "Validate"}
+	out := Page{Title: "Validate funding manifest", Heading: "Validate"}
 	out.Tabs = []Tab{
 		{
 			ID:    "submit",
@@ -140,7 +138,7 @@ func handleSubmitPage(c echo.Context) error {
 		mURL = c.FormValue("url")
 	)
 
-	out := page{Title: "Submit funding manifest", Heading: "Submit"}
+	out := Page{Title: "Submit funding manifest", Heading: "Submit"}
 	out.Tabs = []Tab{
 		{
 			ID:       "submit",
@@ -238,30 +236,41 @@ func handleValidateManifest(c echo.Context) error {
 func handleManifestPage(c echo.Context) error {
 	var app = c.Get("app").(*App)
 
-	// Depending on whether the page (pageID) is the main landing page of
+	// Depending on whether the page (tpl) is the main landing page of
 	// a manifest (entity/projects) or funding, get the manifest GUID
 	// by strips parts off the URI.
 	var (
-		pageID = ""
+		tpl = ""
 
 		// Manifest guid.
 		mGuid = c.Request().URL.Path
 
 		// Project guid.
 		pGuid = ""
+
+		// Template response.
+		out = struct {
+			Page
+			Manifest models.ManifestData
+			Project  v1.Project
+		}{}
 	)
 
 	if strings.HasPrefix(mGuid, "/view/funding") {
 		// Funding page.
 		mGuid = strings.TrimLeft(mGuid, "/view/funding")
-		pageID = "funding"
+		tpl = "funding"
+		out.Title = "Funding plans for %s"
+		out.Description = "Funding plans for free and open source projects by %s"
 	} else if strings.HasPrefix(mGuid, "/view/projects") {
 		// Projects page.
 		mGuid = strings.TrimLeft(mGuid, "/view/projects")
-		pageID = "projects"
+		tpl = "projects"
+		out.Title = "Projects by %s"
+		out.Description = "Projects by %s looking for free and open source funding"
 	} else if strings.HasPrefix(mGuid, "/view/project") {
 		// Single project.
-		pageID = "project"
+		tpl = "project"
 
 		// Extract the last part of the URI.
 		var (
@@ -269,8 +278,7 @@ func handleManifestPage(c echo.Context) error {
 			i    = strings.LastIndex(path, "/")
 		)
 		if i == -1 {
-			return c.Render(http.StatusBadRequest, "message",
-				page{Title: "Manifest not found", ErrMessage: "Invalid project guid."})
+			return errPage(c, http.StatusNotFound, "", "Manifest not found", "Invalid project guid.")
 		}
 
 		mGuid = path[:i]
@@ -278,22 +286,24 @@ func handleManifestPage(c echo.Context) error {
 	} else if strings.HasPrefix(mGuid, "/view/history") {
 		// History page.
 		mGuid = strings.TrimLeft(mGuid, "/view/history")
-		pageID = "history"
+		tpl = "history"
+		out.Title = "Financial history of projects by %s"
+		out.Description = "Financial and funding history of projects by %s"
 	} else {
 		// Main entity page.
-		pageID = "entity"
+		tpl = "entity"
 		mGuid = strings.TrimLeft(mGuid, "/view")
+		out.Title = " %s - Project funding"
+		out.Description = "Fund free and open source projects by %s"
 	}
 
 	// Get the manifest.
 	m, err := app.core.GetManifest(0, mGuid)
 	if err != nil {
 		if err == core.ErrNotFound {
-			return c.Render(http.StatusNotFound, "message",
-				page{Title: "Manifest not found", ErrMessage: err.Error()})
+			return errPage(c, http.StatusNotFound, "", "Manifest not found", err.Error())
 		}
-		return c.Render(http.StatusBadRequest, "message",
-			page{Title: "Error", ErrMessage: "Error fetching manifest."})
+		return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching manifest.")
 	}
 
 	// If it's a single project's page, get the project.
@@ -303,46 +313,39 @@ func handleManifestPage(c echo.Context) error {
 			return o.GUID == pGuid
 		})
 		if idx < 0 {
-			return c.Render(http.StatusNotFound, "message",
-				page{Title: "Project not found", ErrMessage: "Project not found."})
+			return errPage(c, http.StatusNotFound, "", "Project not found", "Project not found.")
 		}
 		prj = m.Manifest.Projects[idx]
+		out.Description = abbrev(prj.Description, 200)
 	}
 
-	out := struct {
-		page
-		Page     string
-		Manifest models.ManifestData
-		Project  v1.Project
-	}{}
-
-	out.Page = pageID
 	out.Manifest = m
 	out.Project = prj
-	out.Title = m.Manifest.Entity.Name
+	out.Title = fmt.Sprintf(out.Title, m.Manifest.Entity.Name)
+	out.Description = fmt.Sprintf(out.Description, m.Manifest.Entity.Name)
 	out.Heading = m.Manifest.Entity.Name
 	out.Tabs = []Tab{
 		{
 			ID:       "entity",
 			Label:    "Entity",
-			Selected: pageID == "entity",
+			Selected: tpl == "entity",
 			URL:      fmt.Sprintf("%s/view/%s", app.consts.RootURL, m.GUID),
 		},
 		{
 			ID:       "projects",
 			Label:    fmt.Sprintf("Projects (%d)", len(m.Manifest.Projects)),
-			Selected: pageID == "projects",
+			Selected: tpl == "projects",
 			URL:      fmt.Sprintf("%s/view/projects/%s", app.consts.RootURL, m.GUID),
 		},
 		{
 			ID:       "funding",
-			Selected: pageID == "funding",
+			Selected: tpl == "funding",
 			Label:    fmt.Sprintf("Funding plans (%d)", len(m.Manifest.Funding.Plans)),
 			URL:      fmt.Sprintf("%s/view/funding/%s", app.consts.RootURL, m.GUID),
 		},
 		{
 			ID:       "history",
-			Selected: pageID == "history",
+			Selected: tpl == "history",
 			Label:    fmt.Sprintf("History (%d)", len(m.Manifest.Funding.History)),
 			URL:      fmt.Sprintf("%s/view/history/%s", app.consts.RootURL, m.GUID),
 		},
@@ -350,8 +353,8 @@ func handleManifestPage(c echo.Context) error {
 
 	// If the view is for a single project, add a tab for that too.
 	if pGuid != "" {
-		out.Page = "project"
-		out.Title = fmt.Sprintf("%s (%s) funding", prj.Name, m.Entity.Name)
+		out.Title = fmt.Sprintf("%s by %s - Funding", prj.Name, m.Entity.Name)
+		out.Description = fmt.Sprintf("Free and open source funding for %s by %s", prj.Name, m.Entity.Name)
 		out.Heading = prj.Name
 		out.Tabs = append(out.Tabs, Tab{
 			ID:       "project",
@@ -360,10 +363,10 @@ func handleManifestPage(c echo.Context) error {
 			URL:      fmt.Sprintf("%s/view/projects/%s/%s", app.consts.RootURL, m.GUID, prj.GUID),
 		})
 
-		return c.Render(http.StatusOK, out.Page, out)
+		return c.Render(http.StatusOK, tpl, out)
 	}
 
-	return c.Render(http.StatusOK, pageID, out)
+	return c.Render(http.StatusOK, tpl, out)
 }
 
 func handleSearchPage(c echo.Context) error {
@@ -373,7 +376,7 @@ func handleSearchPage(c echo.Context) error {
 
 	var q Query
 	if err := c.Bind(&q); err != nil {
-		return c.String(http.StatusBadRequest, "invalid request.")
+		return errPage(c, http.StatusBadRequest, "", "Invalid request", "Invalid request.")
 	}
 	q.Query = strings.TrimSpace(q.Query)
 
@@ -388,7 +391,7 @@ func handleSearchPage(c echo.Context) error {
 
 		o, err := app.search.SearchEntities(query)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New("error searching"))
+			return errPage(c, http.StatusBadRequest, "", "Error", "An internal error occurred while searching.")
 		}
 		results = o
 	case "project":
@@ -401,19 +404,18 @@ func handleSearchPage(c echo.Context) error {
 
 		o, err := app.search.SearchProjects(query)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New("error searching"))
+			return errPage(c, http.StatusBadRequest, "", "Error", "An internal error occurred while searching.")
 		}
 		results = o
 	default:
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("unknown `type`"))
+		return errPage(c, http.StatusBadRequest, "", "Error", "Unknown type.")
 	}
 
 	out := struct {
-		page
+		Page
 		Q       Query
 		Results interface{}
 	}{}
-	out.ID = "search"
 	out.Title = "Search"
 	out.Heading = fmt.Sprintf(`Search "%s"`, q.Query)
 	out.Q = q
@@ -435,5 +437,13 @@ func errPage(c echo.Context, code int, tpl, title, message string) error {
 		tpl = "message"
 	}
 
-	return c.Render(code, tpl, page{Title: title, ErrMessage: message})
+	return c.Render(code, tpl, Page{Title: title, ErrMessage: message})
+}
+
+func abbrev(str string, ln int) string {
+	if len(str) < ln {
+		return str
+	}
+
+	return str[:ln] + ".."
 }

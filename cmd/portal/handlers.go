@@ -42,7 +42,7 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 		return echo.NewHTTPError(http.StatusNotFound, "Unknown endpoint")
 	})
 	srv.RouteNotFound("/*", func(c echo.Context) error {
-		return c.Render(http.StatusNotFound, "message", page{
+		return c.Render(http.StatusNotFound, "message", Page{
 			Title:   "404 Page not found",
 			Heading: "404 Page not found",
 		})
