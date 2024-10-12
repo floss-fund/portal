@@ -13,6 +13,7 @@ import (
 	mrand "math/rand"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 	"unicode"
 
@@ -337,6 +338,23 @@ func initSiteTemplates(dirPath string) *template.Template {
 			input = reMultiLines.ReplaceAllString(html.EscapeString(input), "\n\n")
 			input = strings.Replace(input, "\n", "<br />", -1)
 			return template.HTML(input)
+		},
+
+		"HasField": func(v interface{}, field string) bool {
+			val := reflect.ValueOf(v)
+
+			// If it's a reference, get the underlying.
+			if val.Kind() == reflect.Ptr {
+				val = val.Elem()
+			}
+
+			// Check if it's a struct.
+			if val.Kind() != reflect.Struct {
+				return false
+			}
+
+			_, exists := val.Type().FieldByName(field)
+			return exists
 		},
 	})
 

@@ -1,5 +1,7 @@
 {{ define "projects" }}
-<h3>{{ len .Data.Manifest.Projects }} projects</h3>
+{{ template "header" . }}
+
+<h2>Projects ({{ len .Data.Manifest.Projects }})</h2>
 
 <section class="results projects">
   <ul>
@@ -8,7 +10,7 @@
         <header>
           <div class="row">
             <div class="col-9">
-              <h3 class="title"><a href="{{ $.RootURL }}/view/projects/{{ $.Data.Manifest.GUID }}/{{ $r.GUID }}">{{ .Name }}</a></h3>
+              <h3 class="title"><a href="{{ $.RootURL }}/view/project/{{ $.Data.Manifest.GUID }}/{{ $r.GUID }}">{{ .Name }}</a></h3>
             </div>
             <div class="col-3 col-end props">
               <span class="license text-small text-grey">
@@ -36,4 +38,6 @@
       {{ end }}
   </ul>
 </section>
+
+{{ template "footer" . }}
 {{ end }}

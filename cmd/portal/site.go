@@ -51,7 +51,7 @@ type Tab struct {
 }
 
 type page struct {
-	Page        string
+	ID          string
 	Title       string
 	Description string
 	MetaTags    string
@@ -76,7 +76,7 @@ func handleIndexPage(c echo.Context) error {
 		page
 		Tags []string
 	}{}
-	out.Page = "/"
+	out.ID = "/"
 	out.Title = "Discover FOSS projects seeking funding"
 	out.Tags = tags
 
@@ -106,11 +106,11 @@ func handleValidatePage(c echo.Context) error {
 		// Validate the URL.
 		_, err := common.IsURL("url", mUrl, v1.MaxURLLen)
 		if err != nil {
-			return c.Render(http.StatusBadRequest, "validate", page{Title: title, ErrMessage: err.Error()})
+			return errPage(c, http.StatusBadRequest, "validate", title, err.Error())
 		}
 
 		if _, err := app.schema.ParseManifest([]byte(body), mUrl, false); err != nil {
-			return c.Render(http.StatusBadRequest, "validate", page{Title: title, ErrMessage: err.Error()})
+			return errPage(c, http.StatusBadRequest, "validate", title, err.Error())
 		}
 	}
 
@@ -206,15 +206,13 @@ func handleValidateManifest(c echo.Context) error {
 }
 
 func handleManifestPage(c echo.Context) error {
-	var (
-		app = c.Get("app").(*App)
-	)
+	var app = c.Get("app").(*App)
 
-	// Depending on whether the page (tab) is the main landing page of
+	// Depending on whether the page (pageID) is the main landing page of
 	// a manifest (entity/projects) or funding, get the manifest GUID
 	// by strips parts off the URI.
 	var (
-		tab = "projects"
+		pageID = ""
 
 		// Manifest guid.
 		mGuid = c.Request().URL.Path
@@ -222,24 +220,38 @@ func handleManifestPage(c echo.Context) error {
 		// Project guid.
 		pGuid = ""
 	)
+
 	if strings.HasPrefix(mGuid, "/view/funding") {
+		// Funding page.
 		mGuid = strings.TrimLeft(mGuid, "/view/funding")
-		tab = "funding"
+		pageID = "funding"
 	} else if strings.HasPrefix(mGuid, "/view/projects") {
-		path := strings.TrimLeft(mGuid, "/view/projects")
-		i := strings.LastIndex(path, "/")
+		// Projects page.
+		mGuid = strings.TrimLeft(mGuid, "/view/projects")
+		pageID = "projects"
+	} else if strings.HasPrefix(mGuid, "/view/project") {
+		// Single project.
+		pageID = "project"
+
+		// Extract the last part of the URI.
+		var (
+			path = strings.TrimLeft(mGuid, "/view/project")
+			i    = strings.LastIndex(path, "/")
+		)
 		if i == -1 {
 			return c.Render(http.StatusBadRequest, "message",
 				page{Title: "Manifest not found", ErrMessage: "Invalid project guid."})
 		}
+
 		mGuid = path[:i]
 		pGuid = path[i+1:]
-
-		tab = "project"
 	} else if strings.HasPrefix(mGuid, "/view/history") {
+		// History page.
 		mGuid = strings.TrimLeft(mGuid, "/view/history")
-		tab = "history"
+		pageID = "history"
 	} else {
+		// Main entity page.
+		pageID = "entity"
 		mGuid = strings.TrimLeft(mGuid, "/view")
 	}
 
@@ -269,33 +281,38 @@ func handleManifestPage(c echo.Context) error {
 
 	out := struct {
 		page
-		Tab      string
+		Page     string
 		Manifest models.ManifestData
 		Project  v1.Project
 	}{}
 
-	out.Page = "manifest"
-	out.Tab = tab
+	out.Page = pageID
 	out.Manifest = m
 	out.Project = prj
 	out.Title = m.Manifest.Entity.Name
 	out.Heading = m.Manifest.Entity.Name
 	out.Tabs = []Tab{
 		{
-			ID:       "projects",
-			Label:    fmt.Sprintf("Projects (%d)", len(m.Manifest.Projects)),
-			Selected: tab == "projects",
+			ID:       "entity",
+			Label:    "Entity",
+			Selected: pageID == "entity",
 			URL:      fmt.Sprintf("%s/view/%s", app.consts.RootURL, m.GUID),
 		},
 		{
+			ID:       "projects",
+			Label:    fmt.Sprintf("Projects (%d)", len(m.Manifest.Projects)),
+			Selected: pageID == "projects",
+			URL:      fmt.Sprintf("%s/view/projects/%s", app.consts.RootURL, m.GUID),
+		},
+		{
 			ID:       "funding",
-			Selected: tab == "funding",
+			Selected: pageID == "funding",
 			Label:    fmt.Sprintf("Funding plans (%d)", len(m.Manifest.Funding.Plans)),
 			URL:      fmt.Sprintf("%s/view/funding/%s", app.consts.RootURL, m.GUID),
 		},
 		{
 			ID:       "history",
-			Selected: tab == "history",
+			Selected: pageID == "history",
 			Label:    fmt.Sprintf("History (%d)", len(m.Manifest.Funding.History)),
 			URL:      fmt.Sprintf("%s/view/history/%s", app.consts.RootURL, m.GUID),
 		},
@@ -313,10 +330,10 @@ func handleManifestPage(c echo.Context) error {
 			URL:      fmt.Sprintf("%s/view/projects/%s/%s", app.consts.RootURL, m.GUID, prj.GUID),
 		})
 
-		return c.Render(http.StatusOK, "project", out)
+		return c.Render(http.StatusOK, out.Page, out)
 	}
 
-	return c.Render(http.StatusOK, "manifest", out)
+	return c.Render(http.StatusOK, pageID, out)
 }
 
 func handleSearchPage(c echo.Context) error {
@@ -366,7 +383,7 @@ func handleSearchPage(c echo.Context) error {
 		Q       Query
 		Results interface{}
 	}{}
-	out.Page = "search"
+	out.ID = "search"
 	out.Title = "Search"
 	out.Heading = fmt.Sprintf(`Search "%s"`, q.Query)
 	out.Q = q
@@ -381,4 +398,12 @@ func (t *tplRenderer) Render(w io.Writer, name string, data interface{}, c echo.
 		RootURL: t.RootURL,
 		Data:    data,
 	})
+}
+
+func errPage(c echo.Context, code int, tpl, title, message string) error {
+	if tpl == "" {
+		tpl = "message"
+	}
+
+	return c.Render(code, tpl, page{Title: title, ErrMessage: message})
 }

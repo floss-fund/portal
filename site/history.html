@@ -1,4 +1,5 @@
 {{ define "history" }}
+{{ template "header" . }}
 
 <section class="channels">
 	<h2>History ({{ len .Data.Manifest.Funding.History }})</h2>
@@ -38,4 +39,5 @@
 	{{ end }}
 </section>
 
+{{ template "footer" . }}
 {{ end }}

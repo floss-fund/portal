@@ -231,22 +231,22 @@ button, .button {
     border: 1px solid #aee1c3;
 }
 
-header.wrap {
+.mast {
     background: #f4f4f4;
 }
-    header.wrap .tabs .tab {
+    .mast .tabs .tab {
         background: #eee;
         display: inline-block;
         margin-right: 5px;
         max-width: 225px;
     }
-    header.wrap .tabs .tab:hover span {
+    .mast .tabs .tab:hover span {
         text-decoration: underline;
     }
-    header.wrap .tabs .tab.sel {
+    .mast .tabs .tab.sel {
         background: #fff;
     }
-    header.wrap .tabs .tab span {
+    .mast .tabs .tab span {
         padding: 10px 30px 4px 30px;
         display: inline-block;
         max-width: 100%;
@@ -269,7 +269,7 @@ header.wrap {
     padding: 30px 0 0 0;
     overflow: hidden;
 }
-    .header .top {
+    .header .bar {
         margin-bottom: 45px;
     }
     .header .nav {
@@ -282,12 +282,10 @@ header.wrap {
     .header .title {
         margin: 0 0 30px 0;
     }
-    .page-manifest .header .title,
-    .page-project .header .title {
+    .header .heading .title {
         margin: 0;
     }
-    .page-manifest .header .entity,
-    .page-project .header .entity {
+    .header .subheading {
         margin-bottom: 30px;
     }
 
@@ -403,16 +401,6 @@ header.wrap {
     }
 
 
-.manifest .hero {
-    margin-bottom: 45px;
-}
-    .manifest .title {
-        margin: 0;
-    }
-    .manifest .hero .button {
-        margin-right: 15px;
-    }
-
 .project .props .block {
     border-bottom: 1px solid #eee;
     padding-bottom: 30px;
@@ -444,8 +432,10 @@ header.wrap {
 .footer {
     color: var(--secondary);
     font-size: 0.875rem;
-    margin-top: 15px;
+    margin-top: 5vh;
     margin-bottom: 15px;
+    border-top: 1px solid #eee;
+    padding-top: 30px;
 }
     .footer a {
         text-decoration: none;
@@ -470,13 +460,13 @@ header.wrap {
     .results .result {
         padding: 15px;
     }
-    header.wrap .tabs .tab {
+    .mast .tabs .tab {
         display: block;
         width: 100%;
         max-width: none;
         border-bottom: 1px solid #ccc;
     }
-    header.wrap .tabs .tab:last-child {
+    .mast .tabs .tab:last-child {
         border-bottom: 0;
     }
 

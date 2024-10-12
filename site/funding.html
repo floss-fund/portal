@@ -1,4 +1,5 @@
 {{ define "funding" }}
+{{ template "header" . }}
 
 <section class="plans">
 	<h2>Plans ({{ len .Data.Manifest.Funding.Plans }})</h2>
@@ -80,4 +81,5 @@
 	</div>
 </section>
 
+{{ template "footer" . }}
 {{ end }}

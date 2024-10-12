@@ -23,6 +23,7 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	g.GET("/search", handleSearchPage)
 	g.GET("/view/funding", handleManifestPage)
 	g.GET("/view/projects", handleManifestPage)
+	g.GET("/view/project", handleManifestPage)
 	g.GET("/view/*", handleManifestPage)
 
 	g.POST("/api/validate", handleValidateManifest)

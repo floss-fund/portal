@@ -1,7 +1,7 @@
-{{ define "manifest" }}
+{{ define "entity" }}
 {{ template "header" . }}
 
-<section class="manifest">
+<section class="entity">
     <header>
       <div class="meta row">
         <div class="entity col-9">
@@ -27,14 +27,6 @@
         </div>
       </div>
     </header>
-
-    {{ if eq .Data.Tab "projects" }}
-      {{ template "projects" . }}
-    {{ else if eq .Data.Tab "history" }}
-      {{ template "history" . }}
-    {{ else }}
-      {{ template "funding" . }}
-    {{ end }}
 
     {{ if .Data.ErrMessage }}
         <div class="message error">{{ .Data.ErrMessage }}</div>

@@ -14,11 +14,11 @@
   <link rel="stylesheet" type="text/css" media="screen" href="{{ .RootURL }}/static/style.css" />
 </head>
 
-<body class="page-{{ .Data.Page }}">
-<header class="wrap">
+<body class="{{ if HasField .Data "Page" }}page-{{ .Data.Page }}{{ end }}">
+<section class="mast">
   <header class="header">
     <div class="container">
-      <header class="row top">
+      <div class="row bar">
         <div class="col-6">
           <div class="logo"><a href="{{ .RootURL }}"><img src="{{ .RootURL }}/static/logo.svg" alt="" /></a></div>
         </div>
@@ -26,28 +26,32 @@
           <a href="{{ .RootURL }}/submit">Submit</a>
           <a href="https://floss.fund">FLOSS/Fund</a>
         </nav>
-      </header>
+      </div>
 
       <form action="{{ $.RootURL }}/search" class="search">
         <p>
           <input type="hidden" name="type" value="project" />
-          <input type="text" name="q" maxlength="128" value="{{ if eq .Data.Page "search" }}{{ .Data.Q.Query }}{{ end }}" 
-            data-autocomp-tags placeholder="eg: developer-tools / project name / author name" {{ if eq .Data.Page "/"  }}autofocus{{ end }} />
+          <input type="text" name="q" maxlength="128" value="{{ if HasField .Data "Q" }}{{ .Data.Q.Query }}{{ end }}" 
+            data-autocomp-tags placeholder="eg: developer-tools / project name / author name" {{ if and (HasField .Data "Page") (eq .Data.Page "/")  }}autofocus{{ end }} />
         </p>
       </form>
 
-      <h1 class="title">{{ .Data.Heading }}</h1>
-      {{ if eq .Data.Page "manifest" }}
-        <div class="meta entity text-grey text-small">
-          <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" /> {{ title .Data.Manifest.Entity.Type }}
+
+      {{ if HasField .Data "Manifest" }}
+        <div class="heading">
+          <h1 class="title">{{ .Data.Heading }}</h1>
+          <div class="subheading meta text-grey text-small">
+            {{ if eq .Data.Page "project" }}
+              <a href="{{ .RootURL }}/view/{{ .Data.Manifest.GUID }}">
+                by <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" /> {{ title .Data.Manifest.Entity.Name }}
+              </a>
+            {{ else }}
+                <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" /> {{ title .Data.Manifest.Entity.Type }}
+            {{ end }}
+          </div><!-- subheading -->
         </div>
-      {{ end }}
-      {{ if eq .Data.Page "project" }}
-        <div class="meta entity text-grey text-small">
-          <a href="{{ .RootURL }}/view/{{ .Data.Manifest.GUID }}">
-            by <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" /> {{ title .Data.Manifest.Entity.Name }}
-          </a>
-        </div>
+      {{ else }}
+        <h1 class="title">{{ .Data.Heading }}</h1>
       {{ end }}
 
       {{ if .Data.Tabs }}
@@ -59,7 +63,7 @@
       {{ end }}
     </div>
   </header>
-</header>
+</section>
   <div class="container main">
     <section class="section content">
 {{ end }}
