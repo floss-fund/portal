@@ -112,7 +112,7 @@ sup a {
     text-underline-offset: 0;
 }
 
-input, textarea {
+input[type=text], textarea {
     padding: 10px;
     font-size: 1rem;
     border-radius: 5px;
@@ -335,9 +335,33 @@ button, .button {
 .search {
     margin-bottom: 60px;
 }
-    .search input {
+    .search .more {
+        display: none;
+    }
+    .search:has(#type-project:checked) .more {
+      display: block;
+    }
+    .search .input {
+        margin-bottom: 8px;
+    }
+    .search .q {
         padding: 10px;
     }
+    .search .tabs {
+        font-size: 0.875rem;
+        margin-left: 10px;
+        margin-bottom: -1px;
+        z-index: 2;
+    }
+    .search .tabs .tab {
+        border: 1px solid #ddd;
+        border-bottom: 0;
+        border-radius: 3px 3px 0 0;
+    }
+    .search .tabs .tab span {
+        padding: 6px 15px 3px 15px;
+    }
+
 
 .home .tags {
     margin-top: 10vh;

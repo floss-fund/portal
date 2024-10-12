@@ -11,7 +11,7 @@
 		<div class="tags box">
 			<h3>Popular tags</h3>
 			{{ range $t := .Data.Tags }}
-				<a href="{{ $.RootURL }}/tags/{{ $t }}">{{ $t }}</a>
+				<a href="{{ $.RootURL }}/search?q={{ $t }}&type=project&field=tags">{{ $t }}</a>
 			{{ end }}
 		</div>
 	{{ end }}

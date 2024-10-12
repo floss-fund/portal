@@ -29,13 +29,23 @@
         </nav>
       </div>
 
+      {{ $q := HasField .Data "Q" }}
       <form action="{{ $.RootURL }}/search" class="search">
-        <p>
-          <input type="hidden" name="type" value="project" />
-          <input type="text" name="q" maxlength="128" value="{{ if HasField .Data "Q" }}{{ .Data.Q.Query }}{{ end }}" 
-            data-autocomp-tags placeholder="eg: developer-tools / project name / author name"
-            {{ if or (HasField .Data "Index") (HasField .Data "Q")  }}autofocus{{ end }} />
-        </p>
+          <div class="input">
+            <input type="text" name="q" maxlength="128" value="{{ if $q }}{{ .Data.Q.Query }}{{ end }}" 
+              data-autocomp-tags placeholder="eg: developer-tools / project name / author name"
+              {{ if or (HasField .Data "Index") (HasField .Data "Q")  }}autofocus{{ end }} />
+          </div>
+          <div class="row options text-small text-grey">
+            <div class="col-6">
+              <label><input type="radio" name="type" value="project" id="type-project" {{ if or (not $q) (eq .Data.Q.Type "project" ) }}checked{{ end }} /> Project</label>
+              <label><input type="radio" name="type" value="entity" {{ if and $q (eq .Data.Q.Type "entity" ) }}checked{{ end }} /> Entity</label>
+            </div>
+            <div class="col-end more">
+              <label><input type="radio" name="field" value="name" {{ if or (not $q) (eq .Data.Q.Field "name" ) }}checked{{ end }} /> Name</label>
+              <label><input type="radio" name="field" value="tags" {{ if and $q (eq .Data.Q.Field "tags" ) }}checked{{ end }} /> Tags</label>
+            </div>
+          </div>
       </form>
 
 

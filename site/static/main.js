@@ -13,9 +13,13 @@ if (!localStorage.tags) {
 }
 
 const qInput = document.querySelector("input[data-autocomp-tags]");
+const isTags = document.querySelector(".search input[name=field][value=tags]");
 if (qInput) {
     autocomp(qInput, {
         onQuery: async (val) => {
+            if (!isTags.checked) {
+                return [];
+            }
             const q = val.trim().toLowerCase();
             return TAGS.filter(s => s.includes(q)).slice(0, 10);
         },
