@@ -3,7 +3,7 @@
 
 <h2>Projects ({{ len .Data.Manifest.Projects }})</h2>
 
-<section class="results projects">
+<section class="results projects" aria-labelledby="tab-projects">
   <ul>
       {{ range $r := .Data.Manifest.Projects }}
       <li class="result">
@@ -12,27 +12,25 @@
             <div class="col-9">
               <h3 class="title"><a href="{{ $.RootURL }}/view/project/{{ $.Data.Manifest.GUID }}/{{ $r.GUID }}">{{ .Name }}</a></h3>
             </div>
-            <div class="col-3 col-end props">
-              <span class="license text-small text-grey">
+            <div class="col-3 col-end props" role="region">
+              <span class="license text-small text-grey" aria-label="Licenses">
                   {{ $len := sub (len .Licenses) 1 }}
                   {{ trimPrefix "spdx:" (index .Licenses 0) }} {{ if (gt $len 0) }} +{{ $len }}{{ end }}
               </span>
-              <a href="{{ $r.WebpageURL.URL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL.URL) }}">
-                <img src="/static/ico-link.svg" />
+              <a href="{{ $r.WebpageURL.URL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL.URL) }}" aria-label="Visit project website">
+                <img src="/static/ico-link.svg" alt="" aria-hidden="true" />
               </a>  
-              <a href="{{ $r.RepositoryURL.URL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL.URL) }}">
-                <img src="/static/ico-repo.svg" />
+              <a href="{{ $r.RepositoryURL.URL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL.URL) }}" aria-label="Visit project repository">
+                <img src="/static/ico-repo.svg" alt="" aria-hidden="true" />
               </a>  
             </div>
           </div>
         </header>
 
-        <p class="description">{{ abbrev 200 .Description }}</p>
+        <p class="description" aria-label="Project description">{{ abbrev 200 .Description }}</p>
 
         <footer>
-          <div class="tags">
-            {{ template "tags" .Tags }}
-          </div>
+          {{ template "tags" .Tags }}
         </footer>
       </li>
       {{ end }}

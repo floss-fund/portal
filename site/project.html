@@ -1,37 +1,42 @@
 {{ define "project" }}
 {{ template "header" . }}
 
-<section class="project">
+<section class="project" aria-labelledby="tab-project">
   {{ $r := .Data.Project }}
     <div class="row">
-      <div class="col-7">
-        <div class="description">{{ Nl2br $r.Description }}</div>
+      <div class="col-7" role="region">
+        <div class="description" aria-label="Project description">{{ Nl2br $r.Description }}</div>
 
         <hr />
         <p>
           <a href="{{ $.RootURL }}/view/funding/{{ $.Data.Manifest.GUID }}" class="button">
-            <img src="{{ .RootURL }}/static/ico-wallet.svg" />
+            <img src="{{ .RootURL }}/static/ico-wallet.svg" alt="" aria-hidden="true" />
             Fund this project
           </a>
         </p>
       </div>
-      <div class="col-4 col-end">
+
+      <div class="col-4 col-end" role="region" aria-label="Properties">
         <div class="props">
-          <div class="block licenses">
-            <h4 class="title">Links</h4>
+          <div class="block" role="region" aria-labelledby="links-title">
+            <h4 class="title" id="links-title">Links</h4>
             <div class="meta">
-              <a href="{{ $r.WebpageURL.URL }}" rel="noreferer nofollow" class="ellip">
-                <img src="/static/ico-link.svg" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL.URL) }}
+              <a href="{{ $r.WebpageURL.URL }}" rel="noreferer nofollow" class="ellip" aria-label="Website">
+                <span aria-hidden="true">
+                  <img src="/static/ico-link.svg" alt="" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL.URL) }}
+                </span>
               </a>
               <br />
-              <a href="{{ $r.RepositoryURL.URL }}" rel="noreferer nofollow" class="ellip">
-                <img src="/static/ico-repo.svg" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL.URL) }}
+              <a href="{{ $r.RepositoryURL.URL }}" rel="noreferer nofollow" class="ellip" aria-label="Visit website">
+                <span aria-hidden="true">
+                  <img src="/static/ico-repo.svg" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL.URL) }}
+                </span>
               </a>
             </div>
-          </div><!-- licenses -->
+          </div><!-- links -->
 
-          <div class="block licenses">
-            <h4 class="title">License</h4>
+          <div class="block licenses" role="region" aria-labelledby="license-title">
+            <h4 class="title" id="license-title">License</h4>
             <ul class="flat">
             {{ range $l := $r.Licenses }}
               <li class="text-grey">
@@ -41,8 +46,8 @@
             </ul>
           </div><!-- licenses -->
 
-          <div class="block tags">
-            <h4 class="title">Tags</h4>
+          <div class="block tags" role="region" aria-labelledby="tags-title">
+            <h4 class="title" id="tags-title">Tags</h4>
             {{ template "tags" $r.Tags }}
           </div><!-- tags -->
         </div><!-- props -->

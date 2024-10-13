@@ -1,7 +1,7 @@
 {{ define "entity" }}
 {{ template "header" . }}
 
-<section class="entity">
+<section class="entity" role="tabpanel" aria-labelledby="tab-entity">
     <header>
       <div class="row">
         <div class="entity col-9">
@@ -10,26 +10,32 @@
           <hr />
           <p>
             <a href="{{ $.RootURL }}/view/funding/{{ $.Data.Manifest.GUID }}" class="button">
-              <img src="{{ .RootURL }}/static/ico-wallet.svg" />
+              <img src="{{ .RootURL }}/static/ico-wallet.svg" alt="" aria-hidden="true" />
               Fund this {{ if eq $.Data.Manifest.Entity.Type "other" }}entity{{ else }}{{ $.Data.Manifest.Entity.Type }}{{ end }}
             </a>
           </p>
         </div>
-        <div class="entity col-3 col-end meta text-small">
+        <div class="entity col-3 col-end meta text-small" role="region" aria-label="Contact">
           {{ if .Data.Manifest.Entity.Phone }}
             <div class="item">
-              <a href="tel:{{ .Data.Manifest.Entity.Phone }}"><img src="{{ .RootURL }}/static/ico-phone.svg" /> {{ .Data.Manifest.Entity.Phone }}</a>
+              <a href="tel:{{ .Data.Manifest.Entity.Phone }}" title="Phone {{ .Data.Manifest.Entity.Phone }}">
+                <span aria-hidden="true"><img src="{{ .RootURL }}/static/ico-phone.svg" alt="" /> {{ .Data.Manifest.Entity.Phone }}</span>
+              </a>
             </div>
           {{ end }}
 
           <div class="item">
-            <a href="mailto://{{ .Data.Manifest.Entity.Email }}"><img src="{{ .RootURL }}/static/ico-email.svg" /> {{ .Data.Manifest.Entity.Email }}</a>
+            <a href="mailto:{{ .Data.Manifest.Entity.Email }}" title="E-mail {{ .Data.Manifest.Entity.Email }}">
+              <span aria-hidden="true"><img src="{{ .RootURL }}/static/ico-email.svg" alt="" /> {{ .Data.Manifest.Entity.Email }}</span>
+            </a>
           </div>
 
           <div class="item">
-            <a href="{{ .Data.Manifest.Entity.WebpageURL.URL }}" rel="noreferer nofollow">
-              <img src="{{ .RootURL }}/static/ico-link.svg" />
-              {{ trimPrefix "http://" (trimPrefix "https://" .Data.Manifest.Entity.WebpageURL.URL) }}
+            <a href="{{ .Data.Manifest.Entity.WebpageURL.URL }}" rel="noreferer nofollow" title="Visit website">
+              <span aria-hidden="true">
+                <img src="{{ .RootURL }}/static/ico-link.svg" />
+                 {{ trimPrefix "http://" (trimPrefix "https://" .Data.Manifest.Entity.WebpageURL.URL) }}
+              </span>
             </a>
           </div>
         </div>

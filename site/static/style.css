@@ -65,6 +65,12 @@ hr {
     margin: 45px 0;
 }
 
+fieldset {
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
 table {
     border-collapse: collapse;
     width: 100%;
@@ -355,6 +361,9 @@ button, .button {
     }
     .search .tabs .tab span {
         padding: 6px 15px 3px 15px;
+    }
+    .search label {
+        cursor: pointer;
     }
 
 

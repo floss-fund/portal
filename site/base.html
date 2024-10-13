@@ -21,22 +21,22 @@
     <div class="container">
       <div class="row bar">
         <div class="col-4">
-          <div class="logo"><a href="{{ .RootURL }}"><img src="{{ .RootURL }}/static/logo.svg" alt="" /></a></div>
+          <div class="logo"><a href="{{ .RootURL }}" aria-label="Home"><img src="{{ .RootURL }}/static/logo.svg" alt="FLOSS/Fund directory logo" /></a></div>
         </div>
-        <nav class="col-8 col-end nav">
+        <nav class="col-8 col-end nav" aria-label="Main navigation">
           <a href="{{ .RootURL }}/submit">Submit</a>
           <a href="https://floss.fund">FLOSS/Fund</a>
         </nav>
       </div>
 
       {{ $q := HasField .Data "Q" }}
-      <form action="{{ $.RootURL }}/search" class="search">
+      <form action="{{ $.RootURL }}/search" class="search" aria-label="Search form">
           <div class="input">
             <input type="text" name="q" maxlength="128" value="{{ if $q }}{{ .Data.Q.Query }}{{ end }}" 
               data-autocomp-tags placeholder="eg: developer-tools / project name / author name"
               {{ if or (HasField .Data "Index") (HasField .Data "Q")  }}autofocus{{ end }} />
           </div>
-          <div class="row options text-small text-grey">
+          <fieldset class="row options text-small text-grey" role="group" aria-label="Search options">
             <div class="col-6">
               <label><input type="radio" name="type" value="entity" {{ if or (not $q) (eq .Data.Q.Type "entity" ) }}checked{{ end }} /> Entity</label>
               <label><input type="radio" name="type" value="project" id="type-project" {{ if and $q (eq .Data.Q.Type "project" ) }}checked{{ end }} /> Project</label>
@@ -45,7 +45,7 @@
               <label><input type="radio" name="field" value="name" {{ if or (not $q) (eq .Data.Q.Field "name" ) }}checked{{ end }} /> Name</label>
               <label><input type="radio" name="field" value="tags" {{ if and $q (eq .Data.Q.Field "tags" ) }}checked{{ end }} /> Tags</label>
             </div>
-          </div>
+          </fieldset>
       </form>
 
 
@@ -55,10 +55,10 @@
           <div class="subheading meta text-grey text-small">
             {{ if and (HasField .Data "Project") (ne .Data.Project.GUID "") }}
               <a href="{{ .RootURL }}/view/{{ .Data.Manifest.GUID }}">
-                by <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" /> {{ title .Data.Manifest.Entity.Name }}
+                by <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" alt="" aria-hidden="true" /> {{ title .Data.Manifest.Entity.Name }}
               </a>
             {{ else }}
-                <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" /> {{ title .Data.Manifest.Entity.Type }}
+                <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" alt="" aria-hidden="true" /> {{ title .Data.Manifest.Entity.Type }}
             {{ end }}
           </div><!-- subheading -->
         </div>
@@ -67,9 +67,11 @@
       {{ end }}
 
       {{ if .Data.Tabs }}
-        <nav class="tabs">
+        <nav class="tabs" role="tablist">
         {{ range $t := .Data.Tabs }}
-          <a href="{{ $t.URL }}" class="tab {{ if $t.Selected }}sel{{ end }}"><span>{{ $t.Label }}</span></a>
+          <a href="{{ $t.URL }}" id="tab-{{ $t.ID }}" class="tab {{ if $t.Selected }}sel{{ end }}" role="tab" {{ if $t.Selected }}aria-selected="true"{{ end }}>
+            <span>{{ $t.Label }}</span>
+          </a>
         {{ end }}
         </nav>
       {{ end }}

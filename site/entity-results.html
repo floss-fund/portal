@@ -1,5 +1,5 @@
 {{ define "entity-results" }}
-<section class="results entities">
+<section class="results entities" aria-label="Entity search results">
     <ul>
         {{ range $r := .Data.Results }}
         <li class="result">
@@ -8,14 +8,14 @@
                 <div class="col-9">
                     <h3 class="title"><a href="{{ $.RootURL }}/view/{{ $r.ManifestGUID }}">{{ .Name }}</a></h3>
                     <div class="meta text-grey">
-                        <img src="{{ $.RootURL }}/static/ico-{{ $r.Type }}.svg" /> {{ title $r.Type }} ({{ $r.NumProjects }} projects)
+                        <img src="{{ $.RootURL }}/static/ico-{{ $r.Type }}.svg" alt="" aria-hidden="true" /> {{ title $r.Type }} ({{ $r.NumProjects }} projects)
                     </div>
                     <p>{{ abbrev 200 $r.Description }}</p>
                 </div>
                 <div class="col-3 col-end">
                     <div class="meta">
                       <a href="{{ $r.WebpageURL }}" rel="noreferer nofollow" class="ellip">
-                        <img src="/static/ico-link.svg" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL) }}
+                        <img src="/static/ico-link.svg" alt="" aria-hidden="true" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL) }}
                       </a>  
                     </div>
                 </div>

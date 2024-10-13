@@ -1,7 +1,7 @@
 {{ define "history" }}
 {{ template "header" . }}
 
-<section class="channels">
+<section class="channels" aria-labelledby="tab-history">
 	<h2>History ({{ len .Data.Manifest.Funding.History }})</h2>
 
 	{{ if gt (len .Data.Manifest.Funding.History) 0 }}
