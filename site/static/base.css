@@ -139,30 +139,13 @@
 
 /* Responsive Collapse */
 @media (max-width: 520px) {
-  .col-1, .col-2, .col-3, .col-4, .col-5, 
-  .col-6, .col-7, .col-8, .col-9, .col-10, 
-  .col-11, .col-12 {
+  [class*="col-"]:not(.col-fix) {
     flex: 0 0 100%;
     max-width: 100%;
     padding: 5px 0;
   }
-  
-  .col-offset-1,
-  .col-offset-2,
-  .col-offset-3,
-  .col-offset-4,
-  .col-offset-5,
-  .col-offset-6,
-  .col-offset-7,
-  .col-offset-8,
-  .col-offset-9,
-  .col-offset-10,
-  .col-offset-11,
-  .col-offset-12 {
-    margin-left: 0;
-  }
 
-  .col-end {
-    flex: 0 0 100%;
+  [class*="col-offset-"]:not(.col-fix) {
+    margin-left: 0;
   }
 }
