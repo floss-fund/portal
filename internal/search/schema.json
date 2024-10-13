@@ -3,19 +3,31 @@
     "name": "entities",
     "fields": [
       {"name": "manifest_id", "type": "int64" },
-      {"name": "name", "type": "string" },
+      {"name": "manifest_guid", "type": "string" },
       {"name": "type", "type": "string","facet": true},
-      {"name": "role", "type": "string","facet": true}
+      {"name": "role", "type": "string","facet": true},
+      {"name": "name", "type": "string" },
+      {"name": "description", "type": "string" },
+      {"name": "webpage_url", "type": "string" },
+      {"name": "num_projects", "type": "int32" },
+      {"name": "updated_at", "type": "int64" }
     ]
   },
   {
     "name": "projects",
     "fields": [
       {"name": "manifest_id", "type": "int64" },
+      {"name": "manifest_guid", "type": "string" },
+      {"name": "entity_name", "type": "string" },
+      {"name": "entity_type", "type": "string" },
+      {"name": "entity_num_projects", "type": "int32" },
       {"name": "name", "type": "string" },
       {"name": "description", "type": "string" },
+      {"name": "webpage_url", "type": "string" },
+      {"name": "repository_url", "type": "string" },
       {"name": "licenses", "type": "string[]", "facet": true },
-      {"name": "tags", "type": "string[]"}
+      {"name": "tags", "type": "string[]"},
+      {"name": "updated_at", "type": "int64" }
     ]
   }
 ]

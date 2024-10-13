@@ -194,7 +194,7 @@ button, .button {
     box-shadow: 1px 1px 4px #eee;
     border-radius: 5px;
     border: 2px solid #eee;
-    padding: 30px;
+    padding: 15px 30px;
 }
     .text-small {
         font-size: 0.875rem;
@@ -366,12 +366,12 @@ button, .button {
         cursor: pointer;
     }
 
-
-.home .tags {
-    margin-top: 10vh;
+.home .updates .block {
+    margin-top: 90px;
 }
-
-
+    .home .updates .block:last-child {
+        margin-bottom: 0;
+    }
 
 .validate textarea {
     height: 50vh;

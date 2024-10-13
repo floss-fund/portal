@@ -169,6 +169,66 @@ func (o *Search) SearchProjects(q ProjectQuery) (Projects, error) {
 	return out, nil
 }
 
+// GetRecentEntities retrieves N recently updated entities.
+func (o *Search) GetRecentEntities(limit int) (Entities, error) {
+	p := url.Values{}
+	p.Set("q", "*")
+	p.Set("sort_by", "updated_at:desc")
+	p.Set("limit", fmt.Sprintf("%d", limit))
+
+	// Search.
+	b, _, err := o.do(http.MethodGet, fmt.Sprintf(searchURI, collEntities), []byte(p.Encode()))
+	if err != nil {
+		return nil, err
+	}
+
+	var res EntitiesResp
+	if err := res.UnmarshalJSON(b); err != nil {
+		return nil, err
+	}
+
+	// Iterate through the raw results and replace the Title and Description
+	// fields with their <mark> highlighted equivalents, if any.
+	out := make(Entities, 0, len(res.Hits))
+	for _, h := range res.Hits {
+		d := h.Entity
+
+		out = append(out, d)
+	}
+
+	return out, nil
+}
+
+// GetRecentProjects retrieves N recently updated entities.
+func (o *Search) GetRecentProjects(limit int) (Projects, error) {
+	p := url.Values{}
+	p.Set("q", "*")
+	p.Set("sort_by", "updated_at:desc")
+	p.Set("limit", fmt.Sprintf("%d", limit))
+
+	// Search.
+	b, _, err := o.do(http.MethodGet, fmt.Sprintf(searchURI, collProjects), []byte(p.Encode()))
+	if err != nil {
+		return nil, err
+	}
+
+	var res ProjectsResp
+	if err := res.UnmarshalJSON(b); err != nil {
+		return nil, err
+	}
+
+	// Iterate through the raw results and replace the Title and Description
+	// fields with their <mark> highlighted equivalents, if any.
+	out := make(Projects, 0, len(res.Hits))
+	for _, h := range res.Hits {
+		d := h.Project
+
+		out = append(out, d)
+	}
+
+	return out, nil
+}
+
 // InsertProject adds a project to the search index.
 func (s *Search) InsertProject(p Project) error {
 	// Marshal to JSON.

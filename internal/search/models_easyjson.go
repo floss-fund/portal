@@ -322,6 +322,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch2(in *jlexer.Le
 				}
 				in.Delim(']')
 			}
+		case "updated_at":
+			out.UpdatedAt = int64(in.Int64())
 		default:
 			in.SkipRecursive()
 		}
@@ -427,6 +429,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch2(out *jwriter.
 			}
 			out.RawByte(']')
 		}
+	}
+	{
+		const prefix string = ",\"updated_at\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.UpdatedAt))
 	}
 	out.RawByte('}')
 }
@@ -539,6 +546,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch3(in *jlexer.Le
 				}
 				in.Delim(']')
 			}
+		case "updated_at":
+			out.UpdatedAt = int64(in.Int64())
 		default:
 			in.SkipRecursive()
 		}
@@ -635,6 +644,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch3(out *jwriter.
 			out.RawByte(']')
 		}
 	}
+	{
+		const prefix string = ",\"updated_at\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.UpdatedAt))
+	}
 	out.RawByte('}')
 }
 
@@ -702,6 +716,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch4(in *jlexer.Le
 			out.WebpageURL = string(in.String())
 		case "num_projects":
 			out.NumProjects = int(in.Int())
+		case "updated_at":
+			out.UpdatedAt = int64(in.Int64())
 		default:
 			in.SkipRecursive()
 		}
@@ -771,6 +787,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch4(out *jwriter.
 		out.RawString(prefix)
 		out.Int(int(in.NumProjects))
 	}
+	{
+		const prefix string = ",\"updated_at\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.UpdatedAt))
+	}
 	out.RawByte('}')
 }
 
@@ -834,6 +855,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch5(in *jlexer.Le
 			out.WebpageURL = string(in.String())
 		case "num_projects":
 			out.NumProjects = int(in.Int())
+		case "updated_at":
+			out.UpdatedAt = int64(in.Int64())
 		default:
 			in.SkipRecursive()
 		}
@@ -892,6 +915,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch5(out *jwriter.
 		const prefix string = ",\"num_projects\":"
 		out.RawString(prefix)
 		out.Int(int(in.NumProjects))
+	}
+	{
+		const prefix string = ",\"updated_at\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.UpdatedAt))
 	}
 	out.RawByte('}')
 }

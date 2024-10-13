@@ -223,6 +223,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 					Description:  m.Manifest.Entity.Description,
 					WebpageURL:   m.Manifest.Entity.WebpageURL.URL,
 					NumProjects:  len(m.Manifest.Projects),
+					UpdatedAt:    m.CreatedAt.Unix(),
 				})
 
 				for _, p := range m.Manifest.Projects {
@@ -239,6 +240,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 						Description:       p.Description,
 						Licenses:          p.Licenses,
 						Tags:              p.Tags,
+						UpdatedAt:         m.CreatedAt.Unix(),
 					})
 				}
 			}

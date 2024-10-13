@@ -11,6 +11,7 @@ type Entity struct {
 	Description  string `json:"description"`
 	WebpageURL   string `json:"webpage_url"`
 	NumProjects  int    `json:"num_projects"`
+	UpdatedAt    int64  `json:"updated_at"`
 }
 
 //easyjson:json
@@ -38,6 +39,7 @@ type Project struct {
 	RepositoryURL string   `json:"repository_url"`
 	Licenses      []string `json:"licenses"`
 	Tags          []string `json:"tags"`
+	UpdatedAt     int64    `json:"updated_at"`
 }
 
 //easyjson:json

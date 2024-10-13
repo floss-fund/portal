@@ -10,14 +10,21 @@
 		</p>
 	</div>
 
-	{{ if .Data.Tags }}
-		<div class="tags box">
-			<h3>Popular tags</h3>
-			{{ range $t := .Data.Tags }}
-				<a href="{{ $.RootURL }}/search?q={{ $t }}&type=project&field=tags">{{ $t }}</a>
-			{{ end }}
-		</div>
-	{{ end }}
+	<div class="updates">
+		{{ if .Data.Tags }}
+			<div class="block box" role="region">
+				<h3>Popular tags</h3><br />
+				{{ template "tags" .Data.Tags }}
+			</div>
+		{{ end }}
+
+		{{ if .Data.Results }}
+			<div class="block">
+				<h3>Recent projects</h3>
+				{{ template "project-search" . }}
+			</div>
+		{{ end }}
+	</div>
 </section>
 
 {{ template "footer" .}}

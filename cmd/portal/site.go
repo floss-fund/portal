@@ -67,16 +67,20 @@ func handleIndexPage(c echo.Context) error {
 		app = c.Get("app").(*App)
 	)
 
+	// Get top tags.
 	tags, _ := app.core.GetTopTags(25)
+	projects, _ := app.search.GetRecentProjects(5)
 
 	out := struct {
 		Page
-		Index bool
-		Tags  []string
+		Index   bool
+		Tags    []string
+		Results search.Projects
 	}{}
 	out.Index = true
 	out.Title = "Discover FOSS projects seeking funding"
 	out.Tags = tags
+	out.Results = projects
 
 	return c.Render(http.StatusOK, "index", out)
 }
