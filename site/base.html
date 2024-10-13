@@ -10,7 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,400..500;1,400..500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@0,400..500;1,400..500&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" media="screen" href="{{ .RootURL }}/static/base.css" />
   <link rel="stylesheet" type="text/css" media="screen" href="{{ .RootURL }}/static/style.css" />
 </head>
@@ -25,6 +25,7 @@
         </div>
         <nav class="col-8 col-end nav" aria-label="Main navigation">
           <a href="{{ .RootURL }}/submit">Submit</a>
+          <a href="https://floss.fund/funding-manifest">Docs</a>
           <a href="https://floss.fund">FLOSS/Fund</a>
         </nav>
       </div>
@@ -32,9 +33,10 @@
       {{ $q := HasField .Data "Q" }}
       <form action="{{ $.RootURL }}/search" class="search" aria-label="Search form">
           <div class="input">
-            <input type="text" name="q" maxlength="128" value="{{ if $q }}{{ .Data.Q.Query }}{{ end }}" 
+            <input type="text" name="q" required maxlength="128" value="{{ if $q }}{{ .Data.Q.Query }}{{ end }}"
               data-autocomp-tags placeholder="eg: developer-tools / project name / author name"
               {{ if or (HasField .Data "Index") (HasField .Data "Q")  }}autofocus{{ end }} />
+            <button type="submit">Search</button>
           </div>
           <fieldset class="row options text-small text-grey" role="group" aria-label="Search options">
             <div class="col-6">

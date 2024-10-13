@@ -11,6 +11,7 @@ html, body {
     margin: 0;
     padding: 0;
     font-size: 19px;
+    min-width: 320px;
 }
 body {
     background: #fff;
@@ -335,6 +336,7 @@ button, .button {
 
 .search {
     margin-bottom: 60px;
+    position: relative;
 }
     .search .more {
         display: none;
@@ -344,6 +346,15 @@ button, .button {
     }
     .search .input {
         margin-bottom: 8px;
+    }
+    .search button {
+/*        background: transparent;*/
+        position: absolute;
+        right: 0;
+        border-radius: 0 5px 5px 0;
+        padding: 13px 30px;
+/*        color: var(--black);*/
+/*        border-left: 1px solid #ddd;*/
     }
     .search .q {
         padding: 10px;
