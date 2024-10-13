@@ -118,7 +118,7 @@ sup a {
     text-underline-offset: 0;
 }
 
-input[type=text], textarea {
+input[type=text], input[type=url], textarea {
     padding: 10px;
     font-size: 1rem;
     border-radius: 5px;

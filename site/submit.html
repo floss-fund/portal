@@ -2,12 +2,12 @@
 {{ template "header" . }}
 
 <p>
-    Submitting a funding manifest here makes it publicly discoverable on the portal.
+    Submitting a funding manifest here makes it publicly discoverable on the directory.
     It also creates an application for a FLOSS/Fund grant.
     <a href="https://floss.fund/faq">See FAQs.</a>
 </p>
 <hr />
-<form method="post" class="submit">
+<form method="post" action="" class="submit" aria-label="Submission form">
   <div>
     <label for="funding-url">funding.json manifest URL</label>
     <p>
@@ -21,7 +21,7 @@
     <div class="message error">{{ .Data.ErrMessage }}</div>
 {{ else if eq .Data.Message "success" }}
     <div class="message success">
-        The manifest has been submitted and will appear publicly on the portal after manual review.
+        The manifest has been submitted and will appear publicly on the directory after manual review.
     </div>
 {{ else if ne .Data.Message "" }}
     <div class="message">
