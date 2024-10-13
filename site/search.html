@@ -1,15 +1,18 @@
 {{ define "search" }}
   {{ template "header" . }}
 
-  {{ if not .Data.Results }}
-    No results found
-  {{ end }}
+
+  <h3>{{ .Data.Total }} result(s)</h3>
 
   {{ if eq .Data.Q.Type "project" }}
     {{ template "project-search" . }}
   {{ else if eq .Data.Q.Type "entity" }}
     {{ template "entity-results" . }}
   {{ end }}
+
+  <nav class="pagination bottom" aria-label="Result pages">
+    {{ .Data.Pagination }}
+  </nav>
 
   {{ template "footer" .}}
 {{ end }}

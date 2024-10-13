@@ -54,14 +54,16 @@ type ProjectQuery struct {
 
 //easyjson:json
 type EntitiesResp struct {
-	Hits []struct {
+	Found int `json:"found"`
+	Hits  []struct {
 		Entity Entity `json:"document"`
 	} `json:"hits"`
 }
 
 //easyjson:json
 type ProjectsResp struct {
-	Hits []struct {
+	Found int `json:"found"`
+	Hits  []struct {
 		Project Project `json:"document"`
 	} `json:"hits"`
 }

@@ -36,6 +36,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch(in *jlexer.Lex
 			continue
 		}
 		switch key {
+		case "found":
+			out.Found = int(in.Int())
 		case "hits":
 			if in.IsNull() {
 				in.Skip()
@@ -80,8 +82,13 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch(out *jwriter.W
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"hits\":"
+		const prefix string = ",\"found\":"
 		out.RawString(prefix[1:])
+		out.Int(int(in.Found))
+	}
+	{
+		const prefix string = ",\"hits\":"
+		out.RawString(prefix)
 		if in.Hits == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -966,6 +973,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch6(in *jlexer.Le
 			continue
 		}
 		switch key {
+		case "found":
+			out.Found = int(in.Int())
 		case "hits":
 			if in.IsNull() {
 				in.Skip()
@@ -1010,8 +1019,13 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch6(out *jwriter.
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"hits\":"
+		const prefix string = ",\"found\":"
 		out.RawString(prefix[1:])
+		out.Int(int(in.Found))
+	}
+	{
+		const prefix string = ",\"hits\":"
+		out.RawString(prefix)
 		if in.Hits == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {

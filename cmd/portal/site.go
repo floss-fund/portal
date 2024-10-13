@@ -388,16 +388,20 @@ func handleSearchPage(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, app.consts.RootURL)
 	}
 
-	var results interface{}
+	var (
+		results any
+		total   int
+	)
 	switch q.Type {
 	case "entity":
 		query := search.EntityQuery{Query: q.Query, Field: q.Field}
 
-		o, err := app.search.SearchEntities(query)
+		o, num, err := app.search.SearchEntities(query)
 		if err != nil {
 			return errPage(c, http.StatusBadRequest, "", "Error", "An internal error occurred while searching.")
 		}
 		results = o
+		total = num
 	case "project":
 		query := search.ProjectQuery{Query: q.Query, Field: q.Field}
 		query.Licenses = []string{}
@@ -406,23 +410,31 @@ func handleSearchPage(c echo.Context) error {
 			query.Licenses = append(query.Licenses, l)
 		}
 
-		o, err := app.search.SearchProjects(query)
+		o, num, err := app.search.SearchProjects(query)
 		if err != nil {
 			return errPage(c, http.StatusBadRequest, "", "Error", "An internal error occurred while searching.")
 		}
 		results = o
+		total = num
 	default:
 		return errPage(c, http.StatusBadRequest, "", "Error", "Unknown type.")
 	}
 
+	pg := app.pg.NewFromURL(c.Request().URL.Query())
+	pg.SetTotal(total)
+
 	out := struct {
 		Page
-		Q       Query
-		Results interface{}
+		Pagination template.HTML
+		Q          Query
+		Total      int
+		Results    interface{}
 	}{}
+	out.Pagination = template.HTML(pg.HTML("?page=%d"))
 	out.Title = "Search"
 	out.Heading = fmt.Sprintf(`Search "%s"`, q.Query)
 	out.Q = q
+	out.Total = total
 	out.Results = results
 
 	return c.Render(http.StatusOK, "search", out)

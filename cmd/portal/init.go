@@ -31,6 +31,7 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
+	"github.com/knadh/paginator"
 	"github.com/knadh/stuffbin"
 	"github.com/labstack/echo/v4"
 	flag "github.com/spf13/pflag"
@@ -248,6 +249,14 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 	}
 
 	return crawl.New(&opt, sc, cb, co, lo)
+}
+
+func initPaginator(ko *koanf.Koanf) *paginator.Paginator {
+	perPage := ko.MustInt("search.per_page")
+	pgOpt := paginator.Default()
+	pgOpt.DefaultPerPage = perPage
+	pgOpt.MaxPerPage = perPage
+	return paginator.New(pgOpt)
 }
 
 func initSchema(ko *koanf.Koanf) crawl.Schema {

@@ -68,7 +68,7 @@ func New(o Opt, l *log.Logger) *Search {
 }
 
 // SearchEntities searches the entities collection.
-func (o *Search) SearchEntities(q EntityQuery) (Entities, error) {
+func (o *Search) SearchEntities(q EntityQuery) (Entities, int, error) {
 	p := url.Values{}
 	p.Set("q", q.Query)
 	p.Set("query_by", "name")
@@ -85,12 +85,12 @@ func (o *Search) SearchEntities(q EntityQuery) (Entities, error) {
 	// Search.
 	b, _, err := o.do(http.MethodGet, fmt.Sprintf(searchURI, collEntities), []byte(p.Encode()))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	var res EntitiesResp
 	if err := res.UnmarshalJSON(b); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Iterate through the raw results and replace the Title and Description
@@ -102,7 +102,7 @@ func (o *Search) SearchEntities(q EntityQuery) (Entities, error) {
 		out = append(out, d)
 	}
 
-	return out, nil
+	return out, res.Found, nil
 }
 
 // InsertEntity adds a Entity to the search index.
@@ -130,7 +130,7 @@ func (s *Search) DeleteEntity(id string) error {
 }
 
 // SearchProjects searches the entities collection.
-func (o *Search) SearchProjects(q ProjectQuery) (Projects, error) {
+func (o *Search) SearchProjects(q ProjectQuery) (Projects, int, error) {
 	p := url.Values{}
 	p.Set("q", q.Query)
 
@@ -149,12 +149,12 @@ func (o *Search) SearchProjects(q ProjectQuery) (Projects, error) {
 	// Search.
 	b, _, err := o.do(http.MethodGet, fmt.Sprintf(searchURI, collProjects), []byte(p.Encode()))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	var res ProjectsResp
 	if err := res.UnmarshalJSON(b); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Iterate through the raw results and replace the Title and Description
@@ -166,7 +166,7 @@ func (o *Search) SearchProjects(q ProjectQuery) (Projects, error) {
 		out = append(out, d)
 	}
 
-	return out, nil
+	return out, res.Found, nil
 }
 
 // GetRecentEntities retrieves N recently updated entities.

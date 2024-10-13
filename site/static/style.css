@@ -240,6 +240,27 @@ button, .button {
     border: 1px solid #aee1c3;
 }
 
+.pagination {
+  margin-top: 30px;
+}
+  .pagination a {
+    display: inline-block;
+    text-decoration: none;
+  }
+  .pagination .pg-page {
+    padding: 0 6px;
+  }
+  .pagination .pg-selected {
+    font-weight: bold;
+    border-bottom: 2px solid var(--primary);
+  }
+  .pagination.top {
+    margin-bottom: 30px;
+  }
+  .pagination.bottom {
+    margin-top: 30px;
+  }
+
 .mast {
     background: #f4f4f4;
 }

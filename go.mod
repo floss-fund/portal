@@ -29,6 +29,7 @@ require (
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/imdario/mergo v0.0.0-00010101000000-000000000000 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/knadh/paginator v1.0.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect

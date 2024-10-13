@@ -10,6 +10,7 @@ import (
 	"github.com/floss-fund/portal/internal/search"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/koanf/v2"
+	"github.com/knadh/paginator"
 	"github.com/knadh/stuffbin"
 )
 
@@ -34,6 +35,7 @@ type App struct {
 	search  *search.Search
 	crawl   *crawl.Crawl
 	schema  crawl.Schema
+	pg      *paginator.Paginator
 
 	db *sqlx.DB
 	fs stuffbin.FileSystem
@@ -83,6 +85,7 @@ func main() {
 	app.schema = initSchema(ko)
 	app.search = initSearch(ko)
 	app.crawl = initCrawl(app.schema, app.core, app.search, ko)
+	app.pg = initPaginator(ko)
 
 	// Run the crawl mode.
 	if ko.String("mode") == "crawl" {
