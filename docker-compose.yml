@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:17-alpine3.19
     container_name: portal-postgres
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
@@ -21,6 +22,7 @@ services:
 
   typesense:
     container_name: portal-typesense
+    restart: unless-stopped
     image: typesense/typesense:27.0
     volumes:
       - type: volume
