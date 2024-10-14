@@ -4,7 +4,7 @@ go 1.22.5
 
 require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
-	github.com/floss-fund/go-funding-json v0.0.0-00010101000000-000000000000
+	github.com/floss-fund/go-funding-json v0.1.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/knadh/goyesql/v2 v2.2.0
 	github.com/knadh/koanf/maps v0.1.1
@@ -12,6 +12,7 @@ require (
 	github.com/knadh/koanf/providers/file v0.1.0
 	github.com/knadh/koanf/providers/posflag v0.1.0
 	github.com/knadh/koanf/v2 v2.0.1
+	github.com/knadh/paginator v1.0.1
 	github.com/knadh/stuffbin v1.3.0
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/lib/pq v1.10.0
@@ -29,7 +30,6 @@ require (
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/imdario/mergo v0.0.0-00010101000000-000000000000 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/knadh/paginator v1.0.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
@@ -46,7 +46,5 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
-
-replace github.com/floss-fund/go-funding-json => /home/kailash/code/go/my/floss.fund/go-funding-json
 
 replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.8
