@@ -8,6 +8,9 @@
   <meta name="description" content="{{ if HasField .Data "Page" }}{{ .Data.Page.Description }}{{ else }}Discover Free and Open Source Projects seeking funding and financial assistance{{ end }}" />
   <meta name="keywords" content="foss funding, open source funding, funding manifest, free software funding, directory" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta property="og:image" content="{{ .RootURL }}/static/thumb.png">
+  <link rel="shortcut icon" href="{{ .RootURL }}/static/favicon.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@0,400..500;1,400..500&display=swap" rel="stylesheet">

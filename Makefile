@@ -11,7 +11,7 @@ EASYJSON ?= $(GOPATH)/bin/easyjson
 STUFFBIN ?= $(GOPATH)/bin/stuffbin
 
 BIN := portal
-STATIC := config.sample.toml schema.sql queries.sql admin
+STATIC := config.sample.toml schema.sql queries.sql
 
 EASYJSON_MODELS := $\
 	internal/models/models.go \
