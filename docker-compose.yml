@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17-alpine3.19
+    container_name: portal-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=portal
+      - POSTGRES_USER=portal
+      - POSTGRES_DB=portal
+    restart: "no"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portal"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    volumes:
+      - type: volume
+        source: portal-data
+        target: /var/lib/postgresql/data
+
+  typesense:
+    container_name: portal-typesense
+    image: typesense/typesense:27.0
+    volumes:
+      - type: volume
+        source: typesense-data
+        target: /data
+    ports:
+      - 8108:8108
+    environment:
+      - TYPESENSE_DATA_DIR=/data
+      - TYPESENSE_API_KEY=typesense
+
+volumes:
+  portal-data:
+  typesense-data:
