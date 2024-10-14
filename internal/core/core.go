@@ -16,7 +16,7 @@ import (
 )
 
 const maxURISize = 40
-const maxURLLen = 40
+const maxURLLen = 200
 
 type Opt struct {
 }
