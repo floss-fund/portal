@@ -25,6 +25,7 @@ type Consts struct {
 	WellKnownURI  string `json:"app.wellknown_path"`
 	AdminUsername []byte `json:"app.admin_username"`
 	AdminPassword []byte `json:"app.admin_password"`
+	CaptchaKey    string `json:"-"`
 }
 
 // App contains the "global" components that are passed around, especially through HTTP handlers.

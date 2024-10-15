@@ -4,11 +4,13 @@ github.com/Masterminds/semver v1.5.0 h1:H65muMkzWKEuNDnfl9d70GUjFniHKHRbFPGBuZ3Q
 github.com/Masterminds/semver v1.5.0/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=
 github.com/Masterminds/sprig v2.22.0+incompatible h1:z4yfnGrZ7netVz+0EDJ0Wi+5VZCSYp4Z0m2dk6cEM60=
 github.com/Masterminds/sprig v2.22.0+incompatible/go.mod h1:y6hNFY5UBTIWBxnzTeuNhlNS5hqE0NB0E6fgfo2Br3o=
+github.com/altcha-org/altcha-lib-go v0.1.3 h1:eW0T6gs4tqKjCIm5QZwerj++IMx2UHq8lFlrtzfIwGg=
+github.com/altcha-org/altcha-lib-go v0.1.3/go.mod h1:I8ESLVWR9C58uvGufB/AJDPhaSU4+4Oh3DLpVtgwDAk=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/floss-fund/go-funding-json v0.1.0 h1:EsBZ5E+rVGUCKmYDfiXWtlg42vfHqwzBrwRmXzQIt6c=
-github.com/floss-fund/go-funding-json v0.1.0/go.mod h1:lbXxunXLUHwyawnXMmQc+AatdMEJPX+IfqOVyrt9jvE=
+github.com/floss-fund/go-funding-json v0.1.1 h1:cxGKRsL28ij3KNgR5pNlocOxH+fBjJhTXdVrQWGSZSM=
+github.com/floss-fund/go-funding-json v0.1.1/go.mod h1:lbXxunXLUHwyawnXMmQc+AatdMEJPX+IfqOVyrt9jvE=
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=

@@ -6,12 +6,16 @@ import (
 	"path"
 	"strconv"
 
+	"github.com/altcha-org/altcha-lib-go"
 	"github.com/knadh/koanf/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-const isAuthed = "is_authed"
+const (
+	isAuthed          = "is_authed"
+	captchaComplexity = 75000
+)
 
 func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	g := srv.Group("")
@@ -28,6 +32,7 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 
 	g.POST("/api/validate", handleValidateManifest)
 	g.GET("/api/tags", handleGetTags)
+	g.GET("/api/captcha", handleGenerateCaptcha)
 
 	// Static files.
 	g.Static("/static", path.Join(ko.MustString("app.template_dir"), "/static"))
@@ -82,6 +87,24 @@ func handleUpdateManifestStatus(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, okResp{true})
+}
+
+func handleGenerateCaptcha(c echo.Context) error {
+	var (
+		app = c.Get("app").(*App)
+	)
+
+	// Create a new challenge.
+	ch, err := altcha.CreateChallenge(altcha.ChallengeOptions{
+		HMACKey:   app.consts.CaptchaKey,
+		MaxNumber: captchaComplexity,
+	})
+	if err != nil {
+		app.lo.Printf("error generating captcha: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "error generating captcha")
+	}
+
+	return c.JSON(http.StatusOK, ch)
 }
 
 // basicAuth middleware does an HTTP BasicAuth authentication for admin handlers.

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/altcha-org/altcha-lib-go"
 	"github.com/floss-fund/go-funding-json/common"
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/core"
@@ -60,6 +62,7 @@ type Page struct {
 
 var (
 	reMultiLines = regexp.MustCompile(`\n\n+`)
+	errCaptcha   = errors.New("invalid captcha")
 )
 
 func handleIndexPage(c echo.Context) error {
@@ -162,7 +165,12 @@ func handleSubmitPage(c echo.Context) error {
 		return c.Render(http.StatusOK, "submit", out)
 	}
 
-	// Accept submission.
+	// Process submission.
+	if err := validateCaptcha(c.FormValue("altcha"), app.consts.CaptchaKey); err != nil {
+		out.ErrMessage = "Invalid captcha"
+		return c.Render(http.StatusBadRequest, "submit", out)
+	}
+
 	u, err := common.IsURL("url", mURL, v1.MaxURLLen)
 	if err != nil {
 		out.ErrMessage = err.Error()
@@ -462,4 +470,17 @@ func abbrev(str string, ln int) string {
 	}
 
 	return str[:ln] + ".."
+}
+
+func validateCaptcha(payload string, key string) error {
+	ok, err := altcha.VerifySolution(payload, key, false)
+	if err != nil {
+		return err
+	}
+
+	if !ok {
+		return errCaptcha
+	}
+
+	return nil
 }
