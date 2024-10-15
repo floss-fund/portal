@@ -14,6 +14,7 @@
       <input id="funding-url" type="url" name="url" placeholder="https://yoursite.com/funding.json" required autofocus maxlength="300" />
     </p>
     <altcha-widget challengeurl="{{ .RootURL }}/api/captcha"></altcha-widget>
+    <br />
     <p><button type="submit">Submit</button></p>
   </div>
 </form>
@@ -30,11 +31,10 @@
     </div>
 {{ end }}
 
-<br /><br />
 <hr />
-<h3>What is funding.json manifest?</h3>
+<h3>What is a funding.json manifest?</h3>
 <p>
-  funding.json manifest is a JSON file that describes the funding requirements and financial needs of a project. <a href="https://floss.fund/funding-manifest">Read the docs</a>.
+  A funding.json manifest is a JSON file that describes the funding requirements and financial needs of a project. <a href="https://floss.fund/funding-manifest">See docs</a>.
 </p>
 <p>
   It can be hosted on a project's or organisation's website, or a repository such as https://github.com/user/project/blob/main/funding.json

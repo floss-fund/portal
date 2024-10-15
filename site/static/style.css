@@ -1,6 +1,5 @@
 :root {
     --primary: #0EA74B;
-    --secondary: #a4926a;
     --black: #222;
 }
 
@@ -351,10 +350,6 @@ button, .button {
         background: none;
     }
 
-.submit {
-    margin-bottom: 30px;
-}
-
 .search {
     margin-bottom: 60px;
     position: relative;
@@ -492,7 +487,7 @@ button, .button {
 }
 
 .footer {
-    color: var(--secondary);
+    color: #999;
     font-size: 0.875rem;
     margin-top: 5vh;
     margin-bottom: 15px;
