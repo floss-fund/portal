@@ -26,8 +26,9 @@ type okResp struct {
 
 // tplRenderer wraps a template.tplRenderer for echo.
 type tplRenderer struct {
-	tpl     *template.Template
-	RootURL string
+	tpl      *template.Template
+	RootURL  string
+	AssetVer string
 }
 
 type Query struct {
@@ -40,8 +41,9 @@ type Query struct {
 // tplData is the data container that is injected
 // into public templates for accessing data.
 type tplData struct {
-	RootURL string
-	Data    interface{}
+	RootURL  string
+	AssetVer string
+	Data     interface{}
 }
 
 type Tab struct {
@@ -451,8 +453,9 @@ func handleSearchPage(c echo.Context) error {
 // Render executes and renders a template for echo.
 func (t *tplRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.tpl.ExecuteTemplate(w, name, tplData{
-		RootURL: t.RootURL,
-		Data:    data,
+		RootURL:  t.RootURL,
+		AssetVer: t.AssetVer,
+		Data:     data,
 	})
 }
 

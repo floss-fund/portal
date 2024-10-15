@@ -40,7 +40,7 @@
   It can be hosted on a project's or organisation's website, or a repository such as https://github.com/user/project/blob/main/funding.json
 </p>
 
-<script async defer src="{{ .RootURL }}/static/altcha.js" type="module"></script>
+<script async defer src="{{ .RootURL }}/static/altcha.js?v={{ .AssetVer }}" type="module"></script>
 
 {{ template "footer" .}}
 {{ end }}

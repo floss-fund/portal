@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/md5"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -16,6 +17,7 @@ import (
 	"path"
 	"reflect"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/Masterminds/sprig"
@@ -162,9 +164,13 @@ func initHTTPServer(app *App, ko *koanf.Koanf) *echo.Echo {
 	srv := echo.New()
 	srv.Debug = true
 	srv.HideBanner = true
+
+	// Generate a random string for cache busting in templates.
+	b := md5.Sum([]byte(time.Now().String()))
 	srv.Renderer = &tplRenderer{
-		tpl:     initSiteTemplates(ko.MustString("app.template_dir")),
-		RootURL: ko.MustString("app.root_url"),
+		tpl:      initSiteTemplates(ko.MustString("app.template_dir")),
+		RootURL:  ko.MustString("app.root_url"),
+		AssetVer: fmt.Sprintf("%x", b)[0:10],
 	}
 
 	// Register app (*App) to be injected into all HTTP handlers.
