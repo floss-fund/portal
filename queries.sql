@@ -43,7 +43,7 @@ entity AS (
 ),
 delPrj AS (
     -- Delete project IDs that have disappeared from the manifest.
-    DELETE FROM projects WHERE guid NOT IN (
+    DELETE FROM projects WHERE manifest_id=(SELECT id FROM man) AND guid NOT IN (
         SELECT p->>'guid' FROM JSONB_ARRAY_ELEMENTS($1->'projects') AS p
     )
 ),
