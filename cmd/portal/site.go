@@ -216,7 +216,7 @@ func handleSubmitPage(c echo.Context) error {
 
 	// Add it to the database.
 	m.GUID = core.MakeGUID(m.Manifest.URL.URLobj)
-	m.GUID = strings.TrimRight(m.GUID, app.consts.ManifestURI)
+	m.GUID = strings.TrimSuffix(m.GUID, app.consts.ManifestURI)
 
 	if err := app.core.UpsertManifest(m); err != nil {
 		out.ErrMessage = "Error saving manifest to database. Retry later."
@@ -270,25 +270,25 @@ func handleManifestPage(c echo.Context) error {
 		}{}
 	)
 
-	if strings.HasPrefix(mGuid, "/view/funding") {
+	if strings.HasPrefix(mGuid, "/view/funding/") {
 		// Funding page.
-		mGuid = strings.TrimLeft(mGuid, "/view/funding")
+		mGuid = strings.TrimPrefix(mGuid, "/view/funding/")
 		tpl = "funding"
 		out.Title = "Funding plans for %s"
 		out.Description = "Funding plans for free and open source projects by %s"
-	} else if strings.HasPrefix(mGuid, "/view/projects") {
+	} else if strings.HasPrefix(mGuid, "/view/projects/") {
 		// Projects page.
-		mGuid = strings.TrimLeft(mGuid, "/view/projects")
+		mGuid = strings.TrimPrefix(mGuid, "/view/projects/")
 		tpl = "projects"
 		out.Title = "Projects by %s"
 		out.Description = "Projects by %s looking for free and open source funding"
-	} else if strings.HasPrefix(mGuid, "/view/project") {
+	} else if strings.HasPrefix(mGuid, "/view/project/") {
 		// Single project.
 		tpl = "project"
 
 		// Extract the last part of the URI.
 		var (
-			path = strings.TrimLeft(mGuid, "/view/project")
+			path = strings.TrimPrefix(mGuid, "/view/project/")
 			i    = strings.LastIndex(path, "/")
 		)
 		if i == -1 {
@@ -297,16 +297,16 @@ func handleManifestPage(c echo.Context) error {
 
 		mGuid = path[:i]
 		pGuid = path[i+1:]
-	} else if strings.HasPrefix(mGuid, "/view/history") {
+	} else if strings.HasPrefix(mGuid, "/view/history/") {
 		// History page.
-		mGuid = strings.TrimLeft(mGuid, "/view/history")
+		mGuid = strings.TrimPrefix(mGuid, "/view/history/")
 		tpl = "history"
 		out.Title = "Financial history of projects by %s"
 		out.Description = "Financial and funding history of projects by %s"
 	} else {
 		// Main entity page.
 		tpl = "entity"
-		mGuid = strings.TrimLeft(mGuid, "/view")
+		mGuid = strings.TrimPrefix(mGuid, "/view/")
 		out.Title = " %s - Project funding"
 		out.Description = "Fund free and open source projects by %s"
 	}
