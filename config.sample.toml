@@ -65,3 +65,4 @@ root_url = "http://127.0.0.1:8108"
 api_key = "typesense"
 max_groups = 6
 results_per_group = 4
+per_page = 5

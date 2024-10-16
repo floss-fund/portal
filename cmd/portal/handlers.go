@@ -30,6 +30,8 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	g.GET("/view/project", handleManifestPage)
 	g.GET("/view/*", handleManifestPage)
 
+	// g.GET("/api/view/:guid", handleGetManifestPublicAPI)
+
 	g.POST("/api/validate", handleValidateManifest)
 	g.GET("/api/tags", handleGetTags)
 	g.GET("/api/captcha", handleGenerateCaptcha)
@@ -41,6 +43,8 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	a := srv.Group("", middleware.BasicAuth(basicAuth))
 	a.GET("/api/manifests/:id", handleGetManifest)
 	a.PUT("/api/manifests/:id/status", handleUpdateManifestStatus)
+
+	a.GET("/admin/manifests", handleAdminManifestsPage)
 
 	// 404 pages.
 	srv.RouteNotFound("/api/*", func(c echo.Context) error {
@@ -68,6 +72,27 @@ func handleGetManifest(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, okResp{out})
 }
+
+// func handleGetManifestPublicAPI(c echo.Context) error {
+// 	var (
+// 		app  = c.Get("app").(*App)
+// 		guid = c.Param("guid")
+// 	)
+
+// 	out, err := app.core.GetManifest(0, guid)
+// 	if err != nil {
+// 		if err == core.ErrNotFound {
+// 			return echo.NewHTTPError(http.StatusNotFound, "manifest not found")
+// 		}
+// 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+// 	}
+
+// 	if out.Status != "active" {
+// 		return echo.NewHTTPError(http.StatusNotFound, "manifest not found")
+// 	}
+
+// 	return c.JSON(http.StatusOK, okResp{out})
+// }
 
 func handleUpdateManifestStatus(c echo.Context) error {
 	var (

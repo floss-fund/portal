@@ -1,0 +1,185 @@
+{{ define "admin-manifests" }}
+{{ template "header" .}}
+
+<section class="home">
+	<div class="admin">
+			<div class="block">
+				<h3>Recent Pending Manifests</h3>
+				{{ if .Data.Manifests }}
+				<section class="results projects" aria-label="Project search results">
+					<ul>
+						{{ range $r := .Data.Manifests }}
+						<li class="result">
+							<header>
+							<div class="row">
+								<div class="col-12">
+									<div id="status-update-{{ $r.ID }}"></div>
+									<select id="status-{{ $r.ID }}" name="status-{{ $r.ID }}">
+										<option value="pending" selected>Pending</option>
+										<option value="active">Approved</option>
+										<option value="blocked">Rejected</option>
+									</select>
+								</div>
+							</div>
+							</header>
+
+							<div class="row">
+								<div class="col-12">
+								<h3>Entity</h3>
+								<table>
+									<tr>
+										<td><strong>Type:</strong></td>
+										<td>{{ $r.Entity.Type }}</td>
+									</tr>
+									<tr>
+										<td><strong>Role:</strong></td>
+										<td>{{ $r.Entity.Role }}</td>
+									</tr>
+									<tr>
+										<td><strong>Name:</strong></td>
+										<td>{{ $r.Entity.Name }}</td>
+									</tr>
+									<tr>
+										<td><strong>Email:</strong></td>
+										<td><a href="mailto:{{ $r.Entity.Email }}">{{ $r.Entity.Email }}</a></td>
+									</tr>
+									<tr>
+										<td><strong>Phone:</strong></td>
+										<td><a href="tel:{{ $r.Entity.Phone }}">{{ $r.Entity.Phone }}</a></td>
+									</tr>
+									<tr>
+										<td><strong>Description:</strong></td>
+										<td>{{ $r.Entity.Description }}</td>
+									</tr>
+									<tr>
+										<td><strong>Webpage:</strong></td>
+										<td><a href="{{ $r.Entity.WebpageURL.URL }}" target="_blank">{{ $r.Entity.WebpageURL.URL }}</a></td>
+									</tr>
+								</table>
+								</div>
+							</div>
+
+							{{ if $r.Projects }}
+							<div class="row">
+								<div class="col-12">
+								<h3>Projects</h3>
+								{{ range $p := $r.Projects }}
+								<table>
+									<tr>
+										<td><strong>GUID:</strong></td>
+										<td>{{ $p.GUID }}</td>
+									</tr>
+									<tr>
+										<td><strong>Name:</strong></td>
+										<td>{{ $p.Name }}</td>
+									</tr>
+									<tr>
+										<td><strong>Description:</strong></td>
+										<td>{{ $p.Description }}</td>
+									</tr>
+									<tr>
+										<td><strong>Webpage URL:</strong></td>
+										<td><a href="{{ $p.WebpageURL.URL }}" target="_blank">{{ $p.WebpageURL.URL }}</a></td>
+									</tr>
+									<tr>
+										<td><strong>Repository URL:</strong></td>
+										<td><a href="{{ $p.RepositoryURL.URL }}" target="_blank">{{ $p.RepositoryURL.URL }}</a></td>
+									</tr>
+									<tr>
+										<td><strong>Licenses:</strong></td>
+										<td>{{ range $license := $p.Licenses }}{{ $license }}{{ if not (eq $license (index $p.Licenses (sub (len $p.Licenses) 1))) }}, {{ end }}{{ end }}</td>
+									</tr>
+									<tr>
+										<td><strong>Tags:</strong></td>
+										<td>{{ range $tag := $p.Tags }}{{ $tag }}{{ if not (eq $tag (index $p.Tags (sub (len $p.Tags) 1))) }}, {{ end }}{{ end }}</td>
+									</tr>
+								</table>
+								{{ end }}
+								</div>
+							</div>
+							{{ end }}
+
+							<div class="row">
+								<div class="col-12">
+								<h3>Funding</h3>
+								<table>
+									<tr>
+										<td><strong>Channels:</strong></td>
+										<td>
+											{{ range $channel := $r.Funding.Channels }}
+												<p><strong>GUID:</strong> {{ $channel.GUID }}</p>
+												<p><strong>Type:</strong> {{ $channel.Type }}</p>
+												<p><strong>Address:</strong> {{ $channel.Address }}</p>
+												<p><strong>Description:</strong> {{ $channel.Description }}</p>
+												<hr>
+											{{ end }}
+										</td>
+									</tr>
+									<tr>
+										<td><strong>Plans:</strong></td>
+										<td>
+											{{ range $plan := $r.Funding.Plans }}
+												<p><strong>GUID:</strong> {{ $plan.GUID }}</p>
+												<p><strong>Status:</strong> {{ $plan.Status }}</p>
+												<p><strong>Name:</strong> {{ $plan.Name }}</p>
+												<p><strong>Description:</strong> {{ $plan.Description }}</p>
+												<p><strong>Amount:</strong> {{ $plan.Amount }}</p>
+												<p><strong>Currency:</strong> {{ $plan.Currency }}</p>
+												<p><strong>Frequency:</strong> {{ $plan.Frequency }}</p>
+												<p><strong>Channels:</strong> {{ range $channel := $plan.Channels }}{{ $channel }}{{ if not (eq $channel (index $plan.Channels (sub (len $plan.Channels) 1))) }}, {{ end }}{{ end }}</p>
+												<hr>
+											{{ end }}
+										</td>
+									</tr>
+									<tr>
+										<td><strong>History:</strong></td>
+										<td>
+											{{ range $history := $r.Funding.History }}
+												<p><strong>Year:</strong> {{ $history.Year }}</p>
+												<p><strong>Income:</strong> {{ $history.Income }}</p>
+												<p><strong>Expenses:</strong> {{ $history.Expenses }}</p>
+												<p><strong>Taxes:</strong> {{ $history.Taxes }}</p>
+												<p><strong>Currency:</strong> {{ $history.Currency }}</p>
+												<p><strong>Description:</strong> {{ $history.Description }}</p>
+												<hr>
+											{{ end }}
+										</td>
+									</tr>
+								</table>
+								</div>
+							</div>
+						</li>
+						{{ end }}
+					</ul>
+				</section>
+			</div>
+		{{ end }}
+	</div>
+</section>
+
+<script>
+	{{ range $r := .Data.Manifests }}
+		document.getElementById("status-{{ $r.ID }}").addEventListener("change", function() {
+			var status = this.value;
+			var id = this.id.split("-")[1];
+			var xhr = new XMLHttpRequest();
+			xhr.open("PUT", "/api/manifests/" + id + "/status", true);
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			xhr.onreadystatechange = function() {
+				var statusUpdateSpan = document.getElementById("status-update-" + id);
+				var response = JSON.parse(xhr.responseText);
+				if (response.data) {
+					statusUpdateSpan.textContent = "Status updated successfully!";
+					statusUpdateSpan.style.color = "green";
+				} else {
+					statusUpdateSpan.textContent = "Failed to update status: " + response.message;
+					statusUpdateSpan.style.color = "red";
+				}
+			};
+			xhr.send("status=" + encodeURIComponent(status));
+		});
+	{{ end }}
+</script>
+
+{{ template "footer" .}}
+{{ end }}

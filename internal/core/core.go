@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -38,6 +39,7 @@ type Queries struct {
 	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
 	UpdateCrawlError     *sqlx.Stmt `query:"update-crawl-error"`
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
+	GetPendingManifests  *sqlx.Stmt `query:"get-pending-manifests"`
 }
 
 type Core struct {
@@ -58,6 +60,66 @@ func New(q *Queries, o Opt, lo *log.Logger) *Core {
 	}
 }
 
+// fillRawManifest fills in the raw JSON fields in the manifest data.
+func (d *Core) fillRawManifest(out *models.ManifestData) error {
+	// Entity.
+	if err := out.Entity.UnmarshalJSON(out.EntityRaw); err != nil {
+		return fmt.Errorf("error unmarshalling entity: %w", err)
+	}
+
+	// Funding.
+	if err := out.Funding.UnmarshalJSON(out.FundingRaw); err != nil {
+		return fmt.Errorf("error unmarshalling funding: %w", err)
+	}
+
+	// Create a funding map channel for easy lookups.
+	out.Channels = make(map[string]v1.Channel)
+	for _, c := range out.Funding.Channels {
+		out.Channels[c.GUID] = c
+	}
+
+	// Unmarshal the entity URL. DB names and local names don't match,
+	// and it's a nested structure. Sucks.
+	var entity models.EntityURL
+	if err := entity.UnmarshalJSON(out.EntityRaw); err != nil {
+		return fmt.Errorf("error unmarshalling entity URL: %w", err)
+	}
+
+	if u, err := common.IsURL("url", entity.WebpageURL, maxURLLen); err != nil {
+		return fmt.Errorf("error parsing entity URL %s: %w", entity.WebpageURL, err)
+	} else {
+		out.Entity.WebpageURL = v1.URL{URL: entity.WebpageURL, URLobj: u}
+	}
+
+	// Fill in the projects.
+	if err := out.Projects.UnmarshalJSON(out.ProjectsRaw); err != nil {
+		return fmt.Errorf("error unmarshalling projects: %w", err)
+	}
+
+	// Unmarshal project URLs. DB names and local names don't match,
+	// and it's a nested structure. This sucks.
+	var prjURLs models.ProjectURLs
+	if err := prjURLs.UnmarshalJSON(out.ProjectsRaw); err != nil {
+		return fmt.Errorf("error unmarshalling project URLs: %w", err)
+	}
+
+	for n, p := range prjURLs {
+		if u, err := common.IsURL("url", p.WebpageURL, maxURLLen); err != nil {
+			return fmt.Errorf("error parsing entity URL: %w", err)
+		} else {
+			out.Projects[n].WebpageURL = v1.URL{URL: p.WebpageURL, URLobj: u}
+		}
+
+		if u, err := common.IsURL("url", p.RepositoryURL, maxURLLen); err != nil {
+			return fmt.Errorf("error parsing entity URL (%s): %w", p.RepositoryURL, err)
+		} else {
+			out.Projects[n].RepositoryURL = v1.URL{URL: p.RepositoryURL, URLobj: u}
+		}
+	}
+
+	return nil
+}
+
 // GetManifest retrieves a manifest.
 func (d *Core) GetManifest(id int, guid string) (models.ManifestData, error) {
 	var (
@@ -75,70 +137,9 @@ func (d *Core) GetManifest(id int, guid string) (models.ManifestData, error) {
 		return out, err
 	}
 
-	// Entity.
-	if err := out.Entity.UnmarshalJSON(out.EntityRaw); err != nil {
-		d.log.Printf("error unmarshalling entity: %d: %v", id, err)
+	if err := d.fillRawManifest(&out); err != nil {
+		d.log.Printf("error filling manifest: %d: %v", id, err)
 		return out, err
-	}
-
-	// Funding.
-	if err := out.Funding.UnmarshalJSON(out.FundingRaw); err != nil {
-		d.log.Printf("error unmarshalling funding: %d: %v", id, err)
-		return out, err
-	}
-
-	// Create a funding map channel for easy lookups.
-	out.Channels = make(map[string]v1.Channel)
-	for _, c := range out.Funding.Channels {
-		out.Channels[c.GUID] = c
-	}
-
-	// Unmarshal the entity URL. DB names and local names don't match,
-	// and it's a nested structure. Sucks.
-	{
-		var ug models.EntityURL
-		if err := ug.UnmarshalJSON(out.EntityRaw); err != nil {
-			d.log.Printf("error unmarshalling entity URL: %d: %v", id, err)
-			return out, err
-		}
-
-		if u, err := common.IsURL("url", ug.WebpageURL, maxURLLen); err != nil {
-			d.log.Printf("error parsing entity URL: %d: %s: %v", id, ug.WebpageURL, err)
-			return out, err
-		} else {
-			out.Entity.WebpageURL = v1.URL{URL: ug.WebpageURL, URLobj: u}
-		}
-	}
-
-	if err := out.Projects.UnmarshalJSON(out.ProjectsRaw); err != nil {
-		d.log.Printf("error unmarshalling projects: %d: %v", id, err)
-		return out, err
-	}
-
-	// Unmarshal project URLs. DB names and local names don't match,
-	// and it's a nested structure. This sucks.
-	{
-		var ug models.ProjectURLs
-		if err := ug.UnmarshalJSON(out.ProjectsRaw); err != nil {
-			d.log.Printf("error unmarshalling project URLs: %d: %v", id, err)
-			return out, err
-		}
-
-		for n, p := range ug {
-			if u, err := common.IsURL("url", p.WebpageURL, maxURLLen); err != nil {
-				d.log.Printf("error parsing entity URL: %d: %s: %v", id, p.WebpageURL, err)
-				return out, err
-			} else {
-				out.Projects[n].WebpageURL = v1.URL{URL: p.WebpageURL, URLobj: u}
-			}
-
-			if u, err := common.IsURL("url", p.RepositoryURL, maxURLLen); err != nil {
-				d.log.Printf("error parsing entity URL: %d: %s: %v", id, p.RepositoryURL, err)
-				return out, err
-			} else {
-				out.Projects[n].RepositoryURL = v1.URL{URL: p.RepositoryURL, URLobj: u}
-			}
-		}
 	}
 
 	return out, nil
@@ -237,6 +238,24 @@ func (d *Core) GetTopTags(limit int) ([]string, error) {
 	}
 
 	return tags, nil
+}
+
+// GetPendingManifests returns a list of pending manifests.
+func (d *Core) GetPendingManifests(limit, offset int) ([]models.ManifestData, error) {
+	var out []models.ManifestData
+	if err := d.q.GetPendingManifests.Select(&out, limit, offset); err != nil {
+		d.log.Printf("error fetching pending manifests: %v", err)
+		return nil, err
+	}
+
+	for i := range out {
+		if err := d.fillRawManifest(&out[i]); err != nil {
+			d.log.Printf("error filling manifest: %d: %v", out[i].ID, err)
+			continue
+		}
+	}
+
+	return out, nil
 }
 
 // MakeGUID takes a URL and creates a string "guid" in the form of
