@@ -288,15 +288,17 @@ func handleManifestPage(c echo.Context) error {
 
 		// Extract the last part of the URI.
 		var (
-			path = strings.TrimPrefix(mGuid, "/view/project/")
+			path = strings.TrimSuffix(strings.TrimPrefix(mGuid, "/view/project/"), "/")
 			i    = strings.LastIndex(path, "/")
 		)
+
 		if i == -1 {
-			return errPage(c, http.StatusNotFound, "", "Manifest not found", "Invalid project guid.")
+			return errPage(c, http.StatusNotFound, "", "Bad request", "Invalid project guid.")
 		}
 
 		mGuid = path[:i]
 		pGuid = path[i+1:]
+
 	} else if strings.HasPrefix(mGuid, "/view/history/") {
 		// History page.
 		mGuid = strings.TrimPrefix(mGuid, "/view/history/")
@@ -330,6 +332,7 @@ func handleManifestPage(c echo.Context) error {
 			return errPage(c, http.StatusNotFound, "", "Project not found", "Project not found.")
 		}
 		prj = m.Manifest.Projects[idx]
+		out.Title = prj.Name + "by %s"
 		out.Description = abbrev(prj.Description, 200)
 	}
 
