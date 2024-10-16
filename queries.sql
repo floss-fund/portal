@@ -122,3 +122,28 @@ UPDATE manifests SET
     status = (CASE WHEN crawl_errors + 1 >= $3 THEN 'disabled' ELSE status END)
     WHERE id = $1
     RETURNING status;
+
+-- name: get-pending-manifests
+WITH man AS (
+    SELECT * FROM manifests m
+    WHERE m.status = 'pending'
+    ORDER BY m.id
+    LIMIT $1 OFFSET $2
+),
+entity AS (
+    SELECT e.manifest_id, TO_JSON(e) AS entity_raw
+    FROM entities e
+    WHERE e.manifest_id IN (SELECT id FROM man)
+),
+prj AS (
+    SELECT p.manifest_id, COALESCE(JSON_AGG(TO_JSON(p)), '[]'::json) AS projects_raw
+    FROM projects p
+    WHERE p.manifest_id IN (SELECT id FROM man)
+    GROUP BY p.manifest_id
+)
+SELECT m.id, m.guid, m.version, m.url, m.funding AS funding_raw, m.status,
+       m.status_message, m.crawl_errors, m.crawl_message, m.created_at, m.updated_at,
+       e.entity_raw, p.projects_raw
+FROM man m
+LEFT JOIN entity e ON e.manifest_id = m.id
+LEFT JOIN prj p ON p.manifest_id = m.id;
