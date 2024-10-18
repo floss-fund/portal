@@ -20,12 +20,13 @@ var (
 )
 
 type Consts struct {
-	RootURL       string `json:"app.root_url"`
-	ManifestURI   string `json:"app.manifest_path"`
-	WellKnownURI  string `json:"app.wellknown_path"`
-	AdminUsername []byte `json:"app.admin_username"`
-	AdminPassword []byte `json:"app.admin_password"`
-	CaptchaKey    string `json:"-"`
+	RootURL           string   `json:"app.root_url"`
+	ManifestURI       string   `json:"app.manifest_path"`
+	WellKnownURI      string   `json:"app.wellknown_path"`
+	DisallowedDomains []string `json:"crawl.disallowed_domains"`
+	AdminUsername     []byte   `json:"app.admin_username"`
+	AdminPassword     []byte   `json:"app.admin_password"`
+	CaptchaKey        string   `json:"-"`
 }
 
 // App contains the "global" components that are passed around, especially through HTTP handlers.

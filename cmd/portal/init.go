@@ -100,11 +100,12 @@ func initConfig() {
 
 func initConstants(ko *koanf.Koanf) Consts {
 	c := Consts{
-		RootURL:       ko.MustString("app.root_url"),
-		AdminUsername: ko.MustBytes("app.admin_username"),
-		AdminPassword: ko.MustBytes("app.admin_password"),
-		ManifestURI:   ko.MustString("crawl.manifest_uri"),
-		WellKnownURI:  ko.MustString("crawl.wellknown_uri"),
+		RootURL:           ko.MustString("app.root_url"),
+		AdminUsername:     ko.MustBytes("app.admin_username"),
+		AdminPassword:     ko.MustBytes("app.admin_password"),
+		ManifestURI:       ko.MustString("crawl.manifest_uri"),
+		WellKnownURI:      ko.MustString("crawl.wellknown_uri"),
+		DisallowedDomains: ko.Strings("crawl.disallowed_domains"),
 	}
 
 	b := make([]byte, 24) // 24 bytes will give 32 characters when base64 encoded

@@ -183,6 +183,14 @@ func handleSubmitPage(c echo.Context) error {
 	u.RawQuery = ""
 	u.RawFragment = ""
 
+	// Check if the domain is disallowed.
+	for _, pattern := range app.consts.DisallowedDomains {
+		if matchHostname(u.Host, pattern) {
+			out.ErrMessage = fmt.Sprintf("The host %s (CDN URL) is not allowed. Please use a fully qualified domain or a path like github.com/user/project...", pattern)
+			return c.Render(http.StatusBadRequest, "submit", out)
+		}
+	}
+
 	if !strings.HasSuffix(u.Path, app.consts.ManifestURI) {
 		out.ErrMessage = fmt.Sprintf("URL must end in %s", app.consts.ManifestURI)
 		return c.Render(http.StatusBadRequest, "submit", out)
@@ -489,4 +497,22 @@ func validateCaptcha(payload string, key string) error {
 	}
 
 	return nil
+}
+
+func matchHostname(host, pattern string) bool {
+	if strings.HasPrefix(pattern, "*.") {
+		domain := pattern[2:]
+		if host == domain {
+			return false
+		}
+		if strings.HasSuffix(host, "."+domain) {
+			return true
+		}
+	} else {
+		if host == pattern {
+			return true
+		}
+	}
+
+	return false
 }
