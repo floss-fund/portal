@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/floss-fund/go-funding-json/common"
@@ -17,6 +18,8 @@ import (
 
 const maxURISize = 40
 const maxURLLen = 200
+
+var reGithub = regexp.MustCompile(`^(https://github\.com/([^/]+)/([^/]+))/blob/([^/]+)`)
 
 type Opt struct {
 }
@@ -242,7 +245,13 @@ func (d *Core) GetTopTags(limit int) ([]string, error) {
 // MakeGUID takes a URL and creates a string "guid" in the form of
 // @$host/$uri (last 3 parts, if there are, capped at 40 chars).
 func MakeGUID(u *url.URL) string {
-	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
+	// Match long GitHub blob URLs and return the project URL.
+	match := reGithub.FindStringSubmatch(u.String())
+	if len(match) > 1 {
+		return "@" + strings.TrimPrefix(match[1], "https://")
+	}
+
+	parts := strings.Split(strings.TrimSuffix(u.Path, "/"), "/")
 
 	// Get the last 3 parts (or fewer if there aren't 3).
 	last := parts
