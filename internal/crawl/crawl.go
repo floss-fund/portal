@@ -105,7 +105,7 @@ func (c *Crawl) IsManifestModified(manifest *url.URL, lastModified time.Time) (b
 
 // FetchManifest fetches a given funding.json manifest, parses it, and returns.
 func (c *Crawl) FetchManifest(manifest *url.URL) (models.ManifestData, error) {
-	b, err := c.hc.Get(manifest)
+	b, err := c.hc.Get(common.TransformURLOrigin(manifest))
 	if err != nil {
 		return models.ManifestData{}, err
 	}
