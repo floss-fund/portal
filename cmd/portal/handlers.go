@@ -13,8 +13,7 @@ import (
 )
 
 const (
-	isAuthed          = "is_authed"
-	captchaComplexity = 75000
+	isAuthed = "is_authed"
 )
 
 func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
@@ -97,7 +96,7 @@ func handleGenerateCaptcha(c echo.Context) error {
 	// Create a new challenge.
 	ch, err := altcha.CreateChallenge(altcha.ChallengeOptions{
 		HMACKey:   app.consts.CaptchaKey,
-		MaxNumber: captchaComplexity,
+		MaxNumber: int64(app.consts.CaptchaComplexity),
 	})
 	if err != nil {
 		app.lo.Printf("error generating captcha: %v", err)

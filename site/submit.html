@@ -13,7 +13,9 @@
     <p>
       <input id="funding-url" type="url" name="url" placeholder="https://yoursite.com/funding.json" required autofocus maxlength="300" />
     </p>
-    <altcha-widget challengeurl="{{ .RootURL }}/api/captcha"></altcha-widget>
+    {{ if .Data.EnableCaptcha }}
+      <altcha-widget challengeurl="{{ .RootURL }}/api/captcha"></altcha-widget>
+    {{ end }}
     <br />
     <p><button type="submit">Submit</button></p>
   </div>
@@ -40,7 +42,7 @@
   It can be hosted on a project's or organisation's website, or a repository such as https://github.com/user/project/blob/main/funding.json
 </p>
 
-<script async defer src="{{ .RootURL }}/static/altcha.js?v={{ .AssetVer }}" type="module"></script>
+{{ if .Data.EnableCaptcha }}<script async defer src="{{ .RootURL }}/static/altcha.js?v={{ .AssetVer }}" type="module"></script>{{ end }}
 
 {{ template "footer" .}}
 {{ end }}

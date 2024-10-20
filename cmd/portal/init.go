@@ -106,14 +106,19 @@ func initConstants(ko *koanf.Koanf) Consts {
 		ManifestURI:       ko.MustString("crawl.manifest_uri"),
 		WellKnownURI:      ko.MustString("crawl.wellknown_uri"),
 		DisallowedDomains: ko.Strings("crawl.disallowed_domains"),
+		EnableCaptcha:     ko.Bool("site.enable_captcha"),
 	}
 
-	b := make([]byte, 24) // 24 bytes will give 32 characters when base64 encoded
-	_, err := rand.Read(b)
-	if err != nil {
-		lo.Fatalf("error generating captcha key: %v", err)
+	if c.EnableCaptcha {
+		c.CaptchaComplexity = ko.MustInt64("site.captcha_complexity")
+
+		b := make([]byte, 24) // 24 bytes will give 32 characters when base64 encoded
+		_, err := rand.Read(b)
+		if err != nil {
+			lo.Fatalf("error generating captcha key: %v", err)
+		}
+		c.CaptchaKey = base64.URLEncoding.EncodeToString(b)[:32]
 	}
-	c.CaptchaKey = base64.URLEncoding.EncodeToString(b)[:32]
 
 	return c
 }

@@ -26,6 +26,8 @@ type Consts struct {
 	DisallowedDomains []string `json:"crawl.disallowed_domains"`
 	AdminUsername     []byte   `json:"app.admin_username"`
 	AdminPassword     []byte   `json:"app.admin_password"`
+	EnableCaptcha     bool     `json:"site.enable_captcha"`
+	CaptchaComplexity int64    `json:"site.captcha_complexity"`
 	CaptchaKey        string   `json:"-"`
 }
 

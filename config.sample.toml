@@ -18,8 +18,9 @@ currencies = "data/currencies.json"
 
 [site]
 enable_captcha = false
-captcha_key = ""
-captcha_secret = ""
+
+# Altcha CAPTCHA complexity factor. 0 to nn
+captcha_complexity = 50000
 
 
 [crawl]

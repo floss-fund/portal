@@ -54,12 +54,13 @@ type Tab struct {
 }
 
 type Page struct {
-	Title       string
-	Description string
-	Heading     string
-	Tabs        []Tab
-	ErrMessage  string
-	Message     string
+	Title         string
+	Description   string
+	Heading       string
+	Tabs          []Tab
+	EnableCaptcha bool
+	ErrMessage    string
+	Message       string
 }
 
 var (
@@ -147,18 +148,22 @@ func handleSubmitPage(c echo.Context) error {
 		mURL = c.FormValue("url")
 	)
 
-	out := Page{Title: "Submit funding manifest", Heading: "Submit"}
-	out.Tabs = []Tab{
-		{
-			ID:       "submit",
-			Label:    "Submit",
-			Selected: true,
-			URL:      fmt.Sprintf("%s/submit", app.consts.RootURL),
-		},
-		{
-			ID:    "validate",
-			Label: "Validate",
-			URL:   fmt.Sprintf("%s/validate", app.consts.RootURL),
+	out := Page{
+		Title:         "Submit funding manifest",
+		Heading:       "Submit",
+		EnableCaptcha: app.consts.EnableCaptcha,
+		Tabs: []Tab{
+			{
+				ID:       "submit",
+				Label:    "Submit",
+				Selected: true,
+				URL:      fmt.Sprintf("%s/submit", app.consts.RootURL),
+			},
+			{
+				ID:    "validate",
+				Label: "Validate",
+				URL:   fmt.Sprintf("%s/validate", app.consts.RootURL),
+			},
 		},
 	}
 
@@ -168,9 +173,12 @@ func handleSubmitPage(c echo.Context) error {
 	}
 
 	// Process submission.
-	if err := validateCaptcha(c.FormValue("altcha"), app.consts.CaptchaKey); err != nil {
-		out.ErrMessage = "Invalid captcha"
-		return c.Render(http.StatusBadRequest, "submit", out)
+	// Is Captcha enabled?
+	if app.consts.EnableCaptcha {
+		if err := validateCaptcha(c.FormValue("altcha"), app.consts.CaptchaKey); err != nil {
+			out.ErrMessage = "Invalid captcha"
+			return c.Render(http.StatusBadRequest, "submit", out)
+		}
 	}
 
 	u, err := common.IsURL("url", mURL, v1.MaxURLLen)
