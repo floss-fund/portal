@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"path"
 	"regexp"
 	"strings"
 
@@ -251,22 +252,20 @@ func MakeGUID(u *url.URL) string {
 		return "@" + strings.TrimPrefix(match[1], "https://")
 	}
 
-	parts := strings.Split(strings.TrimSuffix(u.Path, "/"), "/")
-
-	// Get the last 3 parts (or fewer if there aren't 3).
-	last := parts
-	if len(parts) > 3 {
-		last = parts[len(parts)-3:]
+	// Get the first few parts (or fewer).
+	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
+	if len(parts) > 4 {
+		parts = parts[:4]
 	}
 
-	// Join the last parts.
-	uri := strings.Join(last, "/")
+	// Join the parts.
+	uri := strings.Join(parts, "/")
 
 	// If the URI is long, cut it to size from the start.
-	if len(uri) > 40 {
-		uri = "--" + uri[len(uri)-40:]
+	if len(uri) > 50 {
+		uri = uri[:50] + "/**"
 	}
 
-	guid := "@" + u.Host + "/" + uri
+	guid := "@" + path.Join(u.Host, uri)
 	return guid
 }
