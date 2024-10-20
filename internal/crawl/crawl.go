@@ -18,7 +18,7 @@ type Schema interface {
 
 type DB interface {
 	GetManifestForCrawling(age string, offsetID, limit int) ([]models.ManifestJob, error)
-	UpsertManifest(m models.ManifestData) error
+	UpsertManifest(m models.ManifestData, status string) error
 	UpdateManifestCrawlError(id int, message string, maxErrors int) (string, error)
 }
 

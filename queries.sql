@@ -16,7 +16,9 @@ WITH man AS (
         meta = $4,
         status = $5,
         status_message = $6,
-        updated_at = NOW()
+        updated_at = NOW(),
+        crawl_errors = 0,
+        crawl_message = ''
     RETURNING id
 ),
 entity AS (

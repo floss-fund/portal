@@ -166,14 +166,14 @@ func (d *Core) GetManifestStatus(url string) (string, error) {
 }
 
 // UpsertManifest upserts an entry into the database.
-func (d *Core) UpsertManifest(m models.ManifestData) error {
+func (d *Core) UpsertManifest(m models.ManifestData, status string) error {
 	body, err := m.Manifest.MarshalJSON()
 	if err != nil {
 		d.log.Printf("error marshalling manifest: %s: %v", m.URL, err)
 		return err
 	}
 
-	if _, err := d.q.UpsertManifest.Exec(json.RawMessage(body), m.Manifest.URL.URL, m.GUID, json.RawMessage("{}"), ManifestStatusPending, ""); err != nil {
+	if _, err := d.q.UpsertManifest.Exec(json.RawMessage(body), m.Manifest.URL.URL, m.GUID, json.RawMessage("{}"), status, ""); err != nil {
 		d.log.Printf("error upsering manifest: %v", err)
 		return err
 	}

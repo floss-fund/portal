@@ -234,7 +234,7 @@ func handleSubmitPage(c echo.Context) error {
 	m.GUID = core.MakeGUID(m.Manifest.URL.URLobj)
 	m.GUID = strings.TrimSuffix(m.GUID, app.consts.ManifestURI)
 
-	if err := app.core.UpsertManifest(m); err != nil {
+	if err := app.core.UpsertManifest(m, core.ManifestStatusPending); err != nil {
 		out.ErrMessage = "Error saving manifest to database. Retry later."
 		return c.Render(http.StatusBadRequest, "submit", out)
 	}

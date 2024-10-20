@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/floss-fund/portal/internal/core"
+	"github.com/floss-fund/portal/internal/models"
 )
 
 func (c *Crawl) dbWorker() {
@@ -54,6 +55,15 @@ loop:
 			reCrawl, err := c.IsManifestModified(j.URLobj, j.LastModified)
 			if err != nil {
 				c.log.Printf("error fetching modified date: %s: %v", j.URL, err)
+
+				// Record the error.
+				if status, err := c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors); err == nil {
+					// If the manifest is no longer active, delete it from search.
+					if c.Callbacks.OnManifestUpdate != nil && status != core.ManifestStatusActive {
+						c.Callbacks.OnManifestUpdate(models.ManifestData{ID: j.ID}, status)
+					}
+				}
+
 				continue
 			}
 
@@ -79,13 +89,13 @@ loop:
 			}
 
 			// Add it to the database.
-			if err := c.db.UpsertManifest(m); err != nil {
+			if err := c.db.UpsertManifest(m, status); err != nil {
 				c.log.Printf("error upserting manifest: %s: %v", j.URL, err)
 				continue
 			}
 
 			if c.Callbacks.OnManifestUpdate != nil {
-				c.Callbacks.OnManifestUpdate(m, core.ManifestStatusActive)
+				c.Callbacks.OnManifestUpdate(m, status)
 			}
 		}
 	}

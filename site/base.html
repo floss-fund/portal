@@ -84,12 +84,13 @@
   </header>
 </section>
   <div class="container main">
-    {{ if HasField .Data "Manifest" }}{{ template "crawl-error" . }}{{ end }}
     <section class="section content">
 
 {{ end }}
 
 {{ define "footer" }}
+    {{ if HasField .Data "Manifest" }}{{ template "crawl-error" . }}{{ end }}
+
     </section>
   </div>
 
