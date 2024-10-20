@@ -41,6 +41,7 @@ type Queries struct {
 	GetForCrawling       *sqlx.Stmt `query:"get-for-crawling"`
 	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
 	UpdateCrawlError     *sqlx.Stmt `query:"update-crawl-error"`
+	DeleteManifest       *sqlx.Stmt `query:"delete-manifest"`
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
 }
 
@@ -223,6 +224,16 @@ func (d *Core) UpdateManifestCrawlError(id int, message string, maxErrors int) (
 	}
 
 	return status, nil
+}
+
+// DeleteManifest deletes a manifest and all associated data;
+func (d *Core) DeleteManifest(id int, guid string) error {
+	if _, err := d.q.DeleteManifest.Exec(id, guid); err != nil {
+		d.log.Printf("error deleting manifest: %d: %v", id, err)
+		return err
+	}
+
+	return nil
 }
 
 // GetTopTags returns top N tags referenced across projects.

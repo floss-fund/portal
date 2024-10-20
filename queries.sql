@@ -122,3 +122,10 @@ UPDATE manifests SET
     status = (CASE WHEN crawl_errors + 1 >= $3 THEN 'disabled' ELSE status END)
     WHERE id = $1
     RETURNING status;
+
+-- name: delete-manifest
+DELETE FROM manifests WHERE
+    CASE
+        WHEN $1 > 0 THEN id = $1
+        WHEN $2 != '' THEN guid = $2
+    END;

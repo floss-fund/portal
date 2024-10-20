@@ -39,6 +39,7 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	// Private, authenticated endpoints.
 	a := srv.Group("", middleware.BasicAuth(basicAuth))
 	a.GET("/api/manifests/:id", handleGetManifest)
+	a.DELETE("/api/manifests/:id", handleDeleteManifest)
 	a.PUT("/api/manifests/:id/status", handleUpdateManifestStatus)
 
 	// 404 pages.
@@ -66,6 +67,19 @@ func handleGetManifest(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, okResp{out})
+}
+
+func handleDeleteManifest(c echo.Context) error {
+	var (
+		app   = c.Get("app").(*App)
+		id, _ = strconv.Atoi(c.Param("id"))
+	)
+
+	if err := app.core.DeleteManifest(id, ""); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, okResp{true})
 }
 
 func handleUpdateManifestStatus(c echo.Context) error {
