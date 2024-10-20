@@ -17,6 +17,9 @@ languages = "data/languages.json"
 currencies = "data/currencies.json"
 
 [site]
+home_num_tags = 25
+home_num_projects = 20
+
 enable_captcha = false
 
 # Altcha CAPTCHA complexity factor. 0 to nn

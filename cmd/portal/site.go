@@ -74,8 +74,8 @@ func handleIndexPage(c echo.Context) error {
 	)
 
 	// Get top tags.
-	tags, _ := app.core.GetTopTags(25)
-	projects, _ := app.search.GetRecentProjects(5)
+	tags, _ := app.core.GetTopTags(app.consts.HomeNumTags)
+	projects, _ := app.search.GetRecentProjects(app.consts.HomeNumProjects)
 
 	out := struct {
 		Page

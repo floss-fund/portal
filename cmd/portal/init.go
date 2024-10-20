@@ -107,6 +107,8 @@ func initConstants(ko *koanf.Koanf) Consts {
 		WellKnownURI:      ko.MustString("crawl.wellknown_uri"),
 		DisallowedDomains: ko.Strings("crawl.disallowed_domains"),
 		EnableCaptcha:     ko.Bool("site.enable_captcha"),
+		HomeNumTags:       ko.MustInt("site.home_num_tags"),
+		HomeNumProjects:   ko.MustInt("site.home_num_projects"),
 	}
 
 	if c.EnableCaptcha {

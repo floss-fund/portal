@@ -24,11 +24,16 @@ type Consts struct {
 	ManifestURI       string   `json:"app.manifest_path"`
 	WellKnownURI      string   `json:"app.wellknown_path"`
 	DisallowedDomains []string `json:"crawl.disallowed_domains"`
-	AdminUsername     []byte   `json:"app.admin_username"`
-	AdminPassword     []byte   `json:"app.admin_password"`
-	EnableCaptcha     bool     `json:"site.enable_captcha"`
-	CaptchaComplexity int64    `json:"site.captcha_complexity"`
-	CaptchaKey        string   `json:"-"`
+
+	AdminUsername []byte `json:"app.admin_username"`
+	AdminPassword []byte `json:"app.admin_password"`
+
+	EnableCaptcha     bool   `json:"site.enable_captcha"`
+	CaptchaComplexity int64  `json:"site.captcha_complexity"`
+	CaptchaKey        string `json:"-"`
+
+	HomeNumTags     int `json:"site.home_num_tags"`
+	HomeNumProjects int `json:"site.home_num_projects"`
 }
 
 // App contains the "global" components that are passed around, especially through HTTP handlers.
