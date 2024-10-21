@@ -43,6 +43,7 @@ type Queries struct {
 	UpdateCrawlError     *sqlx.Stmt `query:"update-crawl-error"`
 	DeleteManifest       *sqlx.Stmt `query:"delete-manifest"`
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
+	InsertReport         *sqlx.Stmt `query:"insert-report"`
 }
 
 type Core struct {
@@ -186,6 +187,16 @@ func (d *Core) GetTopTags(limit int) ([]string, error) {
 	}
 
 	return tags, nil
+}
+
+// InsertManifestReport inserts a flagged report with reason for the manifest
+func (d *Core) InsertManifestReport(id int, reason string) error {
+	if _, err := d.q.InsertReport.Exec(id, reason); err != nil {
+		d.log.Printf("error inserting report for manifest: %d: %v", id, err)
+		return err
+	}
+
+	return nil
 }
 
 // getManifests retrieves one or more manifests.

@@ -24,7 +24,10 @@
               </a>  
               <a href="{{ $r.RepositoryURL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL) }}" aria-label="Visit project repository">
                 <img src="/static/ico-repo.svg" alt="" aria-hidden="true" />
-              </a>  
+              </a>
+              <label for="modal-1" class="icon-button"><img src="/static/ico-flag.svg" alt="" aria-hidden="true" title="Report project"/></label>
+              <input hx-get="/report/{{ $r.ID }}" hx-target="#report" type="checkbox" id="modal-1" class="modal-toggle">
+              <div class="modal-overlay" id="report"></div>
             </div>
           </div>
         </header>

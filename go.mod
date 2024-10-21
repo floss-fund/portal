@@ -13,14 +13,13 @@ require (
 	github.com/knadh/koanf/providers/file v0.1.0
 	github.com/knadh/koanf/providers/posflag v0.1.0
 	github.com/knadh/koanf/v2 v2.0.1
-	github.com/knadh/paginator v1.0.1
 	github.com/knadh/paginator/v2 v2.0.0
 	github.com/knadh/stuffbin v1.3.0
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/lib/pq v1.10.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
-	github.com/zerodha/easyjson v1.0.0
+	github.com/zerodha/easyjson v1.0.1
 	golang.org/x/mod v0.20.0
 )
 

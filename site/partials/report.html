@@ -1,0 +1,26 @@
+{{ define "report" }}
+<div class="modal">
+    <div class="modal-header">
+        <h3 class="modal-title">Report this project</h3>
+        <label for="modal-1" class="modal-close">&times;</label>
+    </div>
+    <div class="modal-body">
+        <form hx-post="/report/{{ .Data.MGUID }}" hx-target="#report" hx-trigger="submit, load" class="submit"
+            aria-label="Submission form">
+            <div>
+                <label for="reason">Reason</label>
+                <p>
+                    <input id="reason" type="text" name="reason" placeholder="Explain why this entry should be flagged"
+                        required autofocus maxlength="300" />
+                </p>
+                {{ if .Data.EnableCaptcha }}
+                <altcha-widget challengeurl="{{ .RootURL }}/api/captcha"></altcha-widget>
+                {{ end }}
+                <br />
+                <p><button type="submit">Submit</button></p>
+            </div>
+        </form>
+    </div>
+</div>
+{{ if .Data.EnableCaptcha }}<script async defer src="{{ .RootURL }}/static/altcha.js?v={{ .AssetVer }}" type="module"></script>{{ end }}
+{{ end }}

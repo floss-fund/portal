@@ -1,0 +1,16 @@
+{{ define "report-submit" }}
+<div class="modal">
+    <div class="modal-header">
+        <h3 class="modal-title">Report submitted</h3>
+        <label for="modal-1" class="modal-close">&times;</label>
+    </div>
+    <div class="modal-body">
+        {{ if .Data.ErrMessage }}
+            <div class="message error">{{ .Data.ErrMessage }}</div>
+        {{ else }}
+            <p>This project has been flagged. Our moderators will take an action soon.</p>
+        {{ end }}
+    </div>
+    
+</div>
+{{ end }}
