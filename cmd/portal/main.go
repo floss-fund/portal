@@ -10,7 +10,7 @@ import (
 	"github.com/floss-fund/portal/internal/search"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/koanf/v2"
-	"github.com/knadh/paginator"
+	"github.com/knadh/paginator/v2"
 	"github.com/knadh/stuffbin"
 )
 

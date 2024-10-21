@@ -21,6 +21,7 @@ type Entities []Entity
 type EntityQuery struct {
 	Query string `json:"q"`
 	Field string `json:"field"`
+	Page  int    `json:"page"`
 	Entity
 }
 
@@ -49,6 +50,7 @@ type Projects []Project
 type ProjectQuery struct {
 	Query string `json:"q"`
 	Field string `json:"field"`
+	Page  int    `json:"page"`
 	Project
 }
 

@@ -34,7 +34,7 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
-	"github.com/knadh/paginator"
+	"github.com/knadh/paginator/v2"
 	"github.com/knadh/stuffbin"
 	"github.com/labstack/echo/v4"
 	flag "github.com/spf13/pflag"

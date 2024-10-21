@@ -16,7 +16,7 @@ body {
     background: #fff;
     font-family: "Rubik", sans-serif;
     font-weight: 400;
-    line-height: 1.5;
+    line-height: 1.4;
     color: var(--black);
 }
 
@@ -216,7 +216,7 @@ button, .button {
     box-shadow: 1px 1px 4px #eee;
     border-radius: 5px;
     border: 2px solid #eee;
-    padding: 15px 30px;
+    padding: 15px 20px;
 }
     .text-small {
         font-size: 0.875rem;
@@ -436,11 +436,14 @@ button, .button {
 }
     .results .result {
         margin-bottom: 30px;
-        padding: 20px 30px;
+        padding: 20px;
         border: 1px solid #ddd;
     }
     .results .title {
         margin: 0;
+    }
+    .results p:last-child {
+        margin-bottom: 0;
     }
     .results .props {
 /*        text-align: right;*/

@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"net/url"
 	"regexp"
 	"slices"
 	"strings"
@@ -36,6 +37,7 @@ type Query struct {
 	Type    string   `query:"type"`
 	Field   string   `query:"field"`
 	License []string `query:"license"`
+	Page    int      `query:"page"`
 }
 
 // tplData is the data container that is injected
@@ -416,6 +418,9 @@ func handleSearchPage(c echo.Context) error {
 	if q.Query == "" || len(q.Query) > 128 {
 		return c.Redirect(http.StatusTemporaryRedirect, app.consts.RootURL)
 	}
+	if q.Page < 1 {
+		q.Page = 1
+	}
 
 	var (
 		results any
@@ -423,7 +428,7 @@ func handleSearchPage(c echo.Context) error {
 	)
 	switch q.Type {
 	case "entity":
-		query := search.EntityQuery{Query: q.Query, Field: q.Field}
+		query := search.EntityQuery{Query: q.Query, Field: q.Field, Page: q.Page}
 
 		o, num, err := app.search.SearchEntities(query)
 		if err != nil {
@@ -432,7 +437,7 @@ func handleSearchPage(c echo.Context) error {
 		results = o
 		total = num
 	case "project":
-		query := search.ProjectQuery{Query: q.Query, Field: q.Field}
+		query := search.ProjectQuery{Query: q.Query, Field: q.Field, Page: q.Page}
 		query.Licenses = []string{}
 
 		for _, l := range c.QueryParams()["license"] {
@@ -459,7 +464,14 @@ func handleSearchPage(c echo.Context) error {
 		Total      int
 		Results    interface{}
 	}{}
-	out.Pagination = template.HTML(pg.HTML("?page=%d"))
+
+	// Additional query params to attach to paginated URLs.
+	qp := url.Values{}
+	qp.Set("q", q.Query)
+	qp.Set("type", q.Type)
+	qp.Set("field", q.Field)
+
+	out.Pagination = template.HTML(pg.HTML("", qp))
 	out.Title = "Search"
 	out.Heading = fmt.Sprintf(`Search "%s"`, q.Query)
 	out.Q = q

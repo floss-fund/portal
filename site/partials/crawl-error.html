@@ -1,0 +1,13 @@
+{{ define "crawl-error" }}
+  {{ if and $.Data.Manifest.CrawlMessage (gt (len $.Data.Manifest.CrawlMessage) 0) }}
+    <hr />
+    <div class="message error">
+      <p><strong>{{ $.Data.Manifest.UpdatedAt | date "Mon, 02 Jan 2006 15:04:05 MST" }}</strong></p>
+
+      <p>There was a problem with this listing's <a href="{{ $.Data.Manifest.URL }}">funding.json manifest</a>.
+      If it is not fixed, the listing will be removed from the portal.</p>
+
+      <p><strong>Crawl error</strong> <blockquote>{{ $.Data.Manifest.CrawlMessage }}</blockquote></p>
+    </div>
+  {{ end }}
+{{ end }}

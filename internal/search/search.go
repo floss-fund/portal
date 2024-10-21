@@ -72,6 +72,7 @@ func (o *Search) SearchEntities(q EntityQuery) (Entities, int, error) {
 	p := url.Values{}
 	p.Set("q", q.Query)
 	p.Set("query_by", "name")
+	p.Set("page", fmt.Sprintf("%d", q.Page))
 
 	if q.Type != "" {
 		p.Set("filter_by", "type:="+q.Type)
@@ -144,6 +145,7 @@ func (o *Search) SearchProjects(q ProjectQuery) (Projects, int, error) {
 		p.Set("filter_by", "licenses="+strings.Join(q.Licenses, ","))
 	}
 
+	p.Set("page", fmt.Sprintf("%d", q.Page))
 	p.Set("per_page", o.perPage)
 
 	// Search.
