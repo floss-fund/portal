@@ -164,6 +164,25 @@ button, .button {
         filter: brightness(0) invert(1);
     }
 
+.icon-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0 5px;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+
+.icon-button:hover {
+    opacity: 1;
+}
+
+.icon-button img {
+    max-height: 18px;
+    vertical-align: middle;
+}
+
 @keyframes shake {
     0% {
         transform: translate(0);
@@ -526,6 +545,113 @@ button, .button {
         text-decoration: none;
     }
 
+.container-fluid.floating {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    transition: box-shadow 0.3s ease;
+}
+
+.container-fluid.floating:hover {
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--black);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+    padding: 0;
+}
+
+.modal-close:hover {
+    color: var(--black);
+}
+
+.modal-close:checked ~ .modal-overlay {
+    display: flex;
+}
+
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+.modal-footer button {
+    margin-left: 10px;
+}
+
+.modal-toggle {
+    display: none;
+}
+
+.modal-overlay {
+    display: none;
+}
+
+
+.modal-toggle:checked ~ .modal-overlay {
+    display: flex;
+}
+
+@media (max-width: 500px) {
+    .modal {
+        width: 95%;
+    }
+
+    .container-fluid.floating {
+        padding: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+}
 
 @media (max-width: 500px) {
     h1 {

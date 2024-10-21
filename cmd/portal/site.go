@@ -481,6 +481,53 @@ func handleSearchPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "search", out)
 }
 
+func handleReport(c echo.Context) error {
+	var (
+		app    = c.Get("app").(*App)
+		reason = c.FormValue("reason")
+		mGuid  = c.Param("mguid")
+		i      = strings.LastIndex(mGuid, "/")
+	)
+
+	type ResponseData struct {
+		RootURL       string
+		MGUID         string
+		ErrMessage    string
+		EnableCaptcha bool
+	}
+
+	if i == -1 {
+		return c.Render(http.StatusOK, "report-submit", ResponseData{ErrMessage: "Invalid project guid"})
+	}
+
+	if c.Request().Method == http.MethodGet {
+		return c.Render(http.StatusOK, "report", ResponseData{
+			RootURL:       app.consts.RootURL,
+			MGUID:         mGuid,
+			EnableCaptcha: app.consts.EnableCaptcha,
+		})
+	}
+
+	if app.consts.EnableCaptcha {
+		if err := validateCaptcha(c.FormValue("altcha"), app.consts.CaptchaKey); err != nil {
+			return c.Render(http.StatusOK, "report-submit", ResponseData{ErrMessage: "Invalid Captcha"})
+		}
+	}
+
+	guid := mGuid[:i]
+	manifest, err := app.core.GetManifest(0, guid)
+	if err != nil {
+		return c.Render(http.StatusOK, "report-submit", ResponseData{ErrMessage: "Could not get manifest"})
+	}
+
+	err = app.core.InsertManifestReport(manifest.ID, reason)
+	if err != nil {
+		return c.Render(http.StatusOK, "report-submit", ResponseData{ErrMessage: "An internal error occurred while submitting the report."})
+	}
+
+	return c.Render(http.StatusOK, "report-submit", ResponseData{})
+}
+
 // Render executes and renders a template for echo.
 func (t *tplRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.tpl.ExecuteTemplate(w, name, tplData{
