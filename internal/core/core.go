@@ -20,7 +20,7 @@ import (
 const maxURISize = 40
 const maxURLLen = 200
 
-var reGithub = regexp.MustCompile(`^(https://github\.com/([^/]+)/([^/]+))/(blob|raw)/([^/]+)`)
+var reGithub = regexp.MustCompile(`^(https://github\.com/([^/]+))/([^/]+)/(blob|raw)/([^/]+)`)
 
 type Opt struct {
 }
