@@ -9,12 +9,11 @@ import (
 	"github.com/knadh/koanf/v2"
 )
 
-func installSchema(ver string, app *App, prompt bool, ko *koanf.Koanf) {
+func install(ver string, prompt bool, db, search bool, app *App, ko *koanf.Koanf) {
 	if prompt {
 		fmt.Println("")
 		fmt.Println("** first time installation **")
-		fmt.Printf("** IMPORTANT: This will wipe existing tables and types in the DB '%s' **",
-			ko.String("db.db"))
+		fmt.Printf("** IMPORTANT: This will wipe existing schema and data in db=%v, search=%v**", db, search)
 		fmt.Println("")
 
 		if prompt {
@@ -31,6 +30,17 @@ func installSchema(ver string, app *App, prompt bool, ko *koanf.Koanf) {
 		}
 	}
 
+	if db {
+		installDB(ver, app)
+	}
+	if search {
+		installSearch(app, ko)
+	}
+
+	app.lo.Println("done")
+}
+
+func installDB(ver string, app *App) {
 	q, err := app.fs.Read("/schema.sql")
 	if err != nil {
 		app.lo.Fatal(err.Error())
@@ -47,8 +57,10 @@ func installSchema(ver string, app *App, prompt bool, ko *koanf.Koanf) {
 		app.lo.Fatal(err)
 	}
 
-	app.lo.Println("successfully installed Postgres schema")
+	app.lo.Println("installed Postgres schema")
 
+}
+func installSearch(app *App, ko *koanf.Koanf) {
 	// Install Typesense schema.
 	app.lo.Println("installing Typesense schema")
 
@@ -57,7 +69,7 @@ func installSchema(ver string, app *App, prompt bool, ko *koanf.Koanf) {
 		app.lo.Fatal(err)
 	}
 
-	app.lo.Println("done")
+	app.lo.Println("installed typesense schema")
 }
 
 // recordMigrationVersion inserts the given version (of DB migration) into the

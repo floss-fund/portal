@@ -59,6 +59,8 @@ func initConfig() {
 	f.StringSlice("config", []string{"config.toml"},
 		"path to one or more config files (will be merged in order)")
 	f.Bool("install", false, "run first time DB installation")
+	f.Bool("install-db", true, "run installation on PostgresDB")
+	f.Bool("install-search", true, "run installation on TypeSense search")
 	f.Bool("upgrade", false, "upgrade database to the current version")
 	f.Bool("yes", false, "assume 'yes' to prompts during --install/upgrade")
 	f.Bool("version", false, "current version of the build")
