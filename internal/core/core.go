@@ -66,12 +66,13 @@ func New(q *Queries, o Opt, lo *log.Logger) *Core {
 // GetManifest retrieves a manifest.
 func (d *Core) GetManifest(id int, guid string) (models.ManifestData, error) {
 	var (
+		res []models.ManifestData
 		out models.ManifestData
 	)
 
 	// Get the manifest. entity{} and projects[{}] are retrieved
 	// as JSON fields that need to be manually unmarshalled.
-	if err := d.q.GetManifest.Get(&out, id, guid); err != nil {
+	if err := d.q.GetManifest.Select(&res, id, guid); err != nil {
 		if err == sql.ErrNoRows {
 			return out, ErrNotFound
 		}
@@ -79,6 +80,11 @@ func (d *Core) GetManifest(id int, guid string) (models.ManifestData, error) {
 		d.log.Printf("error fetching manifest: %d: %v", id, err)
 		return out, err
 	}
+	if len(res) == 0 {
+		return out, ErrNotFound
+	}
+
+	out = res[0]
 
 	// Entity.
 	if err := out.Entity.UnmarshalJSON(out.EntityRaw); err != nil {

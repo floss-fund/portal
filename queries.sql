@@ -83,6 +83,7 @@ WITH man AS (
     CASE
         WHEN $1 > 0 THEN id = $1
         WHEN $2 != '' THEN guid = $2
+        ELSE TRUE
     END
     AND status = 'active'
 ),
