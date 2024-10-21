@@ -102,8 +102,12 @@ func main() {
 	app.pg = initPaginator(ko)
 
 	// Run the crawl mode.
-	if ko.String("mode") == "crawl" {
+	switch ko.String("mode") {
+	case "crawl":
 		app.crawl.Crawl()
+		return
+	case "sync-search":
+		syncSearch(app.core, app.search, lo)
 		return
 	}
 
