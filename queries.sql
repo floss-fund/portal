@@ -77,29 +77,37 @@ prj AS (
 )
 SELECT (SELECT id FROM man) AS manifest_id;
 
--- name: get-manifest
+-- name: get-manifests
 WITH man AS (
-    SELECT * FROM manifests WHERE
-    CASE
+    SELECT * FROM manifests 
+    WHERE 
+    (CASE
         WHEN $1 > 0 THEN id = $1
         WHEN $2 != '' THEN guid = $2
         ELSE TRUE
-    END
+    END)
     AND status = 'active'
 ),
 entity AS (
-    SELECT TO_JSON(e) AS entity_raw FROM entities e
-    WHERE e.manifest_id = (SELECT id FROM man)
+    SELECT m.id, TO_JSON(e) AS entity_raw 
+    FROM entities e
+    LEFT JOIN man m ON e.manifest_id = m.id
 ),
 prj AS (
-    SELECT COALESCE(JSON_AGG(TO_JSON(p)), '[]'::json) AS projects_raw
-    FROM projects p WHERE p.manifest_id = (SELECT id FROM man)
+    SELECT m.id, COALESCE(JSON_AGG(TO_JSON(p)), '[]'::json) AS projects_raw
+    FROM projects p 
+    JOIN man m ON p.manifest_id = m.id
+    GROUP BY m.id
 )
-SELECT m.id, m.guid, m.version, m.url, m.funding AS funding_raw, m.status,
-        m.status_message, m.crawl_errors, m.crawl_message, m.created_at, m.updated_at,
-        e.entity_raw, p.projects_raw FROM man m
-    LEFT JOIN entity e ON true
-    LEFT JOIN prj p ON true;
+SELECT m.id, m.guid, m.version, m.url, m.funding AS funding_raw, 
+       m.status, m.status_message, m.crawl_errors, 
+       m.crawl_message, m.created_at, m.updated_at, 
+       COALESCE(e.entity_raw, '[]'::json) AS entity_raw, 
+       COALESCE(p.projects_raw, '[]'::json) AS projects_raw
+FROM man m
+    LEFT JOIN entity e ON e.id = m.id
+    LEFT JOIN prj p ON p.id = m.id
+    WHERE m.id > $3 ORDER BY m.id LIMIT $4;
 
 -- name: get-manifest-status
 SELECT status FROM manifests WHERE url = $1;
