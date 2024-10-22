@@ -486,12 +486,7 @@ func handleReport(c echo.Context) error {
 		app    = c.Get("app").(*App)
 		reason = c.FormValue("reason")
 		mGuid  = c.Param("mguid")
-		i      = strings.LastIndex(mGuid, "/")
 	)
-
-	if i == -1 {
-		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Invalid project guid"})
-	}
 
 	if len(reason) > 300 {
 		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Character limit exceeded. Should be less than 300."})
@@ -515,8 +510,7 @@ func handleReport(c echo.Context) error {
 		}
 	}
 
-	guid := mGuid[:i]
-	manifest, err := app.core.GetManifest(0, guid)
+	manifest, err := app.core.GetManifest(0, mGuid)
 	if err != nil {
 		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Could not get manifest"})
 	}

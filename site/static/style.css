@@ -168,14 +168,15 @@ button, .button {
     background: none;
     border: none;
     padding: 0;
-    margin: 0 5px;
     cursor: pointer;
-    opacity: 0.4;
     transition: opacity 0.3s ease;
+    opacity: 0.55;
 }
 
 .icon-button:hover {
-    opacity: 1;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
 }
 
 .icon-button img {

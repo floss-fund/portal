@@ -58,7 +58,14 @@
 
       {{ if HasField .Data "Manifest" }}
         <div class="heading">
-          <h1 class="title">{{ .Data.Heading }}</h1>
+          <div class="row">
+            <h1 class="title col-6">{{ .Data.Heading }}</h1>
+            <div class="col-end"> <!-- Report -->
+              <label for="modal-1" class="icon-button">Report <img src="/static/ico-flag.svg" alt="" aria-hidden="true" title="Report project"/></label>
+              <input hx-get="/report/{{ .Data.Manifest.GUID }}" hx-target="#report" type="checkbox" id="modal-1" class="modal-toggle">
+              <div class="modal-overlay" id="report"></div>
+            </div> <!-- Report -->
+          </div>
           <div class="subheading meta text-grey text-small">
             {{ if and (HasField .Data "Project") (ne .Data.Project.GUID "") }}
               <a href="{{ .RootURL }}/view/{{ .Data.Manifest.GUID }}">
