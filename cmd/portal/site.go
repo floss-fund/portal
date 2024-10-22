@@ -489,19 +489,20 @@ func handleReport(c echo.Context) error {
 		i      = strings.LastIndex(mGuid, "/")
 	)
 
-	type ResponseData struct {
-		RootURL       string
-		MGUID         string
-		ErrMessage    string
-		EnableCaptcha bool
+	if i == -1 {
+		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Invalid project guid"})
 	}
 
-	if i == -1 {
-		return c.Render(http.StatusOK, "report-submit", ResponseData{ErrMessage: "Invalid project guid"})
+	if len(reason) > 300 {
+		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Character limit exceeded. Should be less than 300."})
 	}
 
 	if c.Request().Method == http.MethodGet {
-		return c.Render(http.StatusOK, "report", ResponseData{
+		return c.Render(http.StatusOK, "report", struct {
+			RootURL       string
+			MGUID         string
+			EnableCaptcha bool
+		}{
 			RootURL:       app.consts.RootURL,
 			MGUID:         mGuid,
 			EnableCaptcha: app.consts.EnableCaptcha,
@@ -510,22 +511,22 @@ func handleReport(c echo.Context) error {
 
 	if app.consts.EnableCaptcha {
 		if err := validateCaptcha(c.FormValue("altcha"), app.consts.CaptchaKey); err != nil {
-			return c.Render(http.StatusOK, "report-submit", ResponseData{ErrMessage: "Invalid Captcha"})
+			return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Invalid Captcha"})
 		}
 	}
 
 	guid := mGuid[:i]
 	manifest, err := app.core.GetManifest(0, guid)
 	if err != nil {
-		return c.Render(http.StatusOK, "report-submit", ResponseData{ErrMessage: "Could not get manifest"})
+		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Could not get manifest"})
 	}
 
 	err = app.core.InsertManifestReport(manifest.ID, reason)
 	if err != nil {
-		return c.Render(http.StatusOK, "report-submit", ResponseData{ErrMessage: "An internal error occurred while submitting the report."})
+		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"An internal error occurred while submitting the report."})
 	}
 
-	return c.Render(http.StatusOK, "report-submit", ResponseData{})
+	return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{})
 }
 
 // Render executes and renders a template for echo.
