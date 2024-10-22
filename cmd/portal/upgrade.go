@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/floss-fund/portal/internal/migrations"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/koanf/v2"
 	"github.com/knadh/stuffbin"
@@ -24,10 +23,7 @@ type migFunc struct {
 // migrations is the list of available migrations ordered by the semver.
 // Each migration is a Go file in internal/migrations named after the semver.
 // The functions are named as: v0.7.0 => migrations.V0_7_0() and are idempotent.
-var migrationsList = []migFunc{
-	// {"v1.0.0.0", nil},
-	{"v1.1.0", migrations.V1_1_0},
-}
+var migrationsList = []migFunc{{"v1.0.0", nil}}
 
 // upgrade upgrades the database to the current version by running SQL migration files
 // for all version from the last known version to the current one.
