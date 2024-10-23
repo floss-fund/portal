@@ -33,6 +33,9 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	g.GET("/api/tags", handleGetTags)
 	g.GET("/api/captcha", handleGenerateCaptcha)
 
+	g.POST("/report/:mguid", handleReport)
+	g.GET("/report/:mguid", handleReport)
+
 	// Static files.
 	g.Static("/static", path.Join(ko.MustString("app.template_dir"), "/static"))
 

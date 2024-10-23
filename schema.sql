@@ -88,3 +88,13 @@ DROP INDEX IF EXISTS idx_settings_key; CREATE INDEX idx_settings_key ON settings
 DROP MATERIALIZED VIEW IF EXISTS top_tags;
 CREATE MATERIALIZED VIEW top_tags AS
 SELECT unnest(tags) AS tag, COUNT(*) AS tag_count FROM projects GROUP BY unnest(tags) ORDER BY tag_count DESC LIMIT 1000;
+
+-- reports
+DROP TABLE IF EXISTS reports CASCADE;
+CREATE TABLE IF NOT EXISTS reports (
+    id                  SERIAL PRIMARY KEY,
+    manifest_id         INTEGER REFERENCES manifests(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    reason              TEXT NOT NULL,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at          TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

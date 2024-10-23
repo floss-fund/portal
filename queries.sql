@@ -141,3 +141,10 @@ DELETE FROM manifests WHERE
         WHEN $1 > 0 THEN id = $1
         WHEN $2 != '' THEN guid = $2
     END;
+
+-- name: insert-report
+INSERT INTO reports (manifest_id, reason) 
+VALUES (
+    $1,
+    $2
+);

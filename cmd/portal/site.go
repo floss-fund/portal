@@ -481,6 +481,48 @@ func handleSearchPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "search", out)
 }
 
+func handleReport(c echo.Context) error {
+	var (
+		app    = c.Get("app").(*App)
+		reason = c.FormValue("reason")
+		mGuid  = c.Param("mguid")
+	)
+
+	if len(reason) > 300 {
+		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Character limit exceeded. Should be less than 300."})
+	}
+
+	if c.Request().Method == http.MethodGet {
+		return c.Render(http.StatusOK, "report", struct {
+			RootURL       string
+			MGUID         string
+			EnableCaptcha bool
+		}{
+			RootURL:       app.consts.RootURL,
+			MGUID:         mGuid,
+			EnableCaptcha: app.consts.EnableCaptcha,
+		})
+	}
+
+	if app.consts.EnableCaptcha {
+		if err := validateCaptcha(c.FormValue("altcha"), app.consts.CaptchaKey); err != nil {
+			return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Invalid Captcha"})
+		}
+	}
+
+	manifest, err := app.core.GetManifest(0, mGuid)
+	if err != nil {
+		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Could not get manifest"})
+	}
+
+	err = app.core.InsertManifestReport(manifest.ID, reason)
+	if err != nil {
+		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"An internal error occurred while submitting the report."})
+	}
+
+	return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{})
+}
+
 // Render executes and renders a template for echo.
 func (t *tplRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.tpl.ExecuteTemplate(w, name, tplData{

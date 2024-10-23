@@ -23,7 +23,7 @@ type migFunc struct {
 // migrations is the list of available migrations ordered by the semver.
 // Each migration is a Go file in internal/migrations named after the semver.
 // The functions are named as: v0.7.0 => migrations.V0_7_0() and are idempotent.
-var migrations = []migFunc{{"v1.0.0.0", nil}}
+var migrationsList = []migFunc{{"v1.0.0", nil}}
 
 // upgrade upgrades the database to the current version by running SQL migration files
 // for all version from the last known version to the current one.
@@ -105,9 +105,9 @@ func getPendingMigrations(db *sqlx.DB) (string, []migFunc, error) {
 	// Iterate through the migration versions and get everything above the last
 	// upgraded semver.
 	var toRun []migFunc
-	for i, m := range migrations {
+	for i, m := range migrationsList {
 		if semver.Compare(m.version, lastVer) > 0 {
-			toRun = migrations[i:]
+			toRun = migrationsList[i:]
 			break
 		}
 	}
