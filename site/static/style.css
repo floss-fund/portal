@@ -688,6 +688,12 @@ button, .button {
     .header .nav a {
         margin: 0 10px;
     }
+    .header .heading {
+        margin-bottom: 15px;
+    }
+    .header .subheading {
+        margin-bottom: 0px;
+    }
     .search {
         margin-bottom: 30px;
     }
