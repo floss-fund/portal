@@ -14,7 +14,7 @@ func syncSearch(c *core.Core, s *search.Search, lo *log.Logger) {
 		total  = 0
 	)
 	for {
-		items, err := c.GetManifests(lastID, 1000)
+		items, err := c.GetManifests(lastID, 1000, "active")
 		if err != nil {
 			lo.Fatalf("error fetching manifests: %v", err)
 		}
