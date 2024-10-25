@@ -1,7 +1,12 @@
 {{ define "report-submit" }}
 <div class="modal">
     <div class="modal-header">
-        <h3 class="modal-title">Report submitted</h3>
+        {{ if .Data.ErrMessage }}
+            <h3 class="modal-title">Report not submitted</h3>
+        {{ else }}
+            <h3 class="modal-title">Report submitted</h3>
+        {{ end }}
+        
         <label for="modal-1" class="modal-close">&times;</label>
     </div>
     <div class="modal-body">
