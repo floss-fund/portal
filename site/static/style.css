@@ -454,6 +454,23 @@ button.small {
         cursor: pointer;
     }
 
+table .filter {
+    display: flex;
+}
+
+    table .filter button {
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+    }
+
+    table .filter input {
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
 .home .updates .block {
     margin-top: 90px;
 }

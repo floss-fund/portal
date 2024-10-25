@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	paginationRows = 2 // TODO: Change this or make it configurable.
+	paginationRows = 20
 )
 
 func handleAdminManifestsListing(c echo.Context) error {
@@ -18,6 +18,9 @@ func handleAdminManifestsListing(c echo.Context) error {
 
 		fromRaw      = c.QueryParam("from")
 		statusFilter = c.QueryParam("status")
+		guidFilter   = c.QueryParam("guid")
+
+		m []models.ManifestData
 	)
 
 	// Convert the from parameter to an integer. If it's not a valid
@@ -27,10 +30,24 @@ func handleAdminManifestsListing(c echo.Context) error {
 		from = 0
 	}
 
-	// Get all manifests.
-	m, err := app.core.GetManifests(from, paginationRows, statusFilter)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	// If the GUID filter is not set, get all manifests and apply the
+	// pagination / status filters. Otherwise, get the manifest by GUID.
+	if guidFilter == "" {
+		// Get all manifests.
+		res, err := app.core.GetManifests(from, paginationRows, statusFilter)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		m = res
+	} else {
+		// Get the manifest by GUID.
+		res, err := app.core.GetManifest(0, guidFilter, "")
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		m = []models.ManifestData{res}
 	}
 
 	// Get the last ID.

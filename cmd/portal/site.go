@@ -522,7 +522,7 @@ func handleReport(c echo.Context) error {
 		}
 	}
 
-	manifest, err := app.core.GetManifest(0, mGuid)
+	manifest, err := app.core.GetManifest(0, mGuid, "")
 	if err != nil {
 		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Could not get manifest"})
 	}

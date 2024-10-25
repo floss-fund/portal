@@ -4,6 +4,7 @@
   <div class="admin">
     <div class="block">
       <h3>Manifest List</h3>
+
       <div>
         <button class="small" onclick="filterStatus('all')">All</button>
         <button class="small" onclick="filterStatus('active')">Active</button>
@@ -22,6 +23,16 @@
         <thead>
           <tr>
             <th>Name</th>
+            <th>
+              <div class="filter">
+                <input
+                  type="text"
+                  placeholder="GUID"
+                  id="guid"
+                />
+                <button class="small" onclick="filterGUID()">Filter</button>
+              </div>
+            </th>
             <th>Projects</th>
             <th>View</th>
             <th>Status</th>
@@ -31,6 +42,7 @@
           {{ if .Data.Manifests }} {{ range .Data.Manifests }}
           <tr>
             <td>{{ .Entity.Name }}</td>
+            <td>{{ .GUID }}</td>
             <td>{{ len .Projects }}</td>
             <td>
               <a href="/admin/view/{{.GUID}}">Entity</a> |
@@ -109,6 +121,17 @@
           icon.textContent = "✗";
         });
     });
+  }
+
+  // Add a debounce listener on input with id=guid
+  function filterGUID() {
+    var input = document.getElementById("guid");
+    var value = input.value;
+    if (value) {
+      var url = new URL(window.location.href);
+      url.searchParams.set("guid", value);
+      window.location.href = url.href;
+    }
   }
 
   function filterStatus(status) {
