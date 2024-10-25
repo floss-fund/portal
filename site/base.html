@@ -72,8 +72,8 @@
               </div><!-- subheading -->
             </div>
             <div class="col-4 col-end align-right">
-              <label for="modal-1" class="icon-button">Report <img src="/static/ico-flag.svg" alt="" aria-hidden="true" title="Report project"/></label>
-              <input hx-get="/report/{{ .Data.Manifest.GUID }}" hx-target="#report" type="checkbox" id="modal-1" class="modal-toggle">
+              <label for="modal-1" class="icon-button">Report <img src="/static/ico-flag.svg" alt="" aria-hidden="true" title="Report"/></label>
+              <input hx-get="/report/{{ .Data.Manifest.GUID }}" hx-target="#report" type="checkbox" id="modal-1" class="modal-toggle" />
               <div class="modal-overlay" id="report"></div>
             </div> <!-- Report -->
           </div>

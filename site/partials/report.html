@@ -1,5 +1,5 @@
 {{ define "report" }}
-<div class="modal">
+<div class="modal" aria-modal="true">
     <div class="modal-header">
         <h3 class="modal-title">Report this project</h3>
         <label for="modal-1" class="modal-close">&times;</label>
@@ -10,12 +10,13 @@
             <div>
                 <label for="reason">Reason</label>
                 <p>
-                    <input id="reason" type="text" name="reason" placeholder="Explain why this entry should be flagged"
-                        required autofocus maxlength="300" />
+                    <input id="reason" type="text" name="reason" placeholder="Reason for reporting this entry" required autofocus maxlength="300" />
                 </p>
+
                 {{ if .Data.EnableCaptcha }}
-                <altcha-widget challengeurl="{{ .RootURL }}/api/captcha"></altcha-widget>
+                    <altcha-widget challengeurl="{{ .RootURL }}/api/captcha"></altcha-widget>
                 {{ end }}
+
                 <br />
                 <p><button type="submit">Submit</button></p>
             </div>
