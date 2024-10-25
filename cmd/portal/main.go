@@ -28,9 +28,10 @@ type Consts struct {
 	AdminUsername []byte `json:"app.admin_username"`
 	AdminPassword []byte `json:"app.admin_password"`
 
-	EnableCaptcha     bool   `json:"site.enable_captcha"`
-	CaptchaComplexity int64  `json:"site.captcha_complexity"`
-	CaptchaKey        string `json:"-"`
+	EnableCaptcha           bool   `json:"site.enable_captcha"`
+	CaptchaComplexity       int64  `json:"site.captcha_complexity"`
+	CaptchaKey              string `json:"-"`
+	DefaultSubmissionstatus string `json:"site.default_submission_status"`
 
 	HomeNumTags     int `json:"site.home_num_tags"`
 	HomeNumProjects int `json:"site.home_num_projects"`

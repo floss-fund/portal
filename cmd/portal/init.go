@@ -102,15 +102,16 @@ func initConfig() {
 
 func initConstants(ko *koanf.Koanf) Consts {
 	c := Consts{
-		RootURL:           ko.MustString("app.root_url"),
-		AdminUsername:     ko.MustBytes("app.admin_username"),
-		AdminPassword:     ko.MustBytes("app.admin_password"),
-		ManifestURI:       ko.MustString("crawl.manifest_uri"),
-		WellKnownURI:      ko.MustString("crawl.wellknown_uri"),
-		DisallowedDomains: ko.Strings("crawl.disallowed_domains"),
-		EnableCaptcha:     ko.Bool("site.enable_captcha"),
-		HomeNumTags:       ko.MustInt("site.home_num_tags"),
-		HomeNumProjects:   ko.MustInt("site.home_num_projects"),
+		RootURL:                 ko.MustString("app.root_url"),
+		AdminUsername:           ko.MustBytes("app.admin_username"),
+		AdminPassword:           ko.MustBytes("app.admin_password"),
+		ManifestURI:             ko.MustString("crawl.manifest_uri"),
+		WellKnownURI:            ko.MustString("crawl.wellknown_uri"),
+		DisallowedDomains:       ko.Strings("crawl.disallowed_domains"),
+		EnableCaptcha:           ko.Bool("site.enable_captcha"),
+		HomeNumTags:             ko.MustInt("site.home_num_tags"),
+		HomeNumProjects:         ko.MustInt("site.home_num_projects"),
+		DefaultSubmissionstatus: ko.MustString("site.default_submission_status"),
 	}
 
 	if c.EnableCaptcha {
