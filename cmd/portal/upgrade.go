@@ -55,8 +55,10 @@ func upgrade(db *sqlx.DB, fs stuffbin.FileSystem, prompt bool) {
 	// Execute migrations in succession.
 	for _, m := range toRun {
 		lo.Printf("running migration %s", m.version)
-		if err := m.fn(db, fs, ko); err != nil {
-			lo.Fatalf("error running migration %s: %v", m.version, err)
+		if m.fn != nil {
+			if err := m.fn(db, fs, ko); err != nil {
+				lo.Fatalf("error running migration %s: %v", m.version, err)
+			}
 		}
 
 		// Record the migration version in the settings table. There was no
