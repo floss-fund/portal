@@ -114,7 +114,7 @@ FROM man m
 SELECT status FROM manifests WHERE url = $1;
 
 -- name: get-for-crawling
-SELECT id, url, updated_at FROM manifests
+SELECT id, url, updated_at, status FROM manifests
     WHERE id > $1
     AND updated_at > NOW() - $2::INTERVAL
     AND status != 'disabled'

@@ -73,7 +73,7 @@ loop:
 			}
 
 			// Fetch and validate the manifest.
-			status := ""
+			status := j.Status
 			m, err := c.FetchManifest(j.URLobj)
 			m.ID = j.ID
 			if err != nil {

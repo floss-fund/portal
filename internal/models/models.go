@@ -11,6 +11,7 @@ import (
 type ManifestJob struct {
 	ID           int       `json:"id" db:"id"`
 	URL          string    `json:"url" db:"url"`
+	Status       string    `json:"status" db:"status"`
 	LastModified time.Time `json:"updated_at" db:"updated_at"`
 
 	URLobj *url.URL `json:"-" db:"-"`
