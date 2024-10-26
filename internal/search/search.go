@@ -206,6 +206,7 @@ func (o *Search) GetRecentProjects(limit int) (Projects, error) {
 	p := url.Values{}
 	p.Set("q", "*")
 	p.Set("sort_by", "updated_at:desc")
+	p.Set("group_by", "manifest_guid")
 	p.Set("limit", fmt.Sprintf("%d", limit))
 
 	// Search.
@@ -221,11 +222,11 @@ func (o *Search) GetRecentProjects(limit int) (Projects, error) {
 
 	// Iterate through the raw results and replace the Title and Description
 	// fields with their <mark> highlighted equivalents, if any.
-	out := make(Projects, 0, len(res.Hits))
-	for _, h := range res.Hits {
-		d := h.Project
-
-		out = append(out, d)
+	out := make(Projects, 0, len(res.GroupedHits))
+	for _, h := range res.GroupedHits {
+		for _, p := range h.Hits {
+			out = append(out, p.Project)
+		}
 	}
 
 	return out, nil

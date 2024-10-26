@@ -3,7 +3,7 @@
     "name": "entities",
     "fields": [
       {"name": "manifest_id", "type": "int64" },
-      {"name": "manifest_guid", "type": "string" },
+      {"name": "manifest_guid", "type": "string", "facet": true },
       {"name": "type", "type": "string","facet": true},
       {"name": "role", "type": "string","facet": true},
       {"name": "name", "type": "string" },
@@ -17,7 +17,7 @@
     "name": "projects",
     "fields": [
       {"name": "manifest_id", "type": "int64" },
-      {"name": "manifest_guid", "type": "string" },
+      {"name": "manifest_guid", "type": "string", "facet": true },
       {"name": "entity_name", "type": "string" },
       {"name": "entity_type", "type": "string" },
       {"name": "entity_num_projects", "type": "int32" },

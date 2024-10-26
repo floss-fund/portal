@@ -67,6 +67,41 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch(in *jlexer.Lex
 				}
 				in.Delim(']')
 			}
+		case "grouped_hits":
+			if in.IsNull() {
+				in.Skip()
+				out.GroupedHits = nil
+			} else {
+				in.Delim('[')
+				if out.GroupedHits == nil {
+					if !in.IsDelim(']') {
+						out.GroupedHits = make([]struct {
+							Hits []struct {
+								Project Project `json:"document"`
+							} `json:"hits"`
+						}, 0, 2)
+					} else {
+						out.GroupedHits = []struct {
+							Hits []struct {
+								Project Project `json:"document"`
+							} `json:"hits"`
+						}{}
+					}
+				} else {
+					out.GroupedHits = (out.GroupedHits)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v2 struct {
+						Hits []struct {
+							Project Project `json:"document"`
+						} `json:"hits"`
+					}
+					easyjsonD2b7633eDecode1(in, &v2)
+					out.GroupedHits = append(out.GroupedHits, v2)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -93,11 +128,27 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch(out *jwriter.W
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v2, v3 := range in.Hits {
-				if v2 > 0 {
+			for v3, v4 := range in.Hits {
+				if v3 > 0 {
 					out.RawByte(',')
 				}
-				easyjsonD2b7633eEncode(out, v3)
+				easyjsonD2b7633eEncode(out, v4)
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"grouped_hits\":"
+		out.RawString(prefix)
+		if in.GroupedHits == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v5, v6 := range in.GroupedHits {
+				if v5 > 0 {
+					out.RawByte(',')
+				}
+				easyjsonD2b7633eEncode1(out, v6)
 			}
 			out.RawByte(']')
 		}
@@ -127,6 +178,94 @@ func (v *ProjectsResp) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ProjectsResp) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch(l, v)
+}
+func easyjsonD2b7633eDecode1(in *jlexer.Lexer, out *struct {
+	Hits []struct {
+		Project Project `json:"document"`
+	} `json:"hits"`
+}) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "hits":
+			if in.IsNull() {
+				in.Skip()
+				out.Hits = nil
+			} else {
+				in.Delim('[')
+				if out.Hits == nil {
+					if !in.IsDelim(']') {
+						out.Hits = make([]struct {
+							Project Project `json:"document"`
+						}, 0, 0)
+					} else {
+						out.Hits = []struct {
+							Project Project `json:"document"`
+						}{}
+					}
+				} else {
+					out.Hits = (out.Hits)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v7 struct {
+						Project Project `json:"document"`
+					}
+					easyjsonD2b7633eDecode(in, &v7)
+					out.Hits = append(out.Hits, v7)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonD2b7633eEncode1(out *jwriter.Writer, in struct {
+	Hits []struct {
+		Project Project `json:"document"`
+	} `json:"hits"`
+}) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"hits\":"
+		out.RawString(prefix[1:])
+		if in.Hits == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v8, v9 := range in.Hits {
+				if v8 > 0 {
+					out.RawByte(',')
+				}
+				easyjsonD2b7633eEncode(out, v9)
+			}
+			out.RawByte(']')
+		}
+	}
+	out.RawByte('}')
 }
 func easyjsonD2b7633eDecode(in *jlexer.Lexer, out *struct {
 	Project Project `json:"document"`
@@ -191,9 +330,9 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch1(in *jlexer.Le
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v4 Project
-			(v4).UnmarshalEasyJSON(in)
-			*out = append(*out, v4)
+			var v10 Project
+			(v10).UnmarshalEasyJSON(in)
+			*out = append(*out, v10)
 			in.WantComma()
 		}
 		in.Delim(']')
@@ -207,11 +346,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch1(out *jwriter.
 		out.RawString("null")
 	} else {
 		out.RawByte('[')
-		for v5, v6 := range in {
-			if v5 > 0 {
+		for v11, v12 := range in {
+			if v11 > 0 {
 				out.RawByte(',')
 			}
-			(v6).MarshalEasyJSON(out)
+			(v12).MarshalEasyJSON(out)
 		}
 		out.RawByte(']')
 	}
@@ -301,9 +440,9 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch2(in *jlexer.Le
 					out.Licenses = (out.Licenses)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v7 string
-					v7 = string(in.String())
-					out.Licenses = append(out.Licenses, v7)
+					var v13 string
+					v13 = string(in.String())
+					out.Licenses = append(out.Licenses, v13)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -324,9 +463,9 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch2(in *jlexer.Le
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v8 string
-					v8 = string(in.String())
-					out.Tags = append(out.Tags, v8)
+					var v14 string
+					v14 = string(in.String())
+					out.Tags = append(out.Tags, v14)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -419,11 +558,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch2(out *jwriter.
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v9, v10 := range in.Licenses {
-				if v9 > 0 {
+			for v15, v16 := range in.Licenses {
+				if v15 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v10))
+				out.String(string(v16))
 			}
 			out.RawByte(']')
 		}
@@ -435,11 +574,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch2(out *jwriter.
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v11, v12 := range in.Tags {
-				if v11 > 0 {
+			for v17, v18 := range in.Tags {
+				if v17 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v12))
+				out.String(string(v18))
 			}
 			out.RawByte(']')
 		}
@@ -530,9 +669,9 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch3(in *jlexer.Le
 					out.Licenses = (out.Licenses)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v13 string
-					v13 = string(in.String())
-					out.Licenses = append(out.Licenses, v13)
+					var v19 string
+					v19 = string(in.String())
+					out.Licenses = append(out.Licenses, v19)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -553,9 +692,9 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch3(in *jlexer.Le
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v14 string
-					v14 = string(in.String())
-					out.Tags = append(out.Tags, v14)
+					var v20 string
+					v20 = string(in.String())
+					out.Tags = append(out.Tags, v20)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -633,11 +772,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch3(out *jwriter.
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v15, v16 := range in.Licenses {
-				if v15 > 0 {
+			for v21, v22 := range in.Licenses {
+				if v21 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v16))
+				out.String(string(v22))
 			}
 			out.RawByte(']')
 		}
@@ -649,11 +788,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch3(out *jwriter.
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v17, v18 := range in.Tags {
-				if v17 > 0 {
+			for v23, v24 := range in.Tags {
+				if v23 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v18))
+				out.String(string(v24))
 			}
 			out.RawByte(']')
 		}
@@ -1009,11 +1148,11 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch6(in *jlexer.Le
 					out.Hits = (out.Hits)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v19 struct {
+					var v25 struct {
 						Entity Entity `json:"document"`
 					}
-					easyjsonD2b7633eDecode1(in, &v19)
-					out.Hits = append(out.Hits, v19)
+					easyjsonD2b7633eDecode2(in, &v25)
+					out.Hits = append(out.Hits, v25)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -1044,11 +1183,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch6(out *jwriter.
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v20, v21 := range in.Hits {
-				if v20 > 0 {
+			for v26, v27 := range in.Hits {
+				if v26 > 0 {
 					out.RawByte(',')
 				}
-				easyjsonD2b7633eEncode1(out, v21)
+				easyjsonD2b7633eEncode2(out, v27)
 			}
 			out.RawByte(']')
 		}
@@ -1079,7 +1218,7 @@ func (v *EntitiesResp) UnmarshalJSON(data []byte) error {
 func (v *EntitiesResp) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch6(l, v)
 }
-func easyjsonD2b7633eDecode1(in *jlexer.Lexer, out *struct {
+func easyjsonD2b7633eDecode2(in *jlexer.Lexer, out *struct {
 	Entity Entity `json:"document"`
 }) {
 	isTopLevel := in.IsStart()
@@ -1112,7 +1251,7 @@ func easyjsonD2b7633eDecode1(in *jlexer.Lexer, out *struct {
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncode1(out *jwriter.Writer, in struct {
+func easyjsonD2b7633eEncode2(out *jwriter.Writer, in struct {
 	Entity Entity `json:"document"`
 }) {
 	out.RawByte('{')
@@ -1142,9 +1281,9 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalSearch7(in *jlexer.Le
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v22 Entity
-			(v22).UnmarshalEasyJSON(in)
-			*out = append(*out, v22)
+			var v28 Entity
+			(v28).UnmarshalEasyJSON(in)
+			*out = append(*out, v28)
 			in.WantComma()
 		}
 		in.Delim(']')
@@ -1158,11 +1297,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalSearch7(out *jwriter.
 		out.RawString("null")
 	} else {
 		out.RawByte('[')
-		for v23, v24 := range in {
-			if v23 > 0 {
+		for v29, v30 := range in {
+			if v29 > 0 {
 				out.RawByte(',')
 			}
-			(v24).MarshalEasyJSON(out)
+			(v30).MarshalEasyJSON(out)
 		}
 		out.RawByte(']')
 	}

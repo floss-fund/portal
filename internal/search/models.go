@@ -68,4 +68,9 @@ type ProjectsResp struct {
 	Hits  []struct {
 		Project Project `json:"document"`
 	} `json:"hits"`
+	GroupedHits []struct {
+		Hits []struct {
+			Project Project `json:"document"`
+		} `json:"hits"`
+	} `json:"grouped_hits"`
 }
