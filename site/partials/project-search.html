@@ -10,7 +10,7 @@
                 <div class="meta">
                   <a href="{{ $.RootURL }}/view/{{ $r.ManifestGUID }}">
                     <img src="{{ $.RootURL }}/static/ico-{{ $r.EntityType }}.svg" alt="" aria-hidden="true" /> {{ $r.EntityName }}
-                    {{ if $r.EntityNumProjects }}<span class="num-projects">({{ $r.EntityNumProjects }} projects</span>){{ end }}
+                    {{ if $r.EntityNumProjects }}<span class="num-projects">({{ $r.EntityNumProjects }} {{ $r.EntityNumProjects | plural "project" "projects" }}</span>){{ end }}
                   </a>
                 </div>
             </div>
