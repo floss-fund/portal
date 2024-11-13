@@ -482,6 +482,35 @@ func handleSearchPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "search", out)
 }
 
+func handleListPage(c echo.Context) error {
+	var app = c.Get("app").(*App)
+
+	// Get the starting letter from query parameters
+	startLetter := c.QueryParam("letter")
+	if startLetter == "" {
+		startLetter = "A"
+	}
+
+	// Fetch projects that start with the specified letter
+	projects, err := app.core.GetProjectsByStartLetter(startLetter)
+	if err != nil {
+		return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
+	}
+
+	out := struct {
+		Page
+		Results []core.Project
+		Letter  string
+		Letters []string
+	}{}
+	out.Title = "Project Listing"
+	out.Results = projects
+	out.Letter = startLetter
+	out.Letters = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+
+	return c.Render(http.StatusOK, "list", out)
+}
+
 func handleReport(c echo.Context) error {
 	var (
 		app    = c.Get("app").(*App)

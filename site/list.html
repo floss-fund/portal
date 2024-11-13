@@ -1,0 +1,13 @@
+{{ define "list" }}
+{{ template "header" . }}
+<section class="listing">
+  <h2>Project Listing</h2>
+  <nav>
+      {{ range $letter := $.Data.Letters }}
+      <a href="{{ $.RootURL }}/list?letter={{ $letter }}">{{ $letter }}</a>
+      {{ end }}
+  </nav>
+    {{ template "project-search" . }}
+</section>
+{{ template "footer" . }}
+{{ end }}
