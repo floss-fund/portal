@@ -10,11 +10,13 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/floss-fund/go-funding-json/common"
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 const maxURISize = 40
@@ -44,6 +46,7 @@ type Queries struct {
 	DeleteManifest       *sqlx.Stmt `query:"delete-manifest"`
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
 	InsertReport         *sqlx.Stmt `query:"insert-report"`
+	GetRecentProjects    *sqlx.Stmt `query:"get-recent-projects"`
 }
 
 type Core struct {
@@ -187,6 +190,32 @@ func (d *Core) GetTopTags(limit int) ([]string, error) {
 	}
 
 	return tags, nil
+}
+
+type Project struct {
+	ID                string         `db:"id" json:"id"`
+	ManifestID        int            `db:"manifest_id" json:"manifest_id"`
+	ManifestGUID      string         `db:"manifest_guid" json:"manifest_guid"`
+	EntityName        string         `db:"entity_name" json:"entity_name"`
+	EntityType        string         `db:"entity_type" json:"entity_type"`
+	EntityNumProjects int            `db:"entity_num_projects" json:"entity_num_projects"`
+	Name              string         `db:"name" json:"name"`
+	Description       string         `db:"description" json:"description"`
+	WebpageURL        string         `db:"webpage_url" json:"webpage_url"`
+	RepositoryURL     string         `db:"repository_url" json:"repository_url"`
+	Licenses          pq.StringArray `db:"licenses" json:"licenses"`
+	Tags              pq.StringArray `db:"tags" json:"tags"`
+	UpdatedAt         time.Time      `db:"updated_at" json:"updated_at"`
+}
+
+// GetRecentProjects retrieves N recently updated projects.
+func (d *Core) GetRecentProjects(limit int) ([]Project, error) {
+	var projects []Project
+	if err := d.q.GetRecentProjects.Select(&projects, limit); err != nil {
+		d.log.Printf("error fetching recent projects: %v", err)
+		return nil, err
+	}
+	return projects, nil
 }
 
 // InsertManifestReport inserts a flagged report with reason for the manifest

@@ -148,3 +148,24 @@ VALUES (
     $1,
     $2
 );
+
+-- name: get-recent-projects
+SELECT 
+    p.id,
+    p.manifest_id,
+    m.guid AS manifest_guid,
+    e.name AS entity_name,
+    e.type AS entity_type,
+    (SELECT COUNT(*) FROM projects WHERE manifest_id = p.manifest_id) AS entity_num_projects,
+    p.name,
+    p.description,
+    p.webpage_url,
+    p.repository_url,
+    p.licenses,
+    p.tags,
+    p.updated_at
+FROM projects p
+JOIN manifests m ON p.manifest_id = m.id
+JOIN entities e ON e.manifest_id = m.id
+ORDER BY p.updated_at DESC
+LIMIT $1;
