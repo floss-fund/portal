@@ -197,6 +197,7 @@ func (d *Core) GetRecentProjects(limit int) ([]models.Project, error) {
 		d.log.Printf("error fetching recent projects: %v", err)
 		return nil, err
 	}
+
 	return projects, nil
 }
 

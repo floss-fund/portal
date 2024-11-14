@@ -1,0 +1,41 @@
+{{ define "project-recent" }}
+<section class="results projects" aria-label="Project search results">
+  <ul>
+      {{ range $r := .Data.Results }}
+      <li class="result">
+        <header>
+          <div class="row">
+            <div class="col-9">
+              <h3 class="title"><a href="{{ $.RootURL }}/view/project/{{ $r.ManifestGUID }}/{{ $r.GUID }}">{{ .Name }}</a></h3>
+                <div class="meta">
+                  <a href="{{ $.RootURL }}/view/{{ $r.ManifestGUID }}">
+                    <img src="{{ $.RootURL }}/static/ico-{{ $r.EntityType }}.svg" alt="" aria-hidden="true" /> {{ $r.EntityName }}
+                    {{ if $r.EntityNumProjects }}<span class="num-projects">({{ $r.EntityNumProjects }} {{ $r.EntityNumProjects | plural "project" "projects" }}</span>){{ end }}
+                  </a>
+                </div>
+            </div>
+            <div class="col-3 col-end props">
+              <span class="license text-small text-grey" aria-label="License">
+                  {{ $len := sub (len .Licenses) 1 }}
+                  {{ trimPrefix "spdx:" (index .Licenses 0) }} {{ if (gt $len 0) }} +{{ $len }}{{ end }}
+              </span>
+              <a href="{{ $r.WebpageURL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL) }}" aria-label="Visit project website">
+                <img src="/static/ico-link.svg" alt="" aria-hidden="true" />
+              </a>  
+              <a href="{{ $r.RepositoryURL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL) }}" aria-label="Visit project repository">
+                <img src="/static/ico-repo.svg" alt="" aria-hidden="true" />
+              </a>
+            </div>
+          </div>
+        </header>
+
+        <p class="description" aria-label="Project description">{{ abbrev 200 .Description }}</p>
+
+        <footer class="meta">
+          {{ template "tags" .Tags }}
+        </footer>
+      </li>
+      {{ end }}
+  </ul>
+</section>
+{{ end }}
