@@ -6,7 +6,7 @@
         <header>
           <div class="row">
             <div class="col-9">
-              <h3 class="title"><a href="{{ $.RootURL }}/view/project/{{ $r.ManifestGUID }}/{{ $r.GUID }}">{{ .Name }}</a></h3>
+              <h3 class="title"><a href="{{ $.RootURL }}/view/project/{{ $r.ManifestGUID }}/{{ $r.GUID }}">{{ $r.Name }}</a></h3>
                 <div class="meta">
                   <a href="{{ $.RootURL }}/view/{{ $r.ManifestGUID }}">
                     <img src="{{ $.RootURL }}/static/ico-{{ $r.EntityType }}.svg" alt="" aria-hidden="true" /> {{ $r.EntityName }}
