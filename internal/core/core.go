@@ -44,6 +44,7 @@ type Queries struct {
 	DeleteManifest       *sqlx.Stmt `query:"delete-manifest"`
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
 	InsertReport         *sqlx.Stmt `query:"insert-report"`
+	GetRecentProjects    *sqlx.Stmt `query:"get-recent-projects"`
 }
 
 type Core struct {
@@ -187,6 +188,17 @@ func (d *Core) GetTopTags(limit int) ([]string, error) {
 	}
 
 	return tags, nil
+}
+
+// GetRecentProjects retrieves N recently updated projects.
+func (d *Core) GetRecentProjects(limit int) ([]models.Project, error) {
+	var projects []models.Project
+	if err := d.q.GetRecentProjects.Select(&projects, limit); err != nil {
+		d.log.Printf("error fetching recent projects: %v", err)
+		return nil, err
+	}
+
+	return projects, nil
 }
 
 // InsertManifestReport inserts a flagged report with reason for the manifest

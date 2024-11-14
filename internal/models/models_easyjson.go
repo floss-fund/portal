@@ -4,6 +4,7 @@ package models
 
 import (
 	json "encoding/json"
+	pq "github.com/lib/pq"
 	easyjson "github.com/zerodha/easyjson"
 	jlexer "github.com/zerodha/easyjson/jlexer"
 	jwriter "github.com/zerodha/easyjson/jwriter"
@@ -156,7 +157,230 @@ func (v *ProjectURL) UnmarshalJSON(data []byte) error {
 func (v *ProjectURL) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels1(l, v)
 }
-func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(in *jlexer.Lexer, out *ManifestData) {
+func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(in *jlexer.Lexer, out *Project) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "id":
+			out.ID = string(in.String())
+		case "manifest_id":
+			out.ManifestID = int(in.Int())
+		case "manifest_guid":
+			out.ManifestGUID = string(in.String())
+		case "entity_name":
+			out.EntityName = string(in.String())
+		case "entity_type":
+			out.EntityType = string(in.String())
+		case "entity_num_projects":
+			out.EntityNumProjects = int(in.Int())
+		case "name":
+			out.Name = string(in.String())
+		case "description":
+			out.Description = string(in.String())
+		case "webpage_url":
+			out.WebpageURL = string(in.String())
+		case "repository_url":
+			out.RepositoryURL = string(in.String())
+		case "licenses":
+			if in.IsNull() {
+				in.Skip()
+				out.Licenses = nil
+			} else {
+				in.Delim('[')
+				if out.Licenses == nil {
+					if !in.IsDelim(']') {
+						out.Licenses = make(pq.StringArray, 0, 4)
+					} else {
+						out.Licenses = pq.StringArray{}
+					}
+				} else {
+					out.Licenses = (out.Licenses)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v4 string
+					v4 = string(in.String())
+					out.Licenses = append(out.Licenses, v4)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "tags":
+			if in.IsNull() {
+				in.Skip()
+				out.Tags = nil
+			} else {
+				in.Delim('[')
+				if out.Tags == nil {
+					if !in.IsDelim(']') {
+						out.Tags = make(pq.StringArray, 0, 4)
+					} else {
+						out.Tags = pq.StringArray{}
+					}
+				} else {
+					out.Tags = (out.Tags)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v5 string
+					v5 = string(in.String())
+					out.Tags = append(out.Tags, v5)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "updated_at":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.UpdatedAt).UnmarshalJSON(data))
+			}
+		case "guid":
+			out.GUID = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(out *jwriter.Writer, in Project) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.ID))
+	}
+	{
+		const prefix string = ",\"manifest_id\":"
+		out.RawString(prefix)
+		out.Int(int(in.ManifestID))
+	}
+	{
+		const prefix string = ",\"manifest_guid\":"
+		out.RawString(prefix)
+		out.String(string(in.ManifestGUID))
+	}
+	{
+		const prefix string = ",\"entity_name\":"
+		out.RawString(prefix)
+		out.String(string(in.EntityName))
+	}
+	{
+		const prefix string = ",\"entity_type\":"
+		out.RawString(prefix)
+		out.String(string(in.EntityType))
+	}
+	{
+		const prefix string = ",\"entity_num_projects\":"
+		out.RawString(prefix)
+		out.Int(int(in.EntityNumProjects))
+	}
+	{
+		const prefix string = ",\"name\":"
+		out.RawString(prefix)
+		out.String(string(in.Name))
+	}
+	{
+		const prefix string = ",\"description\":"
+		out.RawString(prefix)
+		out.String(string(in.Description))
+	}
+	{
+		const prefix string = ",\"webpage_url\":"
+		out.RawString(prefix)
+		out.String(string(in.WebpageURL))
+	}
+	{
+		const prefix string = ",\"repository_url\":"
+		out.RawString(prefix)
+		out.String(string(in.RepositoryURL))
+	}
+	{
+		const prefix string = ",\"licenses\":"
+		out.RawString(prefix)
+		if in.Licenses == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v6, v7 := range in.Licenses {
+				if v6 > 0 {
+					out.RawByte(',')
+				}
+				out.String(string(v7))
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"tags\":"
+		out.RawString(prefix)
+		if in.Tags == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v8, v9 := range in.Tags {
+				if v8 > 0 {
+					out.RawByte(',')
+				}
+				out.String(string(v9))
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"updated_at\":"
+		out.RawString(prefix)
+		out.Raw((in.UpdatedAt).MarshalJSON())
+	}
+	{
+		const prefix string = ",\"guid\":"
+		out.RawString(prefix)
+		out.String(string(in.GUID))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Project) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{FloatFmt: ""}
+	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Project) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Project) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Project) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(l, v)
+}
+func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels3(in *jlexer.Lexer, out *ManifestData) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -235,7 +459,7 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(out *jwriter.Writer, in ManifestData) {
+func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels3(out *jwriter.Writer, in ManifestData) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -328,27 +552,27 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(out *jwriter.
 // MarshalJSON supports json.Marshaler interface
 func (v ManifestData) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{FloatFmt: ""}
-	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(&w, v)
+	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ManifestData) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(w, v)
+	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ManifestData) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(&r, v)
+	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ManifestData) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(l, v)
+	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels3(l, v)
 }
-func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels3(in *jlexer.Lexer, out *EntityURL) {
+func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels4(in *jlexer.Lexer, out *EntityURL) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -379,7 +603,7 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels3(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels3(out *jwriter.Writer, in EntityURL) {
+func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels4(out *jwriter.Writer, in EntityURL) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -394,23 +618,23 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels3(out *jwriter.
 // MarshalJSON supports json.Marshaler interface
 func (v EntityURL) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{FloatFmt: ""}
-	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels3(&w, v)
+	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v EntityURL) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels3(w, v)
+	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *EntityURL) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels3(&r, v)
+	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *EntityURL) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels3(l, v)
+	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels4(l, v)
 }

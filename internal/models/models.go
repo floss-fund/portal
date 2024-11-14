@@ -6,6 +6,7 @@ import (
 
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/jmoiron/sqlx/types"
+	"github.com/lib/pq"
 )
 
 type ManifestJob struct {
@@ -54,3 +55,22 @@ type ProjectURL struct {
 
 //easyjson:json
 type ProjectURLs []ProjectURL
+
+//easyjson:json
+type Project struct {
+	v1.Project
+
+	ID                string         `db:"id" json:"id"`
+	ManifestID        int            `db:"manifest_id" json:"manifest_id"`
+	ManifestGUID      string         `db:"manifest_guid" json:"manifest_guid"`
+	EntityName        string         `db:"entity_name" json:"entity_name"`
+	EntityType        string         `db:"entity_type" json:"entity_type"`
+	EntityNumProjects int            `db:"entity_num_projects" json:"entity_num_projects"`
+	Name              string         `db:"name" json:"name"`
+	Description       string         `db:"description" json:"description"`
+	WebpageURL        string         `db:"webpage_url" json:"webpage_url"`
+	RepositoryURL     string         `db:"repository_url" json:"repository_url"`
+	Licenses          pq.StringArray `db:"licenses" json:"licenses"`
+	Tags              pq.StringArray `db:"tags" json:"tags"`
+	UpdatedAt         time.Time      `db:"updated_at" json:"updated_at"`
+}
