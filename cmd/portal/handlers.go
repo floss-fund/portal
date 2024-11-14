@@ -44,6 +44,8 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	a.GET("/api/manifests/:id", handleGetManifest)
 	a.DELETE("/api/manifests/:id", handleDeleteManifest)
 	a.PUT("/api/manifests/:id/status", handleUpdateManifestStatus)
+	a.GET("/admin/manifests", handleAdminManifestsListing)
+	a.GET("/admin/view/*", handleAdminManifestsPage)
 
 	// 404 pages.
 	srv.RouteNotFound("/api/*", func(c echo.Context) error {
@@ -64,7 +66,7 @@ func handleGetManifest(c echo.Context) error {
 		id, _ = strconv.Atoi(c.Param("id"))
 	)
 
-	out, err := app.core.GetManifest(id, "")
+	out, err := app.core.GetManifest(id, "", "active")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -98,7 +100,7 @@ func handleUpdateManifestStatus(c echo.Context) error {
 	}
 
 	// Delete it from search if the status isn't active.
-	if m, err := app.core.GetManifest(id, ""); err == nil {
+	if m, err := app.core.GetManifest(id, "", "active"); err == nil {
 		app.crawl.Callbacks.OnManifestUpdate(m, status)
 	}
 

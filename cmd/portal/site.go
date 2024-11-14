@@ -289,25 +289,36 @@ func handleManifestPage(c echo.Context) error {
 		}{}
 	)
 
-	if strings.HasPrefix(mGuid, "/view/funding/") {
+	var (
+		status = "active"
+		prefix = "/view/"
+	)
+
+	// If the user is an admin, set a few vars
+	if c.Get("is-admin") != nil {
+		status = ""
+		prefix = "/admin/view/"
+	}
+
+	if strings.HasPrefix(mGuid, prefix+"funding/") {
 		// Funding page.
-		mGuid = strings.TrimPrefix(mGuid, "/view/funding/")
+		mGuid = strings.TrimPrefix(mGuid, prefix+"funding/")
 		tpl = "funding"
 		out.Title = "Funding plans for %s"
 		out.Description = "Funding plans for free and open source projects by %s"
-	} else if strings.HasPrefix(mGuid, "/view/projects/") {
+	} else if strings.HasPrefix(mGuid, prefix+"projects/") {
 		// Projects page.
-		mGuid = strings.TrimPrefix(mGuid, "/view/projects/")
+		mGuid = strings.TrimPrefix(mGuid, prefix+"projects/")
 		tpl = "projects"
 		out.Title = "Projects by %s"
 		out.Description = "Projects by %s looking for free and open source funding"
-	} else if strings.HasPrefix(mGuid, "/view/project/") {
+	} else if strings.HasPrefix(mGuid, prefix+"project/") {
 		// Single project.
 		tpl = "project"
 
 		// Extract the last part of the URI.
 		var (
-			path = strings.TrimSuffix(strings.TrimPrefix(mGuid, "/view/project/"), "/")
+			path = strings.TrimSuffix(strings.TrimPrefix(mGuid, prefix+"project/"), "/")
 			i    = strings.LastIndex(path, "/")
 		)
 
@@ -318,22 +329,22 @@ func handleManifestPage(c echo.Context) error {
 		mGuid = path[:i]
 		pGuid = path[i+1:]
 
-	} else if strings.HasPrefix(mGuid, "/view/history/") {
+	} else if strings.HasPrefix(mGuid, prefix+"history/") {
 		// History page.
-		mGuid = strings.TrimPrefix(mGuid, "/view/history/")
+		mGuid = strings.TrimPrefix(mGuid, prefix+"history/")
 		tpl = "history"
 		out.Title = "Financial history of projects by %s"
 		out.Description = "Financial and funding history of projects by %s"
 	} else {
 		// Main entity page.
 		tpl = "entity"
-		mGuid = strings.TrimPrefix(mGuid, "/view/")
+		mGuid = strings.TrimPrefix(mGuid, prefix)
 		out.Title = " %s - Project funding"
 		out.Description = "Fund free and open source projects by %s"
 	}
 
 	// Get the manifest.
-	m, err := app.core.GetManifest(0, mGuid)
+	m, err := app.core.GetManifest(0, mGuid, status)
 	if err != nil {
 		if err == core.ErrNotFound {
 			return errPage(c, http.StatusNotFound, "", "Manifest not found", err.Error())
@@ -365,25 +376,25 @@ func handleManifestPage(c echo.Context) error {
 			ID:       "entity",
 			Label:    "Entity",
 			Selected: tpl == "entity",
-			URL:      fmt.Sprintf("%s/view/%s", app.consts.RootURL, m.GUID),
+			URL:      fmt.Sprintf("%s%s%s", app.consts.RootURL, prefix, m.GUID),
 		},
 		{
 			ID:       "projects",
 			Label:    fmt.Sprintf("Projects (%d)", len(m.Manifest.Projects)),
 			Selected: tpl == "projects",
-			URL:      fmt.Sprintf("%s/view/projects/%s", app.consts.RootURL, m.GUID),
+			URL:      fmt.Sprintf("%s%sprojects/%s", app.consts.RootURL, prefix, m.GUID),
 		},
 		{
 			ID:       "funding",
 			Selected: tpl == "funding",
 			Label:    fmt.Sprintf("Funding plans (%d)", len(m.Manifest.Funding.Plans)),
-			URL:      fmt.Sprintf("%s/view/funding/%s", app.consts.RootURL, m.GUID),
+			URL:      fmt.Sprintf("%s%sfunding/%s", app.consts.RootURL, prefix, m.GUID),
 		},
 		{
 			ID:       "history",
 			Selected: tpl == "history",
 			Label:    fmt.Sprintf("History (%d)", len(m.Manifest.Funding.History)),
-			URL:      fmt.Sprintf("%s/view/history/%s", app.consts.RootURL, m.GUID),
+			URL:      fmt.Sprintf("%s%shistory/%s", app.consts.RootURL, prefix, m.GUID),
 		},
 	}
 
@@ -396,7 +407,7 @@ func handleManifestPage(c echo.Context) error {
 			ID:       "project",
 			Selected: true,
 			Label:    prj.Name,
-			URL:      fmt.Sprintf("%s/view/projects/%s/%s", app.consts.RootURL, m.GUID, prj.GUID),
+			URL:      fmt.Sprintf("%s%sprojects/%s/%s", app.consts.RootURL, prefix, m.GUID, prj.GUID),
 		})
 
 		return c.Render(http.StatusOK, tpl, out)
@@ -511,7 +522,7 @@ func handleReport(c echo.Context) error {
 		}
 	}
 
-	manifest, err := app.core.GetManifest(0, mGuid)
+	manifest, err := app.core.GetManifest(0, mGuid, "")
 	if err != nil {
 		return c.Render(http.StatusOK, "report-submit", struct{ ErrMessage string }{"Could not get manifest"})
 	}

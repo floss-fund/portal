@@ -86,7 +86,10 @@ WITH man AS (
         WHEN $2 != '' THEN guid = $2
         ELSE TRUE
     END)
-    AND status = 'active'
+    AND (CASE 
+        WHEN $5 != '' THEN status = $5::manifest_status
+        ELSE TRUE
+    END)
 ),
 entity AS (
     SELECT m.id, TO_JSON(e) AS entity_raw 
