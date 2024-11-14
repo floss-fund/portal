@@ -83,7 +83,7 @@ func handleIndexPage(c echo.Context) error {
 		Page
 		Index   bool
 		Tags    []string
-		Results []core.Project
+		Results []models.Project
 	}{}
 	out.Index = true
 	out.Title = "Discover FOSS projects seeking funding"
