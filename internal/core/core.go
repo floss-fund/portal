@@ -44,6 +44,7 @@ type Queries struct {
 	DeleteManifest       *sqlx.Stmt `query:"delete-manifest"`
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
 	InsertReport         *sqlx.Stmt `query:"insert-report"`
+	GetRecentProjects    *sqlx.Stmt `query:"get-recent-projects"`
 }
 
 type Core struct {
@@ -65,8 +66,8 @@ func New(q *Queries, o Opt, lo *log.Logger) *Core {
 }
 
 // GetManifest retrieves a particular manifest.
-func (d *Core) GetManifest(id int, guid string) (models.ManifestData, error) {
-	out, err := d.getManifests(id, guid, 0, 1)
+func (d *Core) GetManifest(id int, guid string, status string) (models.ManifestData, error) {
+	out, err := d.getManifests(id, guid, 0, 1, status)
 	if err != nil || len(out) == 0 {
 		return models.ManifestData{}, ErrNotFound
 	}
@@ -75,8 +76,8 @@ func (d *Core) GetManifest(id int, guid string) (models.ManifestData, error) {
 }
 
 // GetManifests retrieves N manifests.
-func (d *Core) GetManifests(lastID, limit int) ([]models.ManifestData, error) {
-	out, err := d.getManifests(0, "", lastID, limit)
+func (d *Core) GetManifests(lastID, limit int, status string) ([]models.ManifestData, error) {
+	out, err := d.getManifests(0, "", lastID, limit, status)
 	if err != nil {
 		return nil, err
 	}
@@ -189,6 +190,17 @@ func (d *Core) GetTopTags(limit int) ([]string, error) {
 	return tags, nil
 }
 
+// GetRecentProjects retrieves N recently updated projects.
+func (d *Core) GetRecentProjects(limit int) ([]models.Project, error) {
+	var projects []models.Project
+	if err := d.q.GetRecentProjects.Select(&projects, limit); err != nil {
+		d.log.Printf("error fetching recent projects: %v", err)
+		return nil, err
+	}
+
+	return projects, nil
+}
+
 // InsertManifestReport inserts a flagged report with reason for the manifest
 func (d *Core) InsertManifestReport(id int, reason string) error {
 	if _, err := d.q.InsertReport.Exec(id, reason); err != nil {
@@ -200,14 +212,14 @@ func (d *Core) InsertManifestReport(id int, reason string) error {
 }
 
 // getManifests retrieves one or more manifests.
-func (d *Core) getManifests(id int, guid string, lastID, limit int) ([]models.ManifestData, error) {
+func (d *Core) getManifests(id int, guid string, lastID, limit int, status string) ([]models.ManifestData, error) {
 	var (
 		out []models.ManifestData
 	)
 
 	// Get the manifest. entity{} and projects[{}] are retrieved
 	// as JSON fields that need to be manually unmarshalled.
-	if err := d.q.GetManifests.Select(&out, id, guid, lastID, limit); err != nil {
+	if err := d.q.GetManifests.Select(&out, id, guid, lastID, limit, status); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
 		}

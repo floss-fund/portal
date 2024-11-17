@@ -86,7 +86,10 @@ WITH man AS (
         WHEN $2 != '' THEN guid = $2
         ELSE TRUE
     END)
-    AND status = 'active'
+    AND (CASE 
+        WHEN $5 != '' THEN status = $5::manifest_status
+        ELSE TRUE
+    END)
 ),
 entity AS (
     SELECT m.id, TO_JSON(e) AS entity_raw 
@@ -148,3 +151,45 @@ VALUES (
     $1,
     $2
 );
+
+-- name: get-recent-projects
+WITH ranked_projects AS (
+    SELECT 
+        p.id,
+        p.guid AS project_guid,
+        p.manifest_id,
+        m.guid AS manifest_guid,
+        e.name AS entity_name,
+        e.type AS entity_type,
+        (SELECT COUNT(*) FROM projects WHERE manifest_id = p.manifest_id) AS entity_num_projects,
+        p.name,
+        p.description,
+        p.webpage_url,
+        p.repository_url,
+        p.licenses,
+        p.tags,
+        p.created_at,
+        ROW_NUMBER() OVER (PARTITION BY p.manifest_id ORDER BY p.created_at DESC) AS rn
+    FROM projects p
+    JOIN manifests m ON p.manifest_id = m.id AND m.status = 'active'
+    JOIN entities e ON e.manifest_id = m.id
+)
+SELECT 
+    id,
+    project_guid,
+    manifest_id,
+    manifest_guid,
+    entity_name,
+    entity_type,
+    entity_num_projects,
+    name,
+    description,
+    webpage_url,
+    repository_url,
+    licenses,
+    tags,
+    created_at
+FROM ranked_projects
+WHERE rn <= 2
+ORDER BY created_at DESC
+LIMIT $1;
