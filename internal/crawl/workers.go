@@ -69,6 +69,10 @@ loop:
 
 			if !reCrawl {
 				c.log.Printf("no modification. Skipping: %s", j.URL)
+
+				// Touch and update its date.
+				_ = c.db.UpdateManifestDate(j.ID)
+
 				continue
 			}
 

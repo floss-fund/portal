@@ -127,6 +127,9 @@ SELECT id, url, updated_at, status FROM manifests
 -- name: update-manifest-status
 UPDATE manifests SET status=$2 WHERE id=$1;
 
+-- name: update-manifest-date
+UPDATE manifests SET updated_at=NOW() WHERE id=$1;
+
 -- name: get-top-tags
 SELECT tag FROM top_tags LIMIT $1;
 
