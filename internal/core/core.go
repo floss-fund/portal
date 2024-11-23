@@ -40,6 +40,7 @@ type Queries struct {
 	GetManifestStatus    *sqlx.Stmt `query:"get-manifest-status"`
 	GetForCrawling       *sqlx.Stmt `query:"get-for-crawling"`
 	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
+	UpdateManifestDate   *sqlx.Stmt `query:"update-manifest-date"`
 	UpdateCrawlError     *sqlx.Stmt `query:"update-crawl-error"`
 	DeleteManifest       *sqlx.Stmt `query:"delete-manifest"`
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
@@ -144,6 +145,16 @@ func (d *Core) GetManifestForCrawling(age string, offsetID, limit int) ([]models
 func (d *Core) UpdateManifestStatus(id int, status string) error {
 	if _, err := d.q.UpdateManifestStatus.Exec(id, status); err != nil {
 		d.log.Printf("error updating manifest status: %d: %v", id, err)
+		return err
+	}
+
+	return nil
+}
+
+// UpdateManifestDate updates a manifest's "updated_at" date.
+func (d *Core) UpdateManifestDate(id int) error {
+	if _, err := d.q.UpdateManifestDate.Exec(id); err != nil {
+		d.log.Printf("error updating manifest date: %d: %v", id, err)
 		return err
 	}
 

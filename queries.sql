@@ -119,13 +119,16 @@ SELECT status FROM manifests WHERE url = $1;
 -- name: get-for-crawling
 SELECT id, url, updated_at, status FROM manifests
     WHERE id > $1
-    AND updated_at > NOW() - $2::INTERVAL
+    AND updated_at < NOW() - $2::INTERVAL
     AND status != 'disabled'
     AND status != 'blocked'
     ORDER BY id LIMIT $3;
 
 -- name: update-manifest-status
 UPDATE manifests SET status=$2 WHERE id=$1;
+
+-- name: update-manifest-date
+UPDATE manifests SET updated_at=NOW() WHERE id=$1;
 
 -- name: get-top-tags
 SELECT tag FROM top_tags LIMIT $1;
