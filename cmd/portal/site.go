@@ -622,7 +622,22 @@ func renderBrowsePage(typ string, c echo.Context) error {
 	out.Letter = q
 	out.Letter = q
 	out.Letters = browseLetters
+
 	out.Title = fmt.Sprintf("Browse %s / %s - Page %d", typ, q, pg.Page)
+	out.Tabs = []Tab{
+		{
+			ID:       "projects",
+			Label:    "Projects",
+			Selected: "projects" == typ,
+			URL:      fmt.Sprintf("%s/browse/projects", app.consts.RootURL),
+		},
+		{
+			ID:       "entities",
+			Label:    "Entities",
+			Selected: "entities" == typ,
+			URL:      fmt.Sprintf("%s/browse/entities", app.consts.RootURL),
+		},
+	}
 
 	return c.Render(http.StatusOK, "browse", out)
 }
