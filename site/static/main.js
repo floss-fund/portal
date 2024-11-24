@@ -39,3 +39,23 @@ document.addEventListener("keydown", function(event) {
     q.select();
   }
 });
+
+(() => {
+    const params = new URLSearchParams(location.search);
+
+    // Set initial values
+    ["order_by", "order"].forEach(param => {
+      if (params.has(param)) {
+        document.querySelector(`select[name="${param}"] option.${params.get(param)}`).selected = true;
+      }
+    });
+
+    // Handle changes
+    document.querySelectorAll(".order select").forEach(e =>
+      e.onchange = () => {
+        params.set("page", 1);
+        params.set(e.name, e.options[e.selectedIndex].className);
+        location.search = params.toString();
+      }
+    );
+  })();

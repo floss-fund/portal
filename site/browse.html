@@ -3,9 +3,24 @@
 <section class="browse">
   <h2>Browse {{ $.Data.Type }} ({{ $.Data.Total }})</h2>
 
-  <nav class="pagination top" aria-label="Result pages">
-    {{ .Data.Pagination }}
-  </nav>
+  <div class="row">
+    <div class="col-9">
+      <nav class="pagination top" aria-label="Result pages">
+        {{ .Data.Pagination }}
+      </nav>
+    </div>
+    <div class="col-3 order align-right">
+      <select name="order_by">
+        <option class="created_at">Created</option>
+        <option class="updated_at">Updated</option>
+        <option class="name">Name</option>
+      </select>
+      <select name="order">
+        <option class="desc">Desc</option>
+        <option class="asc">Asc</option>
+      </select>
+    </div>
+  </div>
 
   {{ if eq (len .Data.Results) 0}}
     <h3>No results</h3>

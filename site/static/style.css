@@ -571,14 +571,10 @@ table .filter {
 }
 
 /* Browse directory */
-.browse .letters a {
-    margin-right: 10px;
+.browse .order select {
     display: inline-block;
+    width: auto;
 }
-    .browse .letters a.selected {
-        font-weight: bold;
-        border-bottom: 2px solid var(--primary);
-    }
 
 .footer {
     color: #999;
