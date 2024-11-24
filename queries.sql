@@ -202,7 +202,7 @@ WITH project_counts AS (
     SELECT manifest_id, COUNT(*) AS project_count FROM projects GROUP BY manifest_id
 )
 SELECT
-    p.id,
+    CONCAT(m.guid, '/', p.guid) as id,
     p.manifest_id,
     m.guid AS manifest_guid,
     e.name AS entity_name,
@@ -216,12 +216,11 @@ SELECT
     p.tags,
     p.updated_at
 FROM projects p
-JOIN manifests m ON p.manifest_id = m.id
-JOIN entities e ON e.manifest_id = m.id
-JOIN project_counts pc ON pc.manifest_id = p.manifest_id
+    JOIN manifests m ON p.manifest_id = m.id
+    JOIN entities e ON e.manifest_id = m.id
+    JOIN project_counts pc ON pc.manifest_id = p.manifest_id
 WHERE UPPER(SUBSTRING(p.name FROM 1 FOR 1)) = $1
-ORDER BY p.name ASC 
-OFFSET $2 LIMIT $3;
+ORDER BY p.name ASC OFFSET $2 LIMIT $3;
 
 -- name: get-project-count-alphabetically
 SELECT COUNT(id) AS total FROM projects WHERE UPPER(SUBSTRING(name FROM 1 FOR 1)) = $1;
