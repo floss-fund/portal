@@ -24,7 +24,7 @@ func initHandlers(ko *koanf.Koanf, srv *echo.Echo) {
 	g.GET("/validate", handleValidatePage)
 	g.POST("/validate", handleValidatePage)
 	g.GET("/search", handleSearchPage)
-	g.GET("/list", handleListPage)
+	g.GET("/browse", handleBrowsePage)
 	g.GET("/view/funding", handleManifestPage)
 	g.GET("/view/projects", handleManifestPage)
 	g.GET("/view/project", handleManifestPage)

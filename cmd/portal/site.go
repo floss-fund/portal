@@ -66,6 +66,8 @@ type Page struct {
 }
 
 var (
+	browseLetters = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+
 	reMultiLines = regexp.MustCompile(`\n\n+`)
 	errCaptcha   = errors.New("invalid captcha")
 )
@@ -493,17 +495,17 @@ func handleSearchPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "search", out)
 }
 
-func handleListPage(c echo.Context) error {
+func handleBrowsePage(c echo.Context) error {
 	var app = c.Get("app").(*App)
 
-	// Get the starting letter from query parameters
-	startLetter := c.QueryParam("letter")
-	if startLetter == "" {
-		startLetter = "A"
+	// Get the starting letter from query parameters.
+	q := c.QueryParam("q")
+	if q == "" || len(q) != 1 {
+		q = "A"
 	}
 
-	// Fetch projects that start with the specified letter
-	projects, err := app.core.GetProjectsByStartLetter(startLetter)
+	// Fetch projects that start with the specified letter.
+	projects, err := app.core.GetProjectsAlphabetically(q)
 	if err != nil {
 		return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
 	}
@@ -516,10 +518,10 @@ func handleListPage(c echo.Context) error {
 	}{}
 	out.Title = "Project Listing"
 	out.Results = projects
-	out.Letter = startLetter
-	out.Letters = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+	out.Letter = q
+	out.Letters = browseLetters
 
-	return c.Render(http.StatusOK, "list", out)
+	return c.Render(http.StatusOK, "browse", out)
 }
 
 func handleReport(c echo.Context) error {

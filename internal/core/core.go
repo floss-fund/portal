@@ -37,18 +37,18 @@ const (
 
 // Queries contains prepared DB queries.
 type Queries struct {
-	UpsertManifest           *sqlx.Stmt `query:"upsert-manifest"`
-	GetManifests             *sqlx.Stmt `query:"get-manifests"`
-	GetManifestStatus        *sqlx.Stmt `query:"get-manifest-status"`
-	GetForCrawling           *sqlx.Stmt `query:"get-for-crawling"`
-	UpdateManifestStatus     *sqlx.Stmt `query:"update-manifest-status"`
-	UpdateManifestDate       *sqlx.Stmt `query:"update-manifest-date"`
-	UpdateCrawlError         *sqlx.Stmt `query:"update-crawl-error"`
-	DeleteManifest           *sqlx.Stmt `query:"delete-manifest"`
-	GetTopTags               *sqlx.Stmt `query:"get-top-tags"`
-	InsertReport             *sqlx.Stmt `query:"insert-report"`
-	GetRecentProjects        *sqlx.Stmt `query:"get-recent-projects"`
-	GetProjectsByStartLetter *sqlx.Stmt `query:"get-projects-by-start-letter"`
+	UpsertManifest            *sqlx.Stmt `query:"upsert-manifest"`
+	GetManifests              *sqlx.Stmt `query:"get-manifests"`
+	GetManifestStatus         *sqlx.Stmt `query:"get-manifest-status"`
+	GetForCrawling            *sqlx.Stmt `query:"get-for-crawling"`
+	UpdateManifestStatus      *sqlx.Stmt `query:"update-manifest-status"`
+	UpdateManifestDate        *sqlx.Stmt `query:"update-manifest-date"`
+	UpdateCrawlError          *sqlx.Stmt `query:"update-crawl-error"`
+	DeleteManifest            *sqlx.Stmt `query:"delete-manifest"`
+	GetTopTags                *sqlx.Stmt `query:"get-top-tags"`
+	InsertReport              *sqlx.Stmt `query:"insert-report"`
+	GetRecentProjects         *sqlx.Stmt `query:"get-recent-projects"`
+	GetProjectsAlphabetically *sqlx.Stmt `query:"get-projects-alphabetically"`
 }
 
 type Project struct {
@@ -241,10 +241,12 @@ func (d *Core) InsertManifestReport(id int, reason string) error {
 	return nil
 }
 
-func (d *Core) GetProjectsByStartLetter(letter string) ([]Project, error) {
+// GetProjectsAlphabetically retrieves projects by the first letter of their name
+// sorted alphabetically.
+func (d *Core) GetProjectsAlphabetically(q string) ([]Project, error) {
 	var projects []Project
 
-	if err := d.q.GetProjectsByStartLetter.Select(&projects, letter); err != nil {
+	if err := d.q.GetProjectsAlphabetically.Select(&projects, q); err != nil {
 		d.log.Printf("error fetching projects by start letter: %v", err)
 		return nil, err
 	}

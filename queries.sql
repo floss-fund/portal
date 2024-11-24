@@ -197,7 +197,7 @@ WHERE rn <= 2
 ORDER BY created_at DESC
 LIMIT $1;
 
--- name: get-projects-by-start-letter
+-- name: get-projects-alphabetically
 SELECT 
     p.id,
     p.manifest_id,
