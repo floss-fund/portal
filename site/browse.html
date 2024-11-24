@@ -2,11 +2,6 @@
 {{ template "header" . }}
 <section class="browse">
   <h2>Browse {{ $.Data.Type }} ({{ $.Data.Total }})</h2>
-  <nav class="letters">
-      {{ range $l := $.Data.Letters }}
-        <a href="{{ $.RootURL }}/browse/{{ $.Data.Type }}?q={{ $l }}" {{ if eq $.Data.Letter $l }}class="selected"{{ end }}>{{ $l }}</a>
-      {{ end }}
-  </nav>
 
   <nav class="pagination top" aria-label="Result pages">
     {{ .Data.Pagination }}

@@ -58,7 +58,7 @@ type ProjectURLs []ProjectURL
 
 //easyjson:json
 type Project struct {
-	v1.Project
+	Total int `db:"total" json:"-"`
 
 	ID                string         `db:"id" json:"id"`
 	ManifestID        int            `db:"manifest_id" json:"manifest_id"`
@@ -77,14 +77,16 @@ type Project struct {
 
 //easyjson:json
 type Entity struct {
-	ID           string `json:"id"`
-	ManifestID   int    `json:"manifest_id"`
-	ManifestGUID string `json:"manifest_guid"`
-	Type         string `json:"type"`
-	Role         string `json:"role"`
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	WebpageURL   string `json:"webpage_url"`
-	NumProjects  int    `json:"num_projects"`
-	UpdatedAt    int64  `json:"updated_at"`
+	Total int `db:"total" json:"-"`
+
+	ID           string    `json:"id" db:"id"`
+	ManifestID   int       `json:"manifest_id" db:"manifest_id"`
+	ManifestGUID string    `json:"manifest_guid" db:"manifest_guid"`
+	Type         string    `json:"type" db:"type"`
+	Role         string    `json:"role" db:"role"`
+	Name         string    `json:"name" db:"name"`
+	Description  string    `json:"description" db:"description"`
+	WebpageURL   string    `json:"webpage_url" db:"webpage_url"`
+	NumProjects  int       `json:"num_projects" db:"num_projects"`
+	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
 }

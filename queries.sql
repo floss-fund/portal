@@ -197,11 +197,12 @@ WHERE rn <= 2
 ORDER BY created_at DESC
 LIMIT $1;
 
--- name: get-projects-alphabetically
+-- name: get-projects
 WITH project_counts AS (
     SELECT manifest_id, COUNT(*) AS project_count FROM projects GROUP BY manifest_id
 )
 SELECT
+	COUNT(*) OVER () AS total,
     CONCAT(m.guid, '/', p.guid) as id,
     p.manifest_id,
     m.guid AS manifest_guid,
@@ -219,25 +220,19 @@ FROM projects p
     JOIN manifests m ON p.manifest_id = m.id
     JOIN entities e ON e.manifest_id = m.id
     JOIN project_counts pc ON pc.manifest_id = p.manifest_id
-WHERE UPPER(SUBSTRING(p.name FROM 1 FOR 1)) = $1
-ORDER BY p.name ASC OFFSET $2 LIMIT $3;
+ORDER BY p.%s OFFSET $1 LIMIT $2;
 
--- name: get-project-count-alphabetically
-SELECT COUNT(id) AS total FROM projects WHERE UPPER(SUBSTRING(name FROM 1 FOR 1)) = $1;
-
--- name: get-entities-alphabetically
+-- name: get-entities
+-- raw: true
 WITH entity_counts AS (
     SELECT manifest_id, COUNT(*) AS project_count FROM projects GROUP BY manifest_id
 )
 SELECT 
+	COUNT(*) OVER () AS total,
     e.*,
-    ec.project_count AS entity_num_projects,
+    ec.project_count AS num_projects,
     m.guid AS manifest_guid
 FROM entities e
     JOIN entity_counts ec ON ec.manifest_id = e.manifest_id
     JOIN manifests m ON m.id = e.manifest_id
-    WHERE UPPER(SUBSTRING(e.name FROM 1 FOR 1)) = $1
-ORDER BY e.name ASC OFFSET $2 LIMIT $3;
-
--- name: get-entity-count-alphabetically
-SELECT COUNT(id) AS total FROM entities WHERE UPPER(SUBSTRING(name FROM 1 FOR 1)) = $1;
+ORDER BY %s OFFSET $1 LIMIT $2;

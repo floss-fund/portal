@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -35,25 +36,24 @@ const (
 
 // Queries contains prepared DB queries.
 type Queries struct {
-	UpsertManifest                *sqlx.Stmt `query:"upsert-manifest"`
-	GetManifests                  *sqlx.Stmt `query:"get-manifests"`
-	GetManifestStatus             *sqlx.Stmt `query:"get-manifest-status"`
-	GetForCrawling                *sqlx.Stmt `query:"get-for-crawling"`
-	UpdateManifestStatus          *sqlx.Stmt `query:"update-manifest-status"`
-	UpdateManifestDate            *sqlx.Stmt `query:"update-manifest-date"`
-	UpdateCrawlError              *sqlx.Stmt `query:"update-crawl-error"`
-	DeleteManifest                *sqlx.Stmt `query:"delete-manifest"`
-	GetTopTags                    *sqlx.Stmt `query:"get-top-tags"`
-	InsertReport                  *sqlx.Stmt `query:"insert-report"`
-	GetRecentProjects             *sqlx.Stmt `query:"get-recent-projects"`
-	GetProjectsAlphabetically     *sqlx.Stmt `query:"get-projects-alphabetically"`
-	GetProjectCountAlphabetically *sqlx.Stmt `query:"get-project-count-alphabetically"`
-	GetEntitiesAlphabetically     *sqlx.Stmt `query:"get-entities-alphabetically"`
-	GetEntityCountAlphabetically  *sqlx.Stmt `query:"get-entity-count-alphabetically"`
+	UpsertManifest       *sqlx.Stmt `query:"upsert-manifest"`
+	GetManifests         *sqlx.Stmt `query:"get-manifests"`
+	GetManifestStatus    *sqlx.Stmt `query:"get-manifest-status"`
+	GetForCrawling       *sqlx.Stmt `query:"get-for-crawling"`
+	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
+	UpdateManifestDate   *sqlx.Stmt `query:"update-manifest-date"`
+	UpdateCrawlError     *sqlx.Stmt `query:"update-crawl-error"`
+	DeleteManifest       *sqlx.Stmt `query:"delete-manifest"`
+	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
+	InsertReport         *sqlx.Stmt `query:"insert-report"`
+	GetRecentProjects    *sqlx.Stmt `query:"get-recent-projects"`
+	GetProjects          string     `query:"get-projects"`
+	GetEntities          string     `query:"get-entities"`
 }
 
 type Core struct {
 	q   *Queries
+	db  *sqlx.DB
 	opt Opt
 	hc  *http.Client
 	log *log.Logger
@@ -63,9 +63,10 @@ var (
 	ErrNotFound = errors.New("not found")
 )
 
-func New(q *Queries, o Opt, lo *log.Logger) *Core {
+func New(q *Queries, db *sqlx.DB, o Opt, lo *log.Logger) *Core {
 	return &Core{
 		q:   q,
+		db:  db,
 		log: lo,
 	}
 }
@@ -226,54 +227,28 @@ func (d *Core) InsertManifestReport(id int, reason string) error {
 	return nil
 }
 
-// GetProjectsAlphabetically retrieves projects by the first letter of their name
-// sorted alphabetically.
-func (d *Core) GetProjectsAlphabetically(q string, offset, limit int) ([]models.Project, error) {
+// GetProjects retrieves paginated projects optionally sorted by certain fields.
+func (c *Core) GetProjects(orderBy, order string, offset, limit int) ([]models.Project, error) {
 	var out []models.Project
 
-	if err := d.q.GetProjectsAlphabetically.Select(&out, q, offset, limit); err != nil {
-		d.log.Printf("error fetching projects by start letter: %v", err)
+	if err := c.db.Select(&out, fmt.Sprintf(c.q.GetProjects, orderBy+" "+order), offset, limit); err != nil {
+		c.log.Printf("error fetching projects by start letter: %v", err)
 		return nil, err
 	}
 
 	return out, nil
 }
 
-// GetProjectCountAlphabetically retrieves projects by the first letter of their name
-// sorted alphabetically.
-func (d *Core) GetProjectCountAlphabetically(q string) (int, error) {
-	var num int
-	if err := d.q.GetProjectCountAlphabetically.Get(&num, q); err != nil {
-		d.log.Printf("error fetching project count by start letter: %v", err)
-		return num, err
-	}
-
-	return num, nil
-}
-
-// GetEntitiesAlphabetically retrieves entities by the first letter of their name
-// sorted alphabetically.
-func (d *Core) GetEntitiesAlphabetically(q string, offset, limit int) ([]models.Entity, error) {
+// GetProjects retrieves paginated entities optionally sorted by certain fields.
+func (c *Core) GetEntities(orderBy, order string, offset, limit int) ([]models.Entity, error) {
 	var out []models.Entity
 
-	if err := d.q.GetEntitiesAlphabetically.Select(&out, q, offset, limit); err != nil {
-		d.log.Printf("error fetching entities by start letter: %v", err)
+	if err := c.db.Select(&out, fmt.Sprintf(c.q.GetEntities, orderBy+" "+order), offset, limit); err != nil {
+		c.log.Printf("error fetching entities by start letter: %v", err)
 		return nil, err
 	}
 
 	return out, nil
-}
-
-// GetEntityCountAlphabetically retrieves projects by the first letter of their name
-// sorted alphabetically.
-func (d *Core) GetEntityCountAlphabetically(q string) (int, error) {
-	var num int
-	if err := d.q.GetEntityCountAlphabetically.Get(&num, q); err != nil {
-		d.log.Printf("error fetching entity count by start letter: %v", err)
-		return num, err
-	}
-
-	return num, nil
 }
 
 // getManifests retrieves one or more manifests.

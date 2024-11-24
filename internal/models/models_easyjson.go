@@ -178,8 +178,6 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(in *jlexer.Le
 		switch key {
 		case "id":
 			out.ID = string(in.String())
-		case "guid":
-			out.GUID = string(in.String())
 		case "manifest_id":
 			out.ManifestID = int(in.Int())
 		case "manifest_guid":
@@ -264,13 +262,13 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(out *jwriter.
 	_ = first
 	{
 		const prefix string = ",\"id\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.ID))
-	}
-	{
-		const prefix string = ",\"guid\":"
-		out.RawString(prefix)
-		out.String(string(in.GUID))
 	}
 	{
 		const prefix string = ",\"manifest_id\":"
@@ -637,4 +635,140 @@ func (v *EntityURL) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *EntityURL) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels4(l, v)
+}
+func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels5(in *jlexer.Lexer, out *Entity) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "id":
+			out.ID = string(in.String())
+		case "manifest_id":
+			out.ManifestID = int(in.Int())
+		case "manifest_guid":
+			out.ManifestGUID = string(in.String())
+		case "type":
+			out.Type = string(in.String())
+		case "role":
+			out.Role = string(in.String())
+		case "name":
+			out.Name = string(in.String())
+		case "description":
+			out.Description = string(in.String())
+		case "webpage_url":
+			out.WebpageURL = string(in.String())
+		case "num_projects":
+			out.NumProjects = int(in.Int())
+		case "updated_at":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.UpdatedAt).UnmarshalJSON(data))
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels5(out *jwriter.Writer, in Entity) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"id\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.ID))
+	}
+	{
+		const prefix string = ",\"manifest_id\":"
+		out.RawString(prefix)
+		out.Int(int(in.ManifestID))
+	}
+	{
+		const prefix string = ",\"manifest_guid\":"
+		out.RawString(prefix)
+		out.String(string(in.ManifestGUID))
+	}
+	{
+		const prefix string = ",\"type\":"
+		out.RawString(prefix)
+		out.String(string(in.Type))
+	}
+	{
+		const prefix string = ",\"role\":"
+		out.RawString(prefix)
+		out.String(string(in.Role))
+	}
+	{
+		const prefix string = ",\"name\":"
+		out.RawString(prefix)
+		out.String(string(in.Name))
+	}
+	{
+		const prefix string = ",\"description\":"
+		out.RawString(prefix)
+		out.String(string(in.Description))
+	}
+	{
+		const prefix string = ",\"webpage_url\":"
+		out.RawString(prefix)
+		out.String(string(in.WebpageURL))
+	}
+	{
+		const prefix string = ",\"num_projects\":"
+		out.RawString(prefix)
+		out.Int(int(in.NumProjects))
+	}
+	{
+		const prefix string = ",\"updated_at\":"
+		out.RawString(prefix)
+		out.Raw((in.UpdatedAt).MarshalJSON())
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Entity) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{FloatFmt: ""}
+	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels5(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Entity) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels5(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Entity) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels5(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Entity) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels5(l, v)
 }

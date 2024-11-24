@@ -66,7 +66,7 @@ type Page struct {
 }
 
 var (
-	browseLetters = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+	orderByFields = []string{"created_at", "updated_at", "name"}
 
 	reMultiLines = regexp.MustCompile(`\n\n+`)
 	errCaptcha   = errors.New("invalid captcha")
@@ -557,54 +557,59 @@ func (t *tplRenderer) Render(w io.Writer, name string, data interface{}, c echo.
 func renderBrowsePage(typ string, c echo.Context) error {
 	var app = c.Get("app").(*App)
 
-	// Get the starting letter from query parameters.
-	q := c.QueryParam("q")
-	if q == "" || len(q) != 1 {
-		q = "A"
+	// Get order by fields from the query.
+	var (
+		orderBy = "created_at"
+		order   = "desc"
+	)
+	if o := c.QueryParam("order_by"); o != "" {
+		for _, f := range orderByFields {
+			if f == o {
+				orderBy = o
+				break
+			}
+		}
+	}
+	if o := c.QueryParam("order"); o != "" && (o == "asc" || o == "desc") {
+		order = o
 	}
 
 	// Get the total count.
-	total := 0
+	var (
+		results interface{}
+		pg      = app.pg.NewFromURL(c.Request().URL.Query())
+		total   = 0
+	)
 
 	switch typ {
 	case "entities":
-		t, err := app.core.GetEntityCountAlphabetically(q)
+		res, err := app.core.GetEntities(orderBy, order, pg.Offset, pg.Limit)
 		if err != nil {
-			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching entities.")
+			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching results.")
 		}
-		total = t
-	case "projects":
-		t, err := app.core.GetProjectCountAlphabetically(q)
-		if err != nil {
-			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
-		}
-		total = t
-	}
+		results = res
 
-	// Paginate.
-	pg := app.pg.NewFromURL(c.Request().URL.Query())
-	pg.SetTotal(total)
+		if len(res) > 0 {
+			total = res[0].Total
+		}
+
+	case "projects":
+		res, err := app.core.GetProjects(orderBy, order, pg.Offset, pg.Limit)
+		if err != nil {
+			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching results.")
+		}
+		results = res
+
+		if len(res) > 0 {
+			total = res[0].Total
+		}
+	}
 
 	// Additional query params to attach to paginated URLs.
+	pg.SetTotal(total)
 	qp := url.Values{}
-	qp.Set("q", q)
-
-	// Fetch results that start with the specified letter.
-	var results interface{}
-	switch typ {
-	case "entities":
-		r, err := app.core.GetEntitiesAlphabetically(q, pg.Offset, pg.Limit)
-		if err != nil {
-			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching entities.")
-		}
-		results = r
-	case "projects":
-		r, err := app.core.GetProjectsAlphabetically(q, pg.Offset, pg.Limit)
-		if err != nil {
-			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
-		}
-		results = r
-	}
+	qp.Set("order_by", orderBy)
+	qp.Set("order", order)
 
 	out := struct {
 		Page
@@ -612,18 +617,13 @@ func renderBrowsePage(typ string, c echo.Context) error {
 		Results    interface{}
 		Total      int
 		Type       string
-		Letter     string
-		Letters    []string
 	}{}
 	out.Pagination = template.HTML(pg.HTML("", qp))
 	out.Results = results
 	out.Total = total
 	out.Type = typ
-	out.Letter = q
-	out.Letter = q
-	out.Letters = browseLetters
 
-	out.Title = fmt.Sprintf("Browse %s / %s - Page %d", typ, q, pg.Page)
+	out.Title = fmt.Sprintf("Browse %s - Page %d", typ, pg.Page)
 	out.Tabs = []Tab{
 		{
 			ID:       "projects",

@@ -217,7 +217,7 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB) *core.Core {
 
 	opt := core.Opt{}
 
-	return core.New(&q, opt, lo)
+	return core.New(&q, db.Unsafe(), opt, lo)
 }
 
 func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf) *crawl.Crawl {
