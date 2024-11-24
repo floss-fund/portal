@@ -10,13 +10,11 @@ import (
 	"path"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/floss-fund/go-funding-json/common"
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/models"
 	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
 )
 
 const maxURISize = 40
@@ -50,22 +48,8 @@ type Queries struct {
 	GetRecentProjects             *sqlx.Stmt `query:"get-recent-projects"`
 	GetProjectsAlphabetically     *sqlx.Stmt `query:"get-projects-alphabetically"`
 	GetProjectCountAlphabetically *sqlx.Stmt `query:"get-project-count-alphabetically"`
-}
-
-type Project struct {
-	ID                string         `db:"id" json:"id"`
-	ManifestID        int            `db:"manifest_id" json:"manifest_id"`
-	ManifestGUID      string         `db:"manifest_guid" json:"manifest_guid"`
-	EntityName        string         `db:"entity_name" json:"entity_name"`
-	EntityType        string         `db:"entity_type" json:"entity_type"`
-	EntityNumProjects int            `db:"entity_num_projects" json:"entity_num_projects"`
-	Name              string         `db:"name" json:"name"`
-	Description       string         `db:"description" json:"description"`
-	WebpageURL        string         `db:"webpage_url" json:"webpage_url"`
-	RepositoryURL     string         `db:"repository_url" json:"repository_url"`
-	Licenses          pq.StringArray `db:"licenses" json:"licenses"`
-	Tags              pq.StringArray `db:"tags" json:"tags"`
-	UpdatedAt         time.Time      `db:"updated_at" json:"updated_at"`
+	GetEntitiesAlphabetically     *sqlx.Stmt `query:"get-entities-alphabetically"`
+	GetEntityCountAlphabetically  *sqlx.Stmt `query:"get-entity-count-alphabetically"`
 }
 
 type Core struct {
@@ -244,15 +228,15 @@ func (d *Core) InsertManifestReport(id int, reason string) error {
 
 // GetProjectsAlphabetically retrieves projects by the first letter of their name
 // sorted alphabetically.
-func (d *Core) GetProjectsAlphabetically(q string, offset, limit int) ([]Project, error) {
-	var projects []Project
+func (d *Core) GetProjectsAlphabetically(q string, offset, limit int) ([]models.Project, error) {
+	var out []models.Project
 
-	if err := d.q.GetProjectsAlphabetically.Select(&projects, q, offset, limit); err != nil {
+	if err := d.q.GetProjectsAlphabetically.Select(&out, q, offset, limit); err != nil {
 		d.log.Printf("error fetching projects by start letter: %v", err)
 		return nil, err
 	}
 
-	return projects, nil
+	return out, nil
 }
 
 // GetProjectCountAlphabetically retrieves projects by the first letter of their name
@@ -260,7 +244,32 @@ func (d *Core) GetProjectsAlphabetically(q string, offset, limit int) ([]Project
 func (d *Core) GetProjectCountAlphabetically(q string) (int, error) {
 	var num int
 	if err := d.q.GetProjectCountAlphabetically.Get(&num, q); err != nil {
-		d.log.Printf("error fetching projects by start letter: %v", err)
+		d.log.Printf("error fetching project count by start letter: %v", err)
+		return num, err
+	}
+
+	return num, nil
+}
+
+// GetEntitiesAlphabetically retrieves entities by the first letter of their name
+// sorted alphabetically.
+func (d *Core) GetEntitiesAlphabetically(q string, offset, limit int) ([]models.Entity, error) {
+	var out []models.Entity
+
+	if err := d.q.GetEntitiesAlphabetically.Select(&out, q, offset, limit); err != nil {
+		d.log.Printf("error fetching entities by start letter: %v", err)
+		return nil, err
+	}
+
+	return out, nil
+}
+
+// GetEntityCountAlphabetically retrieves projects by the first letter of their name
+// sorted alphabetically.
+func (d *Core) GetEntityCountAlphabetically(q string) (int, error) {
+	var num int
+	if err := d.q.GetEntityCountAlphabetically.Get(&num, q); err != nil {
+		d.log.Printf("error fetching entity count by start letter: %v", err)
 		return num, err
 	}
 

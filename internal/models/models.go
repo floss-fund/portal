@@ -74,3 +74,17 @@ type Project struct {
 	Tags              pq.StringArray `db:"tags" json:"tags"`
 	UpdatedAt         time.Time      `db:"updated_at" json:"updated_at"`
 }
+
+//easyjson:json
+type Entity struct {
+	ID           string `json:"id"`
+	ManifestID   int    `json:"manifest_id"`
+	ManifestGUID string `json:"manifest_guid"`
+	Type         string `json:"type"`
+	Role         string `json:"role"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	WebpageURL   string `json:"webpage_url"`
+	NumProjects  int    `json:"num_projects"`
+	UpdatedAt    int64  `json:"updated_at"`
+}

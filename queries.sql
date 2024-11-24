@@ -224,3 +224,20 @@ ORDER BY p.name ASC OFFSET $2 LIMIT $3;
 
 -- name: get-project-count-alphabetically
 SELECT COUNT(id) AS total FROM projects WHERE UPPER(SUBSTRING(name FROM 1 FOR 1)) = $1;
+
+-- name: get-entities-alphabetically
+WITH entity_counts AS (
+    SELECT manifest_id, COUNT(*) AS project_count FROM projects GROUP BY manifest_id
+)
+SELECT 
+    e.*,
+    ec.project_count AS entity_num_projects,
+    m.guid AS manifest_guid
+FROM entities e
+    JOIN entity_counts ec ON ec.manifest_id = e.manifest_id
+    JOIN manifests m ON m.id = e.manifest_id
+    WHERE UPPER(SUBSTRING(e.name FROM 1 FOR 1)) = $1
+ORDER BY e.name ASC OFFSET $2 LIMIT $3;
+
+-- name: get-entity-count-alphabetically
+SELECT COUNT(id) AS total FROM entities WHERE UPPER(SUBSTRING(name FROM 1 FOR 1)) = $1;

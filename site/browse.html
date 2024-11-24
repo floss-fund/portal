@@ -1,10 +1,10 @@
 {{ define "browse" }}
 {{ template "header" . }}
 <section class="browse">
-  <h2>Browse</h2>
+  <h2>Browse {{ $.Data.Type }} ({{ $.Data.Total }})</h2>
   <nav class="letters">
       {{ range $l := $.Data.Letters }}
-        <a href="{{ $.RootURL }}/browse?q={{ $l }}" {{ if eq $.Data.Letter $l }}class="selected"{{ end }}>{{ $l }}</a>
+        <a href="{{ $.RootURL }}/browse/{{ $.Data.Type }}?q={{ $l }}" {{ if eq $.Data.Letter $l }}class="selected"{{ end }}>{{ $l }}</a>
       {{ end }}
   </nav>
 
@@ -16,7 +16,11 @@
     <h3>No results</h3>
   {{ end }}
 
-  {{ template "project-search" . }}
+  {{ if eq $.Data.Type "projects" }}
+    {{ template "project-search" . }}
+  {{ else }}
+    {{ template "entity-results" . }}
+  {{ end }}
 
   <nav class="pagination top" aria-label="Result pages">
     {{ .Data.Pagination }}

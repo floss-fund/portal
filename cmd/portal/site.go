@@ -495,51 +495,12 @@ func handleSearchPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "search", out)
 }
 
-func handleBrowsePage(c echo.Context) error {
-	var app = c.Get("app").(*App)
+func handleEntitiesBrowsePage(c echo.Context) error {
+	return renderBrowsePage("entities", c)
+}
 
-	// Get the starting letter from query parameters.
-	q := c.QueryParam("q")
-	if q == "" || len(q) != 1 {
-		q = "A"
-	}
-
-	// Get the total count.
-	total, err := app.core.GetProjectCountAlphabetically(q)
-	if err != nil {
-		return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
-
-	}
-
-	// Paginate.
-	pg := app.pg.NewFromURL(c.Request().URL.Query())
-	pg.SetTotal(total)
-
-	// Additional query params to attach to paginated URLs.
-	qp := url.Values{}
-	qp.Set("q", q)
-
-	// Fetch projects that start with the specified letter.
-	projects, err := app.core.GetProjectsAlphabetically(q, pg.Offset, pg.Limit)
-	if err != nil {
-		return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
-	}
-
-	out := struct {
-		Page
-		Pagination template.HTML
-		Results    []core.Project
-		Letter     string
-		Letters    []string
-	}{}
-	out.Letter = q
-	out.Pagination = template.HTML(pg.HTML("", qp))
-	out.Title = fmt.Sprintf("Browse %s", "projects")
-	out.Results = projects
-	out.Letter = q
-	out.Letters = browseLetters
-
-	return c.Render(http.StatusOK, "browse", out)
+func handleProjectsBrowsePage(c echo.Context) error {
+	return renderBrowsePage("projects", c)
 }
 
 func handleReport(c echo.Context) error {
@@ -591,6 +552,79 @@ func (t *tplRenderer) Render(w io.Writer, name string, data interface{}, c echo.
 		AssetVer: t.AssetVer,
 		Data:     data,
 	})
+}
+
+func renderBrowsePage(typ string, c echo.Context) error {
+	var app = c.Get("app").(*App)
+
+	// Get the starting letter from query parameters.
+	q := c.QueryParam("q")
+	if q == "" || len(q) != 1 {
+		q = "A"
+	}
+
+	// Get the total count.
+	total := 0
+
+	switch typ {
+	case "entities":
+		t, err := app.core.GetEntityCountAlphabetically(q)
+		if err != nil {
+			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching entities.")
+		}
+		total = t
+	case "projects":
+		t, err := app.core.GetProjectCountAlphabetically(q)
+		if err != nil {
+			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
+		}
+		total = t
+	}
+
+	// Paginate.
+	pg := app.pg.NewFromURL(c.Request().URL.Query())
+	pg.SetTotal(total)
+
+	// Additional query params to attach to paginated URLs.
+	qp := url.Values{}
+	qp.Set("q", q)
+
+	// Fetch results that start with the specified letter.
+	var results interface{}
+	switch typ {
+	case "entities":
+		r, err := app.core.GetEntitiesAlphabetically(q, pg.Offset, pg.Limit)
+		if err != nil {
+			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching entities.")
+		}
+		results = r
+	case "projects":
+		r, err := app.core.GetProjectsAlphabetically(q, pg.Offset, pg.Limit)
+		if err != nil {
+			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
+		}
+		results = r
+	}
+
+	out := struct {
+		Page
+		Pagination template.HTML
+		Results    interface{}
+		Total      int
+		Type       string
+		Letter     string
+		Letters    []string
+	}{}
+	out.Pagination = template.HTML(pg.HTML("", qp))
+	out.Results = results
+	out.Total = total
+	out.Type = typ
+	out.Letter = q
+	out.Letter = q
+	out.Letters = browseLetters
+	out.Title = fmt.Sprintf("Browse %s / %s - Page %d", typ, q, pg.Page)
+
+	return c.Render(http.StatusOK, "browse", out)
 }
 
 func errPage(c echo.Context, code int, tpl, title, message string) error {

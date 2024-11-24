@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS entities (
 DROP INDEX IF EXISTS idx_entity_manifest; CREATE INDEX idx_entity_manifest ON entities(manifest_id);
 DROP INDEX IF EXISTS idx_entity_name; CREATE INDEX idx_entity_name ON entities USING GIN (LOWER(name) gin_trgm_ops);
 DROP INDEX IF EXISTS idx_entity_email; CREATE INDEX idx_entity_email ON entities(LOWER(email));
+DROP INDEX IF EXISTS idx_entity_letter; CREATE INDEX idx_entity_letter ON entities (UPPER(SUBSTRING(name FROM 1 FOR 1)));
 
 -- projects
 DROP TABLE IF EXISTS projects CASCADE;
