@@ -198,13 +198,16 @@ ORDER BY created_at DESC
 LIMIT $1;
 
 -- name: get-projects-alphabetically
-SELECT 
+WITH project_counts AS (
+    SELECT manifest_id, COUNT(*) AS project_count FROM projects GROUP BY manifest_id
+)
+SELECT
     p.id,
     p.manifest_id,
     m.guid AS manifest_guid,
     e.name AS entity_name,
     e.type AS entity_type,
-    (SELECT COUNT(*) FROM projects WHERE manifest_id = p.manifest_id) AS entity_num_projects,
+    pc.project_count AS entity_num_projects,
     p.name,
     p.description,
     p.webpage_url,
@@ -215,9 +218,10 @@ SELECT
 FROM projects p
 JOIN manifests m ON p.manifest_id = m.id
 JOIN entities e ON e.manifest_id = m.id
+JOIN project_counts pc ON pc.manifest_id = p.manifest_id
 WHERE UPPER(SUBSTRING(p.name FROM 1 FOR 1)) = $1
-ORDER BY p.name ASC OFFSET $2 LIMIT $3;
+ORDER BY p.name ASC 
+OFFSET $2 LIMIT $3;
 
 -- name: get-project-count-alphabetically
-SELECT COUNT(id) AS total FROM projects WHERE
-    UPPER(SUBSTRING(name FROM 1 FOR 1)) = $1;
+SELECT COUNT(id) AS total FROM projects WHERE UPPER(SUBSTRING(name FROM 1 FOR 1)) = $1;
