@@ -260,7 +260,7 @@ func handleValidateManifest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	b, err := m.MarshalJSON()
+	b, err := m.Manifest.MarshalJSON()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
