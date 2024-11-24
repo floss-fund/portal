@@ -61,6 +61,7 @@ type Project struct {
 	Total int `db:"total" json:"-"`
 
 	ID                string         `db:"id" json:"id"`
+	GUID              string         `db:"guid" json:"guid"`
 	ManifestID        int            `db:"manifest_id" json:"manifest_id"`
 	ManifestGUID      string         `db:"manifest_guid" json:"manifest_guid"`
 	EntityName        string         `db:"entity_name" json:"entity_name"`

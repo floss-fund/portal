@@ -178,6 +178,8 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(in *jlexer.Le
 		switch key {
 		case "id":
 			out.ID = string(in.String())
+		case "guid":
+			out.GUID = string(in.String())
 		case "manifest_id":
 			out.ManifestID = int(in.Int())
 		case "manifest_guid":
@@ -269,6 +271,11 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(out *jwriter.
 			out.RawString(prefix)
 		}
 		out.String(string(in.ID))
+	}
+	{
+		const prefix string = ",\"guid\":"
+		out.RawString(prefix)
+		out.String(string(in.GUID))
 	}
 	{
 		const prefix string = ",\"manifest_id\":"
