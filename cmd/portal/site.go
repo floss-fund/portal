@@ -504,19 +504,37 @@ func handleBrowsePage(c echo.Context) error {
 		q = "A"
 	}
 
+	// Get the total count.
+	total, err := app.core.GetProjectCountAlphabetically(q)
+	if err != nil {
+		return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
+
+	}
+
+	// Paginate.
+	pg := app.pg.NewFromURL(c.Request().URL.Query())
+	pg.SetTotal(total)
+
+	// Additional query params to attach to paginated URLs.
+	qp := url.Values{}
+	qp.Set("q", q)
+
 	// Fetch projects that start with the specified letter.
-	projects, err := app.core.GetProjectsAlphabetically(q)
+	projects, err := app.core.GetProjectsAlphabetically(q, pg.Offset, pg.Limit)
 	if err != nil {
 		return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching projects.")
 	}
 
 	out := struct {
 		Page
-		Results []core.Project
-		Letter  string
-		Letters []string
+		Pagination template.HTML
+		Results    []core.Project
+		Letter     string
+		Letters    []string
 	}{}
-	out.Title = "Project Listing"
+	out.Letter = q
+	out.Pagination = template.HTML(pg.HTML("", qp))
+	out.Title = fmt.Sprintf("Browse %s", "projects")
 	out.Results = projects
 	out.Letter = q
 	out.Letters = browseLetters

@@ -74,6 +74,7 @@ DROP INDEX IF EXISTS idx_project_manifest; CREATE INDEX idx_project_manifest ON 
 DROP INDEX IF EXISTS idx_project_name; CREATE INDEX idx_project_name ON projects USING GIN (LOWER(name) gin_trgm_ops);
 DROP INDEX IF EXISTS idx_project_licenses; CREATE INDEX idx_project_licenses ON projects USING GIN (licenses);
 DROP INDEX IF EXISTS idx_project_tags; CREATE INDEX idx_project_tags ON projects USING GIN (tags);
+DROP INDEX IF EXISTS idx_project_letter; CREATE INDEX idx_project_letter ON projects (UPPER(SUBSTRING(name FROM 1 FOR 1)));
 
 -- settings
 DROP TABLE IF EXISTS settings CASCADE;

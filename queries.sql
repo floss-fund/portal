@@ -215,5 +215,9 @@ SELECT
 FROM projects p
 JOIN manifests m ON p.manifest_id = m.id
 JOIN entities e ON e.manifest_id = m.id
-WHERE LOWER(p.name) LIKE LOWER($1 || '%')
-ORDER BY p.name ASC;
+WHERE UPPER(SUBSTRING(p.name FROM 1 FOR 1)) = $1
+ORDER BY p.name ASC OFFSET $2 LIMIT $3;
+
+-- name: get-project-count-alphabetically
+SELECT COUNT(id) AS total FROM projects WHERE
+    UPPER(SUBSTRING(name FROM 1 FOR 1)) = $1;

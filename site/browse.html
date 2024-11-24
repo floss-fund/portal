@@ -1,0 +1,27 @@
+{{ define "browse" }}
+{{ template "header" . }}
+<section class="browse">
+  <h2>Browse</h2>
+  <nav class="letters">
+      {{ range $l := $.Data.Letters }}
+        <a href="{{ $.RootURL }}/browse?q={{ $l }}" {{ if eq $.Data.Letter $l }}class="selected"{{ end }}>{{ $l }}</a>
+      {{ end }}
+  </nav>
+
+  <nav class="pagination top" aria-label="Result pages">
+    {{ .Data.Pagination }}
+  </nav>
+
+  {{ if eq (len .Data.Results) 0}}
+    <h3>No results</h3>
+  {{ end }}
+
+  {{ template "project-search" . }}
+
+  <nav class="pagination top" aria-label="Result pages">
+    {{ .Data.Pagination }}
+  </nav>
+
+  </section>
+{{ template "footer" . }}
+{{ end }}
