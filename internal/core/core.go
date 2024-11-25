@@ -49,6 +49,7 @@ type Queries struct {
 	GetRecentProjects    *sqlx.Stmt `query:"get-recent-projects"`
 	GetProjects          string     `query:"get-projects"`
 	GetEntities          string     `query:"get-entities"`
+	GetManifestsDump     *sqlx.Stmt `query:"get-manifests-dump"`
 }
 
 type Core struct {
@@ -245,6 +246,17 @@ func (c *Core) GetEntities(orderBy, order string, offset, limit int) ([]models.E
 
 	if err := c.db.Select(&out, fmt.Sprintf(c.q.GetEntities, orderBy+" "+order), offset, limit); err != nil {
 		c.log.Printf("error fetching entities by start letter: %v", err)
+		return nil, err
+	}
+
+	return out, nil
+}
+
+// GetManifestsDump retrieves N manifests raw dumps for export.
+func (c *Core) GetManifestsDump(lastID, limit int) ([]models.ManifestExport, error) {
+	var out []models.ManifestExport
+	if err := c.q.GetManifestsDump.Select(&out, lastID, limit); err != nil {
+		c.log.Printf("error exporting manifests: %v", err)
 		return nil, err
 	}
 

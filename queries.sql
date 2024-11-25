@@ -236,3 +236,47 @@ FROM entities e
     JOIN entity_counts ec ON ec.manifest_id = e.manifest_id
     JOIN manifests m ON m.id = e.manifest_id
 ORDER BY %s OFFSET $1 LIMIT $2;
+
+-- name: get-manifests-dump
+WITH project_json AS (
+    SELECT 
+        manifest_id,
+        JSONB_AGG(JSONB_BUILD_OBJECT(
+            'guid', guid,
+            'name', name,
+            'description', description,
+            'webpageUrl', JSONB_BUILD_OBJECT(
+                'url', webpage_url,
+                'wellKnown', webpage_wellknown
+            ),
+            'repositoryUrl', JSONB_BUILD_OBJECT(
+                'url', repository_url,
+                'wellKnown', repository_wellknown
+            ),
+            'licenses', TO_JSONB(licenses),
+            'tags', TO_JSONB(tags)
+        )) AS projects_json
+    FROM projects
+    GROUP BY manifest_id
+)
+SELECT m.id, m.url, m.created_at, m.updated_at, m.status, JSONB_BUILD_OBJECT(
+    'version', m.version,
+    'entity', JSONB_BUILD_OBJECT(
+        'type', e.type,
+        'role', e.role,
+        'name', e.name,
+        'email', e.email,
+        'phone', e.phone,
+        'description', e.description,
+        'webpageUrl', JSONB_BUILD_OBJECT(
+            'url', e.webpage_url,
+            'wellKnown', e.webpage_wellknown
+        )
+    ),
+    'projects', COALESCE(p.projects_json, '[]'::JSONB),
+    'funding', m.funding
+) AS manifest_json
+FROM manifests m
+    LEFT JOIN entities e ON e.manifest_id = m.id
+    LEFT JOIN project_json p ON p.manifest_id = m.id
+WHERE m.id > $1 ORDER BY m.id LIMIT $2;

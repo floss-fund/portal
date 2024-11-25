@@ -54,7 +54,7 @@ func initConfig() {
 		os.Exit(0)
 	}
 
-	f.String("mode", "site", "site = runs the public portal | crawl = runs the background crawler")
+	f.String("mode", "site", "site = runs the public portal | crawl = runs the background crawler | dump = dump raw manifest data to stdout")
 	f.Bool("new-config", false, "generate a new sample config.toml file.")
 	f.StringSlice("config", []string{"config.toml"},
 		"path to one or more config files (will be merged in order)")

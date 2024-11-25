@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"net/url"
 	"time"
 
@@ -16,6 +17,16 @@ type ManifestJob struct {
 	LastModified time.Time `json:"updated_at" db:"updated_at"`
 
 	URLobj *url.URL `json:"-" db:"-"`
+}
+
+//easyjson:json
+type ManifestExport struct {
+	ID           int             `db:"id" json:"id"`
+	URL          string          `db:"url" json:"url"`
+	Status       string          `db:"status" json:"status"`
+	CreatedAt    time.Time       `db:"created_at" json:"created_at"`
+	UpdatedAt    time.Time       `db:"updated_at" json:"updated_at"`
+	ManifestJSON json.RawMessage `db:"manifest_json" json:"manifest_json"`
 }
 
 //easyjson:json

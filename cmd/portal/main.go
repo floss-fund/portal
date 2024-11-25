@@ -110,6 +110,9 @@ func main() {
 	case "sync-search":
 		syncSearch(app.core, app.search, lo)
 		return
+	case "dump":
+		dumpManifests(app.core, lo)
+		return
 	}
 
 	// Initialize the echo HTTP server.
