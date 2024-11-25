@@ -159,7 +159,7 @@ VALUES (
 WITH ranked_projects AS (
     SELECT 
         p.id,
-        p.guid AS project_guid,
+        p.guid,
         p.manifest_id,
         m.guid AS manifest_guid,
         e.name AS entity_name,
@@ -179,7 +179,7 @@ WITH ranked_projects AS (
 )
 SELECT 
     id,
-    project_guid,
+    guid,
     manifest_id,
     manifest_guid,
     entity_name,
