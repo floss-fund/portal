@@ -112,6 +112,7 @@ func initConstants(ko *koanf.Koanf) Consts {
 		HomeNumTags:             ko.MustInt("site.home_num_tags"),
 		HomeNumProjects:         ko.MustInt("site.home_num_projects"),
 		DefaultSubmissionstatus: ko.MustString("site.default_submission_status"),
+		DumpFileName:            ko.MustString("site.dump_filename"),
 	}
 
 	if c.EnableCaptcha {

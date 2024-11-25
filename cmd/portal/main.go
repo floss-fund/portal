@@ -35,6 +35,8 @@ type Consts struct {
 
 	HomeNumTags     int `json:"site.home_num_tags"`
 	HomeNumProjects int `json:"site.home_num_projects"`
+
+	DumpFileName string `json:"site.dump_filename"`
 }
 
 // App contains the "global" components that are passed around, especially through HTTP handlers.

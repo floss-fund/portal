@@ -8,9 +8,12 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"slices"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/altcha-org/altcha-lib-go"
 	"github.com/floss-fund/go-funding-json/common"
@@ -30,6 +33,13 @@ type tplRenderer struct {
 	tpl      *template.Template
 	RootURL  string
 	AssetVer string
+}
+
+type fileStats struct {
+	Name         string
+	Size         int64
+	LastModified time.Time
+	lastChecked  time.Time
 }
 
 type Query struct {
@@ -70,6 +80,27 @@ var (
 
 	reMultiLines = regexp.MustCompile(`\n\n+`)
 	errCaptcha   = errors.New("invalid captcha")
+
+	browseTabs = []Tab{
+		{
+			ID:    "projects",
+			Label: "Projects",
+			URL:   "/browse/projects",
+		},
+		{
+			ID:    "entities",
+			Label: "Entities",
+			URL:   "/browse/entities",
+		},
+		{
+			ID:    "export",
+			Label: "Export",
+			URL:   "/browse/export",
+		},
+	}
+
+	dumpFile fileStats
+	mut      sync.RWMutex
 )
 
 func handleIndexPage(c echo.Context) error {
@@ -495,12 +526,50 @@ func handleSearchPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "search", out)
 }
 
-func handleEntitiesBrowsePage(c echo.Context) error {
+func handleBrowseEntitiesPage(c echo.Context) error {
 	return renderBrowsePage("entities", c)
 }
 
-func handleProjectsBrowsePage(c echo.Context) error {
+func handleBrowseProjectsPage(c echo.Context) error {
 	return renderBrowsePage("projects", c)
+}
+
+func handleExportPage(c echo.Context) error {
+	var app = c.Get("app").(*App)
+
+	// Get the filesize and last modified date of dump.tar.gz.
+	mut.RLock()
+	file := dumpFile
+	mut.RUnlock()
+
+	// Update the file stats hourly.
+	if time.Now().Sub(file.lastChecked) > 1*time.Hour {
+		fi, err := os.Stat(app.consts.DumpFileName)
+		if err == nil {
+			mut.Lock()
+			dumpFile.Name = app.consts.DumpFileName
+			dumpFile.Size = fi.Size()
+			dumpFile.LastModified = fi.ModTime()
+			dumpFile.lastChecked = time.Now()
+			file = dumpFile
+			mut.Unlock()
+		}
+	}
+
+	out := struct {
+		Page
+		File fileStats
+	}{}
+
+	out.Title = "Download data export"
+	out.Heading = "Export"
+	out.File = file
+
+	out.Tabs = make([]Tab, len(browseTabs))
+	copy(out.Tabs, browseTabs)
+	out.Tabs[2].Selected = true
+
+	return c.Render(http.StatusOK, "export", out)
 }
 
 func handleReport(c echo.Context) error {
@@ -622,21 +691,16 @@ func renderBrowsePage(typ string, c echo.Context) error {
 	out.Results = results
 	out.Total = total
 	out.Type = typ
-
 	out.Title = fmt.Sprintf("Browse %s - Page %d", typ, pg.Page)
-	out.Tabs = []Tab{
-		{
-			ID:       "projects",
-			Label:    "Projects",
-			Selected: "projects" == typ,
-			URL:      fmt.Sprintf("%s/browse/projects", app.consts.RootURL),
-		},
-		{
-			ID:       "entities",
-			Label:    "Entities",
-			Selected: "entities" == typ,
-			URL:      fmt.Sprintf("%s/browse/entities", app.consts.RootURL),
-		},
+	out.Heading = fmt.Sprintf("Browse %s (%d)", typ, total)
+
+	out.Tabs = make([]Tab, len(browseTabs))
+	copy(out.Tabs, browseTabs)
+
+	if typ == "projects" {
+		out.Tabs[0].Selected = true
+	} else if typ == "entities" {
+		out.Tabs[1].Selected = true
 	}
 
 	return c.Render(http.StatusOK, "browse", out)
