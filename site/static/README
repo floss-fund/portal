@@ -1,0 +1,8 @@
+# funding.json manifests from https://dir.floss.fund/browse/export
+
+The manifest database is exported daily and made available as a CSV file in the following format. manifest_json field is a double quote escaped JSON string.
+
+## Fields
+id, url, created_at, updated_at, status, manifest_json
+
+The contents of this archive are licensed under CC BY-SA 4.0.

@@ -54,7 +54,7 @@ func initConfig() {
 		os.Exit(0)
 	}
 
-	f.String("mode", "site", "site = runs the public portal | crawl = runs the background crawler")
+	f.String("mode", "site", "site = runs the public portal | crawl = runs the background crawler | dump = dump raw manifest data to stdout")
 	f.Bool("new-config", false, "generate a new sample config.toml file.")
 	f.StringSlice("config", []string{"config.toml"},
 		"path to one or more config files (will be merged in order)")
@@ -112,6 +112,7 @@ func initConstants(ko *koanf.Koanf) Consts {
 		HomeNumTags:             ko.MustInt("site.home_num_tags"),
 		HomeNumProjects:         ko.MustInt("site.home_num_projects"),
 		DefaultSubmissionstatus: ko.MustString("site.default_submission_status"),
+		DumpFileName:            ko.MustString("site.dump_filename"),
 	}
 
 	if c.EnableCaptcha {
@@ -217,7 +218,7 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB) *core.Core {
 
 	opt := core.Opt{}
 
-	return core.New(&q, opt, lo)
+	return core.New(&q, db.Unsafe(), opt, lo)
 }
 
 func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf) *crawl.Crawl {

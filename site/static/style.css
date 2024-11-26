@@ -581,6 +581,12 @@ table .filter {
    animation-iteration-count: 2;
 }
 
+/* Browse directory */
+.browse .order select {
+    display: inline-block;
+    width: auto;
+}
+
 .footer {
     color: #999;
     font-size: 0.875rem;

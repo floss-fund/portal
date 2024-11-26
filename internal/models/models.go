@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"net/url"
 	"time"
 
@@ -16,6 +17,16 @@ type ManifestJob struct {
 	LastModified time.Time `json:"updated_at" db:"updated_at"`
 
 	URLobj *url.URL `json:"-" db:"-"`
+}
+
+//easyjson:json
+type ManifestExport struct {
+	ID           int             `db:"id" json:"id"`
+	URL          string          `db:"url" json:"url"`
+	Status       string          `db:"status" json:"status"`
+	CreatedAt    time.Time       `db:"created_at" json:"created_at"`
+	UpdatedAt    time.Time       `db:"updated_at" json:"updated_at"`
+	ManifestJSON json.RawMessage `db:"manifest_json" json:"manifest_json"`
 }
 
 //easyjson:json
@@ -58,10 +69,10 @@ type ProjectURLs []ProjectURL
 
 //easyjson:json
 type Project struct {
-	v1.Project
+	Total int `db:"total" json:"-"`
 
 	ID                string         `db:"id" json:"id"`
-	GUID              string         `db:"project_guid" json:"guid"`
+	GUID              string         `db:"guid" json:"guid"`
 	ManifestID        int            `db:"manifest_id" json:"manifest_id"`
 	ManifestGUID      string         `db:"manifest_guid" json:"manifest_guid"`
 	EntityName        string         `db:"entity_name" json:"entity_name"`
@@ -74,4 +85,20 @@ type Project struct {
 	Licenses          pq.StringArray `db:"licenses" json:"licenses"`
 	Tags              pq.StringArray `db:"tags" json:"tags"`
 	UpdatedAt         time.Time      `db:"updated_at" json:"updated_at"`
+}
+
+//easyjson:json
+type Entity struct {
+	Total int `db:"total" json:"-"`
+
+	ID           string    `json:"id" db:"id"`
+	ManifestID   int       `json:"manifest_id" db:"manifest_id"`
+	ManifestGUID string    `json:"manifest_guid" db:"manifest_guid"`
+	Type         string    `json:"type" db:"type"`
+	Role         string    `json:"role" db:"role"`
+	Name         string    `json:"name" db:"name"`
+	Description  string    `json:"description" db:"description"`
+	WebpageURL   string    `json:"webpage_url" db:"webpage_url"`
+	NumProjects  int       `json:"num_projects" db:"num_projects"`
+	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
 }

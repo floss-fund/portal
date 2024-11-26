@@ -27,20 +27,20 @@ type EntityQuery struct {
 
 //easyjson:json
 type Project struct {
-	ID                string `json:"id"`
-	ManifestID        int    `json:"manifest_id"`
-	ManifestGUID      string `json:"manifest_guid"`
-	EntityName        string `json:"entity_name"`
-	EntityType        string `json:"entity_type"`
-	EntityNumProjects int    `json:"entity_num_projects"`
+	ID                string `json:"id" db:"id"`
+	ManifestID        int    `json:"manifest_id" db:"manifest_id"`
+	ManifestGUID      string `json:"manifest_guid" db:"manifest_guid"`
+	EntityName        string `json:"entity_name" db:"entity_name"`
+	EntityType        string `json:"entity_type" db:"entity_type"`
+	EntityNumProjects int    `json:"entity_num_projects" db:"entity_num_projects"`
 
-	Name          string   `json:"name"`
-	Description   string   `json:"description"`
-	WebpageURL    string   `json:"webpage_url"`
-	RepositoryURL string   `json:"repository_url"`
-	Licenses      []string `json:"licenses"`
-	Tags          []string `json:"tags"`
-	UpdatedAt     int64    `json:"updated_at"`
+	Name          string   `json:"name" db:"name"`
+	Description   string   `json:"description" db:"description"`
+	WebpageURL    string   `json:"webpage_url" db:"webpage_url"`
+	RepositoryURL string   `json:"repository_url" db:"repository_url"`
+	Licenses      []string `json:"licenses" db:"licenses"`
+	Tags          []string `json:"tags" db:"tags"`
+	UpdatedAt     int64    `json:"updated_at" db:"updated_at"`
 }
 
 //easyjson:json

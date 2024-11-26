@@ -1,0 +1,22 @@
+{{ define "export" }}
+{{ template "header" . }}
+
+<p>
+    The manifest database is exported daily and made available as a CSV file in the following format.
+    <code>manifest_json</code> field is a double quote escaped JSON string.
+</p>
+
+<h3>Fields</h3>
+<p><code>id, url, created_at, updated_at, status, manifest_json</code></p>
+
+<br /><br />
+{{ if gt .Data.File.Size 0 }}
+    <h3>Download</h3>
+    <p>{{ .Data.File.Name }}. Last modified on {{ .Data.File.LastModified | date "Mon, 02 Jan 2006 15:04 MST" }}.</p>
+    <p><a href="/{{ .Data.File.Name }}" class="button">Download ({{ div .Data.File.Size 1024 }}) KB</a></p>
+{{ else }}
+    <p>Error. Dump file not found.</p>
+{{ end }}
+
+{{ template "footer" .}}
+{{ end }}

@@ -8,9 +8,12 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"slices"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/altcha-org/altcha-lib-go"
 	"github.com/floss-fund/go-funding-json/common"
@@ -30,6 +33,13 @@ type tplRenderer struct {
 	tpl      *template.Template
 	RootURL  string
 	AssetVer string
+}
+
+type fileStats struct {
+	Name         string
+	Size         int64
+	LastModified time.Time
+	lastChecked  time.Time
 }
 
 type Query struct {
@@ -66,8 +76,31 @@ type Page struct {
 }
 
 var (
+	orderByFields = []string{"created_at", "updated_at", "name"}
+
 	reMultiLines = regexp.MustCompile(`\n\n+`)
 	errCaptcha   = errors.New("invalid captcha")
+
+	browseTabs = []Tab{
+		{
+			ID:    "projects",
+			Label: "Projects",
+			URL:   "/browse/projects",
+		},
+		{
+			ID:    "entities",
+			Label: "Entities",
+			URL:   "/browse/entities",
+		},
+		{
+			ID:    "export",
+			Label: "Export",
+			URL:   "/browse/export",
+		},
+	}
+
+	dumpFile fileStats
+	mut      sync.RWMutex
 )
 
 func handleIndexPage(c echo.Context) error {
@@ -258,7 +291,7 @@ func handleValidateManifest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	b, err := m.MarshalJSON()
+	b, err := m.Manifest.MarshalJSON()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -493,6 +526,52 @@ func handleSearchPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "search", out)
 }
 
+func handleBrowseEntitiesPage(c echo.Context) error {
+	return renderBrowsePage("entities", c)
+}
+
+func handleBrowseProjectsPage(c echo.Context) error {
+	return renderBrowsePage("projects", c)
+}
+
+func handleExportPage(c echo.Context) error {
+	var app = c.Get("app").(*App)
+
+	// Get the filesize and last modified date of dump.tar.gz.
+	mut.RLock()
+	file := dumpFile
+	mut.RUnlock()
+
+	// Update the file stats hourly.
+	if time.Now().Sub(file.lastChecked) > 1*time.Hour {
+		fi, err := os.Stat(app.consts.DumpFileName)
+		if err == nil {
+			mut.Lock()
+			dumpFile.Name = app.consts.DumpFileName
+			dumpFile.Size = fi.Size()
+			dumpFile.LastModified = fi.ModTime()
+			dumpFile.lastChecked = time.Now()
+			file = dumpFile
+			mut.Unlock()
+		}
+	}
+
+	out := struct {
+		Page
+		File fileStats
+	}{}
+
+	out.Title = "Download data export"
+	out.Heading = "Export"
+	out.File = file
+
+	out.Tabs = make([]Tab, len(browseTabs))
+	copy(out.Tabs, browseTabs)
+	out.Tabs[2].Selected = true
+
+	return c.Render(http.StatusOK, "export", out)
+}
+
 func handleReport(c echo.Context) error {
 	var (
 		app    = c.Get("app").(*App)
@@ -542,6 +621,89 @@ func (t *tplRenderer) Render(w io.Writer, name string, data interface{}, c echo.
 		AssetVer: t.AssetVer,
 		Data:     data,
 	})
+}
+
+func renderBrowsePage(typ string, c echo.Context) error {
+	var app = c.Get("app").(*App)
+
+	// Get order by fields from the query.
+	var (
+		orderBy = "created_at"
+		order   = "desc"
+	)
+	if o := c.QueryParam("order_by"); o != "" {
+		for _, f := range orderByFields {
+			if f == o {
+				orderBy = o
+				break
+			}
+		}
+	}
+	if o := c.QueryParam("order"); o != "" && (o == "asc" || o == "desc") {
+		order = o
+	}
+
+	// Get the total count.
+	var (
+		results interface{}
+		pg      = app.pg.NewFromURL(c.Request().URL.Query())
+		total   = 0
+	)
+
+	switch typ {
+	case "entities":
+		res, err := app.core.GetEntities(orderBy, order, pg.Offset, pg.Limit)
+		if err != nil {
+			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching results.")
+		}
+		results = res
+
+		if len(res) > 0 {
+			total = res[0].Total
+		}
+
+	case "projects":
+		res, err := app.core.GetProjects(orderBy, order, pg.Offset, pg.Limit)
+		if err != nil {
+			return errPage(c, http.StatusInternalServerError, "", "Error", "Error fetching results.")
+		}
+		results = res
+
+		if len(res) > 0 {
+			total = res[0].Total
+		}
+	}
+
+	// Additional query params to attach to paginated URLs.
+	pg.SetTotal(total)
+	qp := url.Values{}
+	qp.Set("order_by", orderBy)
+	qp.Set("order", order)
+
+	out := struct {
+		Page
+		Pagination template.HTML
+		Results    interface{}
+		Total      int
+		Type       string
+	}{}
+	out.Pagination = template.HTML(pg.HTML("", qp))
+	out.Results = results
+	out.Total = total
+	out.Type = typ
+	out.Title = fmt.Sprintf("Browse %s - Page %d", typ, pg.Page)
+	out.Heading = fmt.Sprintf("Browse %s (%d)", typ, total)
+
+	out.Tabs = make([]Tab, len(browseTabs))
+	copy(out.Tabs, browseTabs)
+
+	if typ == "projects" {
+		out.Tabs[0].Selected = true
+	} else if typ == "entities" {
+		out.Tabs[1].Selected = true
+	}
+
+	return c.Render(http.StatusOK, "browse", out)
 }
 
 func errPage(c echo.Context, code int, tpl, title, message string) error {

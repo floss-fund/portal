@@ -1,9 +1,14 @@
 package main
 
 import (
+	"encoding/csv"
+	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 
+	"github.com/floss-fund/portal/internal/core"
 	"github.com/floss-fund/portal/internal/models"
 	"github.com/labstack/echo/v4"
 )
@@ -88,4 +93,36 @@ func handleAdminManifestsPage(c echo.Context) error {
 	c.Set("is-admin", true)
 
 	return handleManifestPage(c)
+}
+
+func dumpManifests(co *core.Core, lo *log.Logger) {
+	c := csv.NewWriter(os.Stdout)
+	c.Write([]string{"id", "url", "created_at", "updated_at", "status", "manifest_json"})
+
+	var (
+		lastID = 0
+		total  = 0
+	)
+	for {
+		res, err := co.GetManifestsDump(lastID, 10000)
+		if err != nil {
+			lo.Fatalf("error exporting manifests: %v", err)
+		}
+
+		if len(res) == 0 {
+			break
+		}
+		lo.Printf("fetched %d", len(res))
+
+		for _, r := range res {
+			c.Write([]string{fmt.Sprintf("%d", r.ID), r.URL, r.CreatedAt.String(), r.UpdatedAt.String(), r.Status, string(r.ManifestJSON)})
+		}
+
+		lastID = res[len(res)-1].ID
+		total += len(res)
+	}
+
+	c.Flush()
+
+	lo.Printf("dumped %d manifests in total", total)
 }

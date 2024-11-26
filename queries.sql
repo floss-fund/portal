@@ -159,7 +159,7 @@ VALUES (
 WITH ranked_projects AS (
     SELECT 
         p.id,
-        p.guid AS project_guid,
+        p.guid,
         p.manifest_id,
         m.guid AS manifest_guid,
         e.name AS entity_name,
@@ -179,7 +179,7 @@ WITH ranked_projects AS (
 )
 SELECT 
     id,
-    project_guid,
+    guid,
     manifest_id,
     manifest_guid,
     entity_name,
@@ -196,3 +196,87 @@ FROM ranked_projects
 WHERE rn <= 2
 ORDER BY created_at DESC
 LIMIT $1;
+
+-- name: get-projects
+WITH project_counts AS (
+    SELECT manifest_id, COUNT(*) AS project_count FROM projects GROUP BY manifest_id
+)
+SELECT
+	COUNT(*) OVER () AS total,
+    CONCAT(m.guid, '/', p.guid) as id,
+    p.manifest_id,
+    m.guid AS manifest_guid,
+    e.name AS entity_name,
+    e.type AS entity_type,
+    pc.project_count AS entity_num_projects,
+    p.name,
+    p.description,
+    p.webpage_url,
+    p.repository_url,
+    p.licenses,
+    p.tags,
+    p.updated_at
+FROM projects p
+    JOIN manifests m ON p.manifest_id = m.id
+    JOIN entities e ON e.manifest_id = m.id
+    JOIN project_counts pc ON pc.manifest_id = p.manifest_id
+ORDER BY p.%s OFFSET $1 LIMIT $2;
+
+-- name: get-entities
+-- raw: true
+WITH entity_counts AS (
+    SELECT manifest_id, COUNT(*) AS project_count FROM projects GROUP BY manifest_id
+)
+SELECT 
+	COUNT(*) OVER () AS total,
+    e.*,
+    ec.project_count AS num_projects,
+    m.guid AS manifest_guid
+FROM entities e
+    JOIN entity_counts ec ON ec.manifest_id = e.manifest_id
+    JOIN manifests m ON m.id = e.manifest_id
+ORDER BY %s OFFSET $1 LIMIT $2;
+
+-- name: get-manifests-dump
+WITH project_json AS (
+    SELECT 
+        manifest_id,
+        JSONB_AGG(JSONB_BUILD_OBJECT(
+            'guid', guid,
+            'name', name,
+            'description', description,
+            'webpageUrl', JSONB_BUILD_OBJECT(
+                'url', webpage_url,
+                'wellKnown', webpage_wellknown
+            ),
+            'repositoryUrl', JSONB_BUILD_OBJECT(
+                'url', repository_url,
+                'wellKnown', repository_wellknown
+            ),
+            'licenses', TO_JSONB(licenses),
+            'tags', TO_JSONB(tags)
+        )) AS projects_json
+    FROM projects
+    GROUP BY manifest_id
+)
+SELECT m.id, m.url, m.created_at, m.updated_at, m.status, JSONB_BUILD_OBJECT(
+    'version', m.version,
+    'entity', JSONB_BUILD_OBJECT(
+        'type', e.type,
+        'role', e.role,
+        'name', e.name,
+        'email', e.email,
+        'phone', e.phone,
+        'description', e.description,
+        'webpageUrl', JSONB_BUILD_OBJECT(
+            'url', e.webpage_url,
+            'wellKnown', e.webpage_wellknown
+        )
+    ),
+    'projects', COALESCE(p.projects_json, '[]'::JSONB),
+    'funding', m.funding
+) AS manifest_json
+FROM manifests m
+    LEFT JOIN entities e ON e.manifest_id = m.id
+    LEFT JOIN project_json p ON p.manifest_id = m.id
+WHERE m.id > $1 ORDER BY m.id LIMIT $2;

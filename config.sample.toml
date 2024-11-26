@@ -28,6 +28,8 @@ captcha_complexity = 50000
 # Default status to assign on submission.
 default_submission_status = "active"
 
+dump_filename = "funding-manifests.tar.gz"
+
 
 [crawl]
 manifest_uri = "/funding.json"

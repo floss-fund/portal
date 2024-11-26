@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -46,10 +47,14 @@ type Queries struct {
 	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
 	InsertReport         *sqlx.Stmt `query:"insert-report"`
 	GetRecentProjects    *sqlx.Stmt `query:"get-recent-projects"`
+	GetProjects          string     `query:"get-projects"`
+	GetEntities          string     `query:"get-entities"`
+	GetManifestsDump     *sqlx.Stmt `query:"get-manifests-dump"`
 }
 
 type Core struct {
 	q   *Queries
+	db  *sqlx.DB
 	opt Opt
 	hc  *http.Client
 	log *log.Logger
@@ -59,9 +64,10 @@ var (
 	ErrNotFound = errors.New("not found")
 )
 
-func New(q *Queries, o Opt, lo *log.Logger) *Core {
+func New(q *Queries, db *sqlx.DB, o Opt, lo *log.Logger) *Core {
 	return &Core{
 		q:   q,
+		db:  db,
 		log: lo,
 	}
 }
@@ -220,6 +226,41 @@ func (d *Core) InsertManifestReport(id int, reason string) error {
 	}
 
 	return nil
+}
+
+// GetProjects retrieves paginated projects optionally sorted by certain fields.
+func (c *Core) GetProjects(orderBy, order string, offset, limit int) ([]models.Project, error) {
+	var out []models.Project
+
+	if err := c.db.Select(&out, fmt.Sprintf(c.q.GetProjects, orderBy+" "+order), offset, limit); err != nil {
+		c.log.Printf("error fetching projects by start letter: %v", err)
+		return nil, err
+	}
+
+	return out, nil
+}
+
+// GetProjects retrieves paginated entities optionally sorted by certain fields.
+func (c *Core) GetEntities(orderBy, order string, offset, limit int) ([]models.Entity, error) {
+	var out []models.Entity
+
+	if err := c.db.Select(&out, fmt.Sprintf(c.q.GetEntities, orderBy+" "+order), offset, limit); err != nil {
+		c.log.Printf("error fetching entities by start letter: %v", err)
+		return nil, err
+	}
+
+	return out, nil
+}
+
+// GetManifestsDump retrieves N manifests raw dumps for export.
+func (c *Core) GetManifestsDump(lastID, limit int) ([]models.ManifestExport, error) {
+	var out []models.ManifestExport
+	if err := c.q.GetManifestsDump.Select(&out, lastID, limit); err != nil {
+		c.log.Printf("error exporting manifests: %v", err)
+		return nil, err
+	}
+
+	return out, nil
 }
 
 // getManifests retrieves one or more manifests.
