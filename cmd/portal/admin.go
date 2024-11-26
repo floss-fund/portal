@@ -122,5 +122,7 @@ func dumpManifests(co *core.Core, lo *log.Logger) {
 		total += len(res)
 	}
 
+	c.Flush()
+
 	lo.Printf("dumped %d manifests in total", total)
 }
