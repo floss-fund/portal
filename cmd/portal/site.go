@@ -245,8 +245,8 @@ func handleSubmitPage(c echo.Context) error {
 		return c.Render(http.StatusBadRequest, "submit", out)
 	} else if status != "" {
 		switch status {
-		case core.ManifestStatusActive:
-			out.ErrMessage = "Manifest is already active."
+		// case core.ManifestStatusActive:
+		// 	out.ErrMessage = "Manifest is already active."
 		case core.ManifestStatusPending:
 			out.ErrMessage = "Manifest is already submitted and is pending review."
 		case core.ManifestStatusBlocked:

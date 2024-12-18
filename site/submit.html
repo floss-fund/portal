@@ -25,7 +25,7 @@
     <div class="message error">{{ .Data.ErrMessage }}</div>
 {{ else if eq .Data.Message "success" }}
     <div class="message success">
-        The manifest has been submitted and will appear publicly on the directory after manual review.
+        The manifest has been submitted.
     </div>
 {{ else if ne .Data.Message "" }}
     <div class="message">
