@@ -37,7 +37,9 @@ entity AS (
         type = ($1->'entity'->>'type')::entity_type,
         role = ($1->'entity'->>'role')::entity_role,
         name = $1->'entity'->>'name',
+        email = $1->'entity'->>'email',
         phone = $1->'entity'->>'phone',
+        description = $1->'entity'->>'description',
         webpage_url = $1->'entity'->'webpageUrl'->>'url',
         webpage_wellknown = $1->'entity'->'webpageUrl'->>'wellKnown',
         updated_at = NOW()
