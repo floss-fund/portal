@@ -1,6 +1,6 @@
 # funding.json manifest portal
 
-An open web directory and portal and a directory for [funding.json](https://floss.fund/funding-manifest) manifests. Single binary Go application that uses Postgres as its data store and Typesense for search.
+An open web directory and portal and a directory for [funding.json](https://fundingjson.org) manifests. Single binary Go application that uses Postgres as its data store and Typesense for search.
 
 See the official instance in action at **[dir.floss.fund](https://dir.floss.fund)**.
 
