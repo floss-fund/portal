@@ -1,12 +1,13 @@
 module github.com/floss-fund/portal
 
-go 1.22.5
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/altcha-org/altcha-lib-go v0.1.3
-	github.com/floss-fund/go-funding-json v0.5.1
+	github.com/floss-fund/go-funding-json v0.5.2
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/knadh/goyesql/v2 v2.2.0
 	github.com/knadh/koanf/maps v0.1.1

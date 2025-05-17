@@ -9,8 +9,8 @@ github.com/altcha-org/altcha-lib-go v0.1.3/go.mod h1:I8ESLVWR9C58uvGufB/AJDPhaSU
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/floss-fund/go-funding-json v0.5.1 h1:8qFzyRK7GngkMZ0ilKzcomnTd9LFCp1haSK3n0H7Bj4=
-github.com/floss-fund/go-funding-json v0.5.1/go.mod h1:tftKA5O0Cx5S36ZVPH7ib+f403grScyDyyvQrat9Vew=
+github.com/floss-fund/go-funding-json v0.5.2 h1:9JIAaJwAf68Qd2l9uAAy449tGsNlsoG4Ol50jdNkRkA=
+github.com/floss-fund/go-funding-json v0.5.2/go.mod h1:tftKA5O0Cx5S36ZVPH7ib+f403grScyDyyvQrat9Vew=
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
