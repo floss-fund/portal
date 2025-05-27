@@ -122,9 +122,10 @@ SELECT status FROM manifests WHERE url = $1;
 SELECT id, url, updated_at, status FROM manifests
     WHERE id > $1
     AND updated_at < NOW() - $2::INTERVAL
+    AND crawl_errors < $3
     AND status != 'disabled'
     AND status != 'blocked'
-    ORDER BY id LIMIT $3;
+    ORDER BY id LIMIT $4;
 
 -- name: update-manifest-status
 UPDATE manifests SET status=$2 WHERE id=$1;
@@ -139,7 +140,7 @@ SELECT tag FROM top_tags LIMIT $1;
 UPDATE manifests SET
     crawl_errors = crawl_errors + 1,
     crawl_message = $2,
-    status = (CASE WHEN crawl_errors + 1 >= $3 THEN 'disabled' ELSE status END)
+    status = (CASE WHEN $4 AND crawl_errors + 1 >= $3 THEN 'disabled' ELSE status END)
     WHERE id = $1
     RETURNING status;
 

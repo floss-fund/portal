@@ -14,7 +14,7 @@ func (c *Crawl) dbWorker() {
 	)
 	for {
 		n++
-		items, err := c.db.GetManifestForCrawling(c.opt.ManifestAge, lastID, c.opt.BatchSize)
+		items, err := c.db.GetManifestForCrawling(c.opt.ManifestAge, lastID, c.opt.MaxCrawlErrors, c.opt.BatchSize)
 		if err != nil {
 			time.Sleep(time.Second * 5)
 			continue
@@ -57,7 +57,7 @@ loop:
 				c.log.Printf("error fetching modified date: %s: %v", j.URL, err)
 
 				// Record the error.
-				if status, err := c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors); err == nil {
+				if status, err := c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros); err == nil {
 					// If the manifest is no longer active, delete it from search.
 					if c.Callbacks.OnManifestUpdate != nil && status != core.ManifestStatusActive {
 						c.Callbacks.OnManifestUpdate(models.ManifestData{ID: j.ID}, status)
@@ -84,7 +84,7 @@ loop:
 				c.log.Printf("error crawling: %s: %v", j.URL, err)
 
 				// Record the error.
-				status, _ = c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors)
+				status, _ = c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros)
 				if c.Callbacks.OnManifestUpdate != nil {
 					c.Callbacks.OnManifestUpdate(m, status)
 				}

@@ -17,10 +17,10 @@ type Schema interface {
 }
 
 type DB interface {
-	GetManifestForCrawling(age string, offsetID, limit int) ([]models.ManifestJob, error)
+	GetManifestForCrawling(age string, offsetID, maxCrawlErrors, limit int) ([]models.ManifestJob, error)
 	UpsertManifest(m models.ManifestData, status string) error
 	UpdateManifestDate(id int) error
-	UpdateManifestCrawlError(id int, message string, maxErrors int) (string, error)
+	UpdateManifestCrawlError(id int, message string, maxErrors int, disableOnErrors bool) (string, error)
 }
 
 type Opt struct {
@@ -29,6 +29,7 @@ type Opt struct {
 	BatchSize       int    `json:"batch_size"`
 	CheckProvenance bool   `json:"check_provenance"`
 	MaxCrawlErrors  int    `json:"max_crawl_errors"`
+	DisableOnErrros bool   `json:"disable_on_errors"`
 
 	HTTP common.HTTPOpt
 }
@@ -86,6 +87,12 @@ func (c *Crawl) Crawl() error {
 func (c *Crawl) IsManifestModified(manifest *url.URL, lastModified time.Time) (bool, error) {
 	hdr, err := c.hc.Head(manifest)
 	if err != nil {
+		// If it's a ratelimit, ignore for now.
+		if err == common.ErrRatelimited {
+			c.log.Printf("skipping ratelimited host %s: url: %s", manifest.Host, manifest.String())
+			return false, nil
+		}
+
 		return false, err
 	}
 

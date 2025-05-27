@@ -228,6 +228,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 		BatchSize:       ko.MustInt("crawl.batch_size"),
 		CheckProvenance: ko.Bool("crawl.check_provenance"),
 		MaxCrawlErrors:  ko.MustInt("crawl.max_crawl_errors"),
+		DisableOnErrros: ko.Bool("crawl.disable_on_errors"),
 
 		HTTP: initHTTPOpt(),
 	}

@@ -126,9 +126,9 @@ func (d *Core) UpsertManifest(m models.ManifestData, status string) error {
 
 // GetManifestForCrawling retrieves manifest URLs that need to be crawled again. It returns records in batches of limit length,
 // continued from the last processed row ID which is the offsetID.
-func (d *Core) GetManifestForCrawling(age string, offsetID, limit int) ([]models.ManifestJob, error) {
+func (d *Core) GetManifestForCrawling(age string, offsetID, maxCrawlErrors, limit int) ([]models.ManifestJob, error) {
 	var out []models.ManifestJob
-	if err := d.q.GetForCrawling.Select(&out, offsetID, age, limit); err != nil {
+	if err := d.q.GetForCrawling.Select(&out, offsetID, age, maxCrawlErrors, limit); err != nil {
 		d.log.Printf("error fetching URLs for crawling: %v", err)
 		return nil, err
 	}
@@ -169,9 +169,9 @@ func (d *Core) UpdateManifestDate(id int) error {
 
 // UpdateManifestCrawlError updates a manifest's crawl error count and sets
 // it to 'disabled' if it exceeds the given limit.
-func (d *Core) UpdateManifestCrawlError(id int, message string, maxErrors int) (string, error) {
+func (d *Core) UpdateManifestCrawlError(id int, message string, maxErrors int, disableOnErrors bool) (string, error) {
 	var status string
-	if err := d.q.UpdateCrawlError.Get(&status, id, message, maxErrors); err != nil {
+	if err := d.q.UpdateCrawlError.Get(&status, id, message, maxErrors, disableOnErrors); err != nil {
 		d.log.Printf("error updating manifest crawl error status: %d: %v", id, err)
 		return "", err
 	}
