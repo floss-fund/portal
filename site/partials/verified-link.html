@@ -1,0 +1,25 @@
+{{ define "verified-link" }}
+    {{ $status := ValidateURL .manifest_url .target_url }}
+
+    <a href="{{ .target_url.URL }}" rel="noreferer nofollow"
+        title="{{ trimPrefix "http://" (trimPrefix "https://" .target_url.URL) }}"
+        aria-label="Visit {{ if $status.Verified }}UNVERIFIED{{ end }} {{ .label }}"
+        {{ if not $status.Verified }}data-unverified="true"{{ end }}
+    >
+
+        {{ if (and $status.Verified (.label)) }}
+            <img src="/static/ico-tick.svg" alt="Verified" aria-hidden="true" />
+        {{ end }}
+        {{ if not $status.Verified}}
+            <img src="/static/ico-warning.svg" alt="Unverified" aria-hidden="true" />
+        {{ end }}
+
+        {{ if .icon }}
+            <img src="{{ .icon }}" alt="" aria-hidden="true" class="link-icon" />
+        {{ end }}
+
+        {{ if .label }}
+            {{ trimPrefix "http://" (trimPrefix "https://" .target_url.URL) }}
+        {{ end }}
+    </a>
+{{ end }}

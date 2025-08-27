@@ -21,17 +21,24 @@
           <div class="block" role="region" aria-labelledby="links-title">
             <h4 class="title" id="links-title">Links</h4>
             <div class="meta">
-              <a href="{{ $r.WebpageURL.URL }}" rel="noreferer nofollow" class="ellip" aria-label="Website">
-                <span aria-hidden="true">
-                  <img src="/static/ico-link.svg" alt="" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL.URL) }}
-                </span>
-              </a>
+              {{ template "verified-link"
+                ( dict
+                  "manifest_url" $.Data.Manifest.Manifest.URL
+                  "target_url" $r.WebpageURL
+                  "icon" "/static/ico-link.svg"
+                  "label" true
+                )
+              }}
               <br />
-              <a href="{{ $r.RepositoryURL.URL }}" rel="noreferer nofollow" class="ellip" aria-label="Visit website">
-                <span aria-hidden="true">
-                  <img src="/static/ico-repo.svg" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL.URL) }}
-                </span>
-              </a>
+              {{ template "verified-link"
+                ( dict
+                  "manifest_url" $.Data.Manifest.Manifest.URL
+                  "target_url" $r.RepositoryURL
+                  "icon" "/static/ico-repo.svg"
+                  "label" true
+                )
+              }}
+
             </div>
           </div><!-- links -->
 

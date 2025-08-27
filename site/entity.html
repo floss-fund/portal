@@ -31,12 +31,14 @@
           </div>
 
           <div class="item">
-            <a href="{{ .Data.Manifest.Entity.WebpageURL.URL }}" rel="noreferer nofollow" title="Visit website">
-              <span aria-hidden="true">
-                <img src="{{ .RootURL }}/static/ico-link.svg" />
-                 {{ trimPrefix "http://" (trimPrefix "https://" .Data.Manifest.Entity.WebpageURL.URL) }}
-              </span>
-            </a>
+            {{ template "verified-link"
+              ( dict
+                "manifest_url" $.Data.Manifest.Manifest.URL
+                "target_url" .Data.Manifest.Entity.WebpageURL
+                "icon" "/static/ico-link.svg"
+                "label" true
+              )
+            }}
           </div>
 
           <div class="item">

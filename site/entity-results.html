@@ -17,6 +17,14 @@
                       <a href="{{ $r.WebpageURL }}" rel="noreferer nofollow" class="ellip">
                         <img src="/static/ico-link.svg" alt="" aria-hidden="true" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL) }}
                       </a>  
+                      {{ template "verified-link"
+                        ( dict
+                          "manifest_url" $r.WebpageURL
+                          "target_url" .Data.Manifest.Entity.WebpageURL
+                          "icon" "/static/ico-link.svg"
+                          "label" true
+                        )
+                      }}
                     </div>
                 </div>
             </div>

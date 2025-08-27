@@ -56,3 +56,4 @@ require (
 )
 
 replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.8
+replace github.com/floss-fund/go-funding-json => /mnt/mydrive/workstation/code/go/my/floss.fund/go-funding-json

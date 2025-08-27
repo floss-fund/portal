@@ -283,6 +283,13 @@ func (d *Core) getManifests(id int, guid string, lastID, limit int, status strin
 	for n, o := range out {
 		o := o
 
+		if u, err := common.IsURL("url", o.URL, maxURLLen); err != nil {
+			d.log.Printf("error manifest URL: %d: %s: %v", id, o.URL, err)
+			return nil, err
+		} else {
+			o.Manifest.URL = v1.URL{URL: o.URL, URLobj: u}
+		}
+
 		// Entity.
 		if err := o.Entity.UnmarshalJSON(o.EntityRaw); err != nil {
 			d.log.Printf("error unmarshalling entity: %d: %v", id, err)
