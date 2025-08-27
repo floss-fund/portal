@@ -333,15 +333,15 @@ func handleManifestPage(c echo.Context) error {
 		prefix = "/admin/view/"
 	}
 
-	if strings.HasPrefix(mGuid, prefix+"funding/") {
+	if after, ok := strings.CutPrefix(mGuid, prefix+"funding/"); ok {
 		// Funding page.
-		mGuid = strings.TrimPrefix(mGuid, prefix+"funding/")
+		mGuid = after
 		tpl = "funding"
 		out.Title = "Funding plans for %s"
 		out.Description = "Funding plans for free and open source projects by %s"
-	} else if strings.HasPrefix(mGuid, prefix+"projects/") {
+	} else if after, ok := strings.CutPrefix(mGuid, prefix+"projects/"); ok {
 		// Projects page.
-		mGuid = strings.TrimPrefix(mGuid, prefix+"projects/")
+		mGuid = after
 		tpl = "projects"
 		out.Title = "Projects by %s"
 		out.Description = "Projects by %s looking for free and open source funding"
@@ -362,9 +362,9 @@ func handleManifestPage(c echo.Context) error {
 		mGuid = path[:i]
 		pGuid = path[i+1:]
 
-	} else if strings.HasPrefix(mGuid, prefix+"history/") {
+	} else if after, ok := strings.CutPrefix(mGuid, prefix+"history/"); ok {
 		// History page.
-		mGuid = strings.TrimPrefix(mGuid, prefix+"history/")
+		mGuid = after
 		tpl = "history"
 		out.Title = "Financial history of projects by %s"
 		out.Description = "Financial and funding history of projects by %s"
@@ -543,7 +543,7 @@ func handleExportPage(c echo.Context) error {
 	mut.RUnlock()
 
 	// Update the file stats hourly.
-	if time.Now().Sub(file.lastChecked) > 1*time.Hour {
+	if time.Since(file.lastChecked) > 1*time.Hour {
 		fi, err := os.Stat(app.consts.DumpFileName)
 		if err == nil {
 			mut.Lock()
