@@ -20,6 +20,11 @@ body {
     color: var(--black);
 }
 
+dialog {
+    max-width: 600px;
+    border-radius: 3px;
+}
+
 a {
     color: var(--primary);
     text-decoration: none;
@@ -182,6 +187,18 @@ button, .button {
         filter: brightness(0) invert(1);
     }
 
+.button-outline {
+    background: none;
+    border: 2px solid var(--black);
+    color: var(--black);
+    padding: 13px 38px;
+}
+    .button-outline:hover {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+
 button.small {
     font-size: 0.875rem;
     padding: 10px 20px;
@@ -267,6 +284,10 @@ button.small {
     .text-grey {
         color: #888;
     }
+
+.light {
+    opacity: 0.4;
+}
 
 .tags a {
     background-color: #e1fdec;
@@ -504,9 +525,6 @@ table .filter {
     .results p:last-child {
         margin-bottom: 0;
     }
-    .results .props {
-/*        text-align: right;*/
-    }
         .results .props .license {
             vertical-align: top;
             line-height: 1;
@@ -514,19 +532,22 @@ table .filter {
         .results .props img {
             max-height: 18px;
             vertical-align: top;
+            transition: scale 0.1s ease-in-out;
         }
         .results .props a {
             display: inline-block;
             margin-left: 15px;
-            opacity: 0.4;
+            text-decoration: none;;
         }
         .results .props a:hover {
             opacity: 1;
         }
-.meta {
-}
     .meta a {
         color: #888;
+        text-decoration: none;
+    }
+    .meta a:hover {
+        color: var(--black);
     }
     .meta .item {
         margin: 0 0 10px 0;
@@ -537,8 +558,10 @@ table .filter {
     .meta img {
         max-height: 18px;
         vertical-align: middle;
-        opacity: 0.5;
         margin-right: 5px;
+    }
+    .meta img .link-icon {
+        opacity: 0.5;
     }
 
 

@@ -176,7 +176,7 @@ func initHTTPServer(app *App, ko *koanf.Koanf) *echo.Echo {
 	// Generate a random string for cache busting in templates.
 	b := md5.Sum([]byte(time.Now().String()))
 	srv.Renderer = &tplRenderer{
-		tpl:      initSiteTemplates(ko.MustString("app.template_dir")),
+		tpl:      initSiteTemplates(ko.MustString("app.template_dir"), ko.MustString("crawl.wellknown_uri")),
 		RootURL:  ko.MustString("app.root_url"),
 		AssetVer: fmt.Sprintf("%x", b)[0:10],
 	}
@@ -307,7 +307,7 @@ func initHTTPOpt() common.HTTPOpt {
 	}
 }
 
-func initSiteTemplates(dirPath string) *template.Template {
+func initSiteTemplates(dirPath string, wellKnownURI string) *template.Template {
 	// Create a new template set
 	tmpl := template.New("")
 
@@ -316,10 +316,9 @@ func initSiteTemplates(dirPath string) *template.Template {
 	tmpl.Funcs(template.FuncMap{
 		"Nl2br": func(input string) template.HTML {
 			input = reMultiLines.ReplaceAllString(html.EscapeString(input), "\n\n")
-			input = strings.Replace(input, "\n", "<br />", -1)
+			input = strings.ReplaceAll(input, "\n", "<br />")
 			return template.HTML(input)
 		},
-
 		"HasField": func(v interface{}, field string) bool {
 			val := reflect.ValueOf(v)
 
@@ -335,6 +334,16 @@ func initSiteTemplates(dirPath string) *template.Template {
 
 			_, exists := val.Type().FieldByName(field)
 			return exists
+		},
+
+		// Validates a URL by checking its well-known URL and returns if it's verified or not.
+		"ValidateURL": func(manifestURL v1.URL, targetURL v1.URL) urlStatus {
+			state, err := common.WellKnownURL("", manifestURL.URLobj, targetURL.URLobj, targetURL.WellKnownObj, wellKnownURI)
+			if state == common.WellKnownNotRequired || state == common.WellKnownValid {
+				return urlStatus{Verified: true}
+			}
+
+			return urlStatus{Verified: false, Error: err}
 		},
 	})
 
@@ -399,6 +408,6 @@ func (s *Schema) ParseManifest(b []byte, manifestURL string, checkProvenance boo
 		Projects: models.ProjectsFromSchema(scm.Projects),
 		Funding:  scm.Funding,
 		URLStr:   scm.URL.URL,
-		URLobj:   scm.URL.URLobj,
+		URL:      v1.URL{URL: scm.URL.URL, URLobj: scm.URL.URLobj},
 	}, nil
 }

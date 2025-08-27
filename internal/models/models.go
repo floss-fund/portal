@@ -50,7 +50,7 @@ type ManifestData struct {
 	GUID          string         `db:"guid" json:"guid"`
 	Version       string         `db:"version" json:"version"`
 	URLStr        string         `db:"url" json:"url"`
-	URLobj        *url.URL       `db:"-" json:"-"`
+	URL           v1.URL         `db:"-" json:"-"`
 	Meta          types.JSONText `db:"meta" json:"meta"`
 	Status        string         `db:"status" json:"status"`
 	StatusMessage *string        `db:"status_message" json:"status_message"`

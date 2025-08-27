@@ -350,6 +350,14 @@ func (c *Core) getManifests(id int, guid string, lastID, limit int, status strin
 	}
 
 	for n, o := range out {
+		// Parse the manifest URL.
+		u, err := common.IsURL("url", o.URLStr, maxURLLen)
+		if err != nil {
+			c.log.Printf("error parsing url: %s: %v: ", o.URLStr, err)
+			return nil, err
+		}
+		o.URL = v1.URL{URL: o.URLStr, URLobj: u}
+
 		// Funding.
 		if err := o.Funding.UnmarshalJSON(o.FundingRaw); err != nil {
 			c.log.Printf("error unmarshalling funding: %s: %v", o.GUID, err)

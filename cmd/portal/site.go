@@ -57,6 +57,11 @@ type tplData struct {
 	Data     any
 }
 
+type urlStatus struct {
+	Verified bool
+	Error    error
+}
+
 type Tab struct {
 	ID       string
 	URL      string
@@ -265,7 +270,7 @@ func handleSubmitPage(c echo.Context) error {
 	}
 
 	// Add it to the database.
-	m.GUID = core.MakeGUID(m.URLobj)
+	m.GUID = core.MakeGUID(m.URL.URLobj)
 	m.GUID = strings.TrimSuffix(m.GUID, app.consts.ManifestURI)
 
 	if err := app.core.UpsertManifest(m, app.consts.DefaultSubmissionstatus); err != nil {
@@ -707,9 +712,10 @@ func renderBrowsePage(typ string, c echo.Context) error {
 	out.Tabs = make([]Tab, len(browseTabs))
 	copy(out.Tabs, browseTabs)
 
-	if typ == "projects" {
+	switch typ {
+	case "projects":
 		out.Tabs[0].Selected = true
-	} else if typ == "entities" {
+	case "entities":
 		out.Tabs[1].Selected = true
 	}
 

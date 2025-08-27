@@ -58,4 +58,27 @@ document.addEventListener("keydown", function(event) {
         location.search = params.toString();
       }
     );
-  })();
+
+    // Unverified links.
+    document.querySelectorAll('a[data-unverified]').forEach(el => {
+        el.addEventListener('click', function(ev) {
+            ev.preventDefault();
+            const dialog = document.querySelector('dialog.unverified-link').cloneNode(true);
+            document.body.appendChild(dialog);
+
+            const link = dialog.querySelector('.continue-link');
+            link.href = el.href;
+            link.addEventListener('click', function() {
+                dialog.close();
+                dialog.remove();
+              });
+
+              dialog.querySelector('.btn-cancel').addEventListener('click', function() {
+                dialog.close();
+                dialog.remove();
+            });
+
+            dialog.showModal();
+        });
+    });
+})();

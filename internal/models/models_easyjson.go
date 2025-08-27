@@ -4,7 +4,6 @@ package models
 
 import (
 	json "encoding/json"
-
 	pq "github.com/lib/pq"
 	easyjson "github.com/zerodha/easyjson"
 	jlexer "github.com/zerodha/easyjson/jlexer"
