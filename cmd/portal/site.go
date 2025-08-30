@@ -20,12 +20,11 @@ import (
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/core"
 	"github.com/floss-fund/portal/internal/models"
-	"github.com/floss-fund/portal/internal/search"
 	"github.com/labstack/echo/v4"
 )
 
 type okResp struct {
-	Data interface{} `json:"data"`
+	Data any `json:"data"`
 }
 
 // tplRenderer wraps a template.tplRenderer for echo.
@@ -55,7 +54,7 @@ type Query struct {
 type tplData struct {
 	RootURL  string
 	AssetVer string
-	Data     interface{}
+	Data     any
 }
 
 type Tab struct {
@@ -451,75 +450,79 @@ func handleManifestPage(c echo.Context) error {
 
 func handleSearchPage(c echo.Context) error {
 	var (
-		app = c.Get("app").(*App)
+		app      = c.Get("app").(*App)
+		query    = c.QueryParam("q")
+		typ      = c.QueryParam("type")
+		tags     = c.QueryParams()["tag"]
+		licenses = c.QueryParams()["license"]
+		order    = strings.ToUpper(c.QueryParam("order"))
+		orderBy  = c.QueryParam("order_by")
+
+		pg = app.pg.NewFromURL(c.Request().URL.Query())
 	)
 
-	var q Query
-	if err := c.Bind(&q); err != nil {
-		return errPage(c, http.StatusBadRequest, "", "Invalid request", "Invalid request.")
-	}
-	q.Query = strings.TrimSpace(q.Query)
-
-	if q.Query == "" || len(q.Query) > 128 {
+	// Sanitize search fields.
+	query = strings.TrimSpace(query)
+	if (query == "" || len(query) > 128) && len(tags) == 0 && len(licenses) == 0 {
 		return c.Redirect(http.StatusTemporaryRedirect, app.consts.RootURL)
 	}
-	if q.Page < 1 {
-		q.Page = 1
+
+	if order != "" && order != "ASC" && order != "DESC" {
+		order = "ASC"
 	}
 
+	// Do the search.
 	var (
 		results any
 		total   int
 	)
-	switch q.Type {
+	switch typ {
 	case "entity":
-		query := search.EntityQuery{Query: q.Query, Field: q.Field, Page: q.Page}
-
-		o, num, err := app.search.SearchEntities(query)
+		res, err := app.core.SearchEntities(query, pg.Offset, pg.Limit)
 		if err != nil {
 			return errPage(c, http.StatusBadRequest, "", "Error", "An internal error occurred while searching.")
 		}
-		results = o
-		total = num
+
+		results = res
+		if len(res) > 0 {
+			total = res[0].Total
+		}
 	case "project":
-		query := search.ProjectQuery{Query: q.Query, Field: q.Field, Page: q.Page}
-		query.Licenses = []string{}
+		tags := append([]string{}, tags...)
+		licenses := append([]string{}, licenses...)
 
-		for _, l := range c.QueryParams()["license"] {
-			query.Licenses = append(query.Licenses, l)
-		}
-
-		o, num, err := app.search.SearchProjects(query)
+		res, err := app.core.SearchProjects(query, tags, licenses, orderBy, order, pg.Offset, pg.Limit)
 		if err != nil {
 			return errPage(c, http.StatusBadRequest, "", "Error", "An internal error occurred while searching.")
 		}
-		results = o
-		total = num
+		results = res
+		if len(res) > 0 {
+			total = res[0].Total
+		}
 	default:
 		return errPage(c, http.StatusBadRequest, "", "Error", "Unknown type.")
 	}
 
-	pg := app.pg.NewFromURL(c.Request().URL.Query())
 	pg.SetTotal(total)
 
 	out := struct {
 		Page
-		Pagination template.HTML
-		Q          Query
-		Total      int
-		Results    interface{}
+		Pagination                   template.HTML
+		QueryType, Query, QueryField string
+		Total                        int
+		Results                      any
 	}{}
 
 	// Additional query params to attach to paginated URLs.
 	qp := url.Values{}
-	qp.Set("q", q.Query)
-	qp.Set("type", q.Type)
-	qp.Set("field", q.Field)
+	qp.Set("q", query)
+	qp.Set("type", typ)
 
 	out.Pagination = template.HTML(pg.HTML("", qp))
 	out.Title = "Search"
-	out.Heading = fmt.Sprintf(`Search "%s"`, q.Query)
-	out.Q = q
+	out.Heading = fmt.Sprintf(`Search "%s"`, query)
+	out.QueryType = typ
+	out.Query = query
 	out.Total = total
 	out.Results = results
 
@@ -615,7 +618,7 @@ func handleReport(c echo.Context) error {
 }
 
 // Render executes and renders a template for echo.
-func (t *tplRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (t *tplRenderer) Render(w io.Writer, name string, data any, c echo.Context) error {
 	return t.tpl.ExecuteTemplate(w, name, tplData{
 		RootURL:  t.RootURL,
 		AssetVer: t.AssetVer,
@@ -645,7 +648,7 @@ func renderBrowsePage(typ string, c echo.Context) error {
 
 	// Get the total count.
 	var (
-		results interface{}
+		results any
 		pg      = app.pg.NewFromURL(c.Request().URL.Query())
 		total   = 0
 	)
@@ -683,7 +686,7 @@ func renderBrowsePage(typ string, c echo.Context) error {
 	out := struct {
 		Page
 		Pagination template.HTML
-		Results    interface{}
+		Results    any
 		Total      int
 		Type       string
 	}{}

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"path"
 	"regexp"
@@ -16,6 +15,7 @@ import (
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 const maxURISize = 40
@@ -50,13 +50,13 @@ type Queries struct {
 	GetProjects          string     `query:"get-projects"`
 	GetEntities          string     `query:"get-entities"`
 	GetManifestsDump     *sqlx.Stmt `query:"get-manifests-dump"`
+	SearchEntities       *sqlx.Stmt `query:"search-entities"`
+	SearchProjects       *sqlx.Stmt `query:"search-projects"`
 }
 
 type Core struct {
 	q   *Queries
 	db  *sqlx.DB
-	opt Opt
-	hc  *http.Client
 	log *log.Logger
 }
 
@@ -246,6 +246,30 @@ func (c *Core) GetEntities(orderBy, order string, offset, limit int) ([]models.E
 
 	if err := c.db.Select(&out, fmt.Sprintf(c.q.GetEntities, orderBy+" "+order), offset, limit); err != nil {
 		c.log.Printf("error fetching entities by start letter: %v", err)
+		return nil, err
+	}
+
+	return out, nil
+}
+
+// SearchEntities searches entities by keywords.
+func (c *Core) SearchEntities(query string, offset, limit int) ([]models.Entity, error) {
+	var out []models.Entity
+
+	if err := c.q.SearchEntities.Select(&out, query, offset, limit); err != nil {
+		c.log.Printf("error searching entities: %v", err)
+		return nil, err
+	}
+
+	return out, nil
+}
+
+// SearchProjects searches projects by keywords.
+func (c *Core) SearchProjects(query string, tags, licenses []string, orderBy, order string, offset, limit int) ([]models.Project, error) {
+	var out []models.Project
+
+	if err := c.q.SearchProjects.Select(&out, query, pq.Array(tags), pq.Array(licenses), offset, limit); err != nil {
+		c.log.Printf("error searching projects: %v", err)
 		return nil, err
 	}
 

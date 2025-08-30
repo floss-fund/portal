@@ -8,9 +8,9 @@
     {{ .Data.Pagination }}
   </nav>
 
-  {{ if eq .Data.Q.Type "project" }}
+  {{ if eq .Data.QueryType "project" }}
     {{ template "project-search" . }}
-  {{ else if eq .Data.Q.Type "entity" }}
+  {{ else if eq .Data.QueryType "entity" }}
     {{ template "entity-results" . }}
   {{ end }}
 
