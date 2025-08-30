@@ -69,36 +69,39 @@ type ProjectURLs []ProjectURL
 
 //easyjson:json
 type Project struct {
-	Total int `db:"total" json:"-"`
+	v1.Project
 
-	ID                string         `db:"id" json:"id"`
-	GUID              string         `db:"guid" json:"guid"`
-	ManifestID        int            `db:"manifest_id" json:"manifest_id"`
-	ManifestGUID      string         `db:"manifest_guid" json:"manifest_guid"`
-	EntityName        string         `db:"entity_name" json:"entity_name"`
-	EntityType        string         `db:"entity_type" json:"entity_type"`
-	EntityNumProjects int            `db:"entity_num_projects" json:"entity_num_projects"`
-	Name              string         `db:"name" json:"name"`
-	Description       string         `db:"description" json:"description"`
-	WebpageURL        string         `db:"webpage_url" json:"webpage_url"`
-	RepositoryURL     string         `db:"repository_url" json:"repository_url"`
-	Licenses          pq.StringArray `db:"licenses" json:"licenses"`
-	Tags              pq.StringArray `db:"tags" json:"tags"`
-	UpdatedAt         time.Time      `db:"updated_at" json:"updated_at"`
+	// Overrides v1.Project fields.
+	Licenses         pq.StringArray `json:"licenses" db:"licenses"`
+	Tags             pq.StringArray `json:"tags" db:"tags"`
+	WebpageURLRaw    string         `json:"-" db:"webpageUrl"`
+	RepositoryURLRaw string         `json:"-" db:"repositoryUrl"`
+
+	// Entity.
+	EntityRaw json.RawMessage `json:"-" db:"entity"`
+	Entity    Entity          `json:"entity" db:"-"`
+
+	ID        int       `db:"id" json:"id"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	Total     int       `db:"total" json:"-"`
 }
 
 //easyjson:json
 type Entity struct {
-	Total int `db:"total" json:"-"`
+	// Manifest fields.
+	ManifestID   int    `json:"manifest_id" db:"manifest_id"`
+	ManifestGUID string `json:"manifest_guid" db:"manifest_guid"`
+	NumProjects  int    `json:"num_projects" db:"num_projects"`
 
-	ID           string    `json:"id" db:"id"`
-	ManifestID   int       `json:"manifest_id" db:"manifest_id"`
-	ManifestGUID string    `json:"manifest_guid" db:"manifest_guid"`
-	Type         string    `json:"type" db:"type"`
-	Role         string    `json:"role" db:"role"`
-	Name         string    `json:"name" db:"name"`
-	Description  string    `json:"description" db:"description"`
-	WebpageURL   string    `json:"webpage_url" db:"webpage_url"`
-	NumProjects  int       `json:"num_projects" db:"num_projects"`
-	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
+	Type        string `json:"type" db:"type"`
+	Role        string `json:"role" db:"role"`
+	Name        string `json:"name" db:"name"`
+	Email       string `json:"email" db:"email"`
+	Phone       string `json:"phone" db:"phone"`
+	Description string `json:"description" db:"description"`
+	WebpageURL  v1.URL `json:"webpageUrl" db:"-"`
+
+	WebpageURLRaw          string `json:"-" db:"webpageUrl"`
+	WebpageURLWellKnownRaw string `json:"-" db:"webpageWellknown"`
+	Total                  int    `db:"total" json:"-"`
 }

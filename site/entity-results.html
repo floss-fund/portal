@@ -15,7 +15,7 @@
                 <div class="col-3 col-end">
                     <div class="meta">
                       <a href="{{ $r.WebpageURL }}" rel="noreferer nofollow" class="ellip">
-                        <img src="/static/ico-link.svg" alt="" aria-hidden="true" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL) }}
+                        <img src="/static/ico-link.svg" alt="" aria-hidden="true" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL.URL) }}
                       </a>  
                     </div>
                 </div>

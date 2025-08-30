@@ -26,7 +26,6 @@ import (
 	"github.com/floss-fund/portal/internal/core"
 	"github.com/floss-fund/portal/internal/crawl"
 	"github.com/floss-fund/portal/internal/models"
-	"github.com/floss-fund/portal/internal/search"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/goyesql/v2"
 	goyesqlx "github.com/knadh/goyesql/v2/sqlx"
@@ -59,8 +58,6 @@ func initConfig() {
 	f.StringSlice("config", []string{"config.toml"},
 		"path to one or more config files (will be merged in order)")
 	f.Bool("install", false, "run first time DB installation")
-	f.Bool("install-db", true, "run installation on PostgresDB")
-	f.Bool("install-search", true, "run installation on TypeSense search")
 	f.Bool("upgrade", false, "upgrade database to the current version")
 	f.Bool("yes", false, "assume 'yes' to prompts during --install/upgrade")
 	f.Bool("version", false, "current version of the build")
@@ -221,7 +218,7 @@ func initCore(fs stuffbin.FileSystem, db *sqlx.DB) *core.Core {
 	return core.New(&q, db.Unsafe(), opt, lo)
 }
 
-func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf) *crawl.Crawl {
+func initCrawl(sc crawl.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
 	opt := crawl.Opt{
 		Workers:         ko.MustInt("crawl.workers"),
 		ManifestAge:     ko.MustString("crawl.manifest_age"),
@@ -233,14 +230,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, s *search.Search, ko *koanf.Koanf
 		HTTP: initHTTPOpt(),
 	}
 
-	// When the crawler updates manifests, fire the callback to search results.
-	cb := &crawl.Callbacks{
-		OnManifestUpdate: func(m models.ManifestData, status string) {
-			updateSearchRecord(m, status, s)
-		},
-	}
-
-	return crawl.New(&opt, sc, cb, co, lo)
+	return crawl.New(&opt, sc, nil, co, lo)
 }
 
 func initPaginator(ko *koanf.Koanf) *paginator.Paginator {
@@ -316,18 +306,6 @@ func initHTTPOpt() common.HTTPOpt {
 		MaxBytes:     ko.MustInt64("crawl.max_bytes"),
 		UserAgent:    ko.MustString("crawl.useragent"),
 	}
-}
-
-func initSearch(ko *koanf.Koanf) *search.Search {
-	opt := search.Opt{
-		RootURL: ko.MustString("search.root_url"),
-		APIKey:  ko.MustString("search.api_key"),
-		PerPage: ko.MustInt("search.per_page"),
-
-		HTTP: initHTTPOpt(),
-	}
-
-	return search.New(opt, lo)
 }
 
 func initSiteTemplates(dirPath string) *template.Template {

@@ -19,20 +19,5 @@ services:
         source: portal-data
         target: /var/lib/postgresql/data
 
-  typesense:
-    container_name: portal-typesense
-    restart: unless-stopped
-    image: typesense/typesense:27.0
-    volumes:
-      - type: volume
-        source: typesense-data
-        target: /data
-    ports:
-      - 8108:8108
-    environment:
-      - TYPESENSE_DATA_DIR=/data
-      - TYPESENSE_API_KEY=typesense
-
 volumes:
   portal-data:
-  typesense-data:

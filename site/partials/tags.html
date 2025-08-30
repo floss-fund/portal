@@ -1,7 +1,7 @@
 {{ define "tags" }}
 <nav class="tags">
   {{ range $t := . }}
-    <a href="/search?q={{ $t }}&type=project&field=tags" class="tag">{{ $t }}</a>
+    <a href="/search?type=project&tag={{ $t }}" class="tag">{{ $t }}</a>
   {{ end }}
 </nav>
 {{ end }}

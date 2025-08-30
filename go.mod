@@ -10,7 +10,6 @@ require (
 	github.com/floss-fund/go-funding-json v0.5.3
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/knadh/goyesql/v2 v2.2.0
-	github.com/knadh/koanf/maps v0.1.2
 	github.com/knadh/koanf/parsers/toml v0.1.0
 	github.com/knadh/koanf/providers/file v1.2.0
 	github.com/knadh/koanf/providers/posflag v1.0.1
@@ -31,16 +30,15 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/imdario/mergo v1.0.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/knadh/koanf/maps v0.1.2 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -56,3 +54,4 @@ require (
 )
 
 replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.8
+replace github.com/floss-fund/go-funding-json => /mnt/mydrive/workstation/code/go/my/floss.fund/go-funding-json

@@ -14,12 +14,10 @@ BIN := portal
 STATIC := config.sample.toml schema.sql queries.sql
 
 EASYJSON_MODELS := $\
-	internal/models/models.go \
-	internal/search/models.go
+	internal/models/models.go
 
 GENERATED_EASYJSON_MODELS := $\
-	internal/models/models_easyjson.go \
-	internal/search/models_easyjson.go
+	internal/models/models_easyjson.go
 
 $(EASYJSON):
 	go get github.com/zerodha/easyjson && go install github.com/zerodha/easyjson/...@latest

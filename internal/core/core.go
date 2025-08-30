@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"path"
 	"regexp"
@@ -16,6 +15,7 @@ import (
 	v1 "github.com/floss-fund/go-funding-json/schemas/v1"
 	"github.com/floss-fund/portal/internal/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 const maxURISize = 40
@@ -50,13 +50,14 @@ type Queries struct {
 	GetProjects          string     `query:"get-projects"`
 	GetEntities          string     `query:"get-entities"`
 	GetManifestsDump     *sqlx.Stmt `query:"get-manifests-dump"`
+	SearchEntities       *sqlx.Stmt `query:"search-entities"`
+	QueryProjectsTpl     string     `query:"query-projects-template"`
+	SearchProjects       string     `query:"search-projects"`
 }
 
 type Core struct {
 	q   *Queries
 	db  *sqlx.DB
-	opt Opt
-	hc  *http.Client
 	log *log.Logger
 }
 
@@ -209,13 +210,17 @@ func (d *Core) GetTopTags(limit int) ([]string, error) {
 
 // GetRecentProjects retrieves N recently updated projects.
 func (d *Core) GetRecentProjects(limit int) ([]models.Project, error) {
-	var projects []models.Project
-	if err := d.q.GetRecentProjects.Select(&projects, limit); err != nil {
+	var out []models.Project
+	if err := d.q.GetRecentProjects.Select(&out, limit); err != nil {
 		d.log.Printf("error fetching recent projects: %v", err)
 		return nil, err
 	}
 
-	return projects, nil
+	if err := parseUrls(out, d.log); err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
 // InsertManifestReport inserts a flagged report with reason for the manifest
@@ -237,6 +242,10 @@ func (c *Core) GetProjects(orderBy, order string, offset, limit int) ([]models.P
 		return nil, err
 	}
 
+	if err := parseUrls(out, c.log); err != nil {
+		return nil, err
+	}
+
 	return out, nil
 }
 
@@ -246,6 +255,55 @@ func (c *Core) GetEntities(orderBy, order string, offset, limit int) ([]models.E
 
 	if err := c.db.Select(&out, fmt.Sprintf(c.q.GetEntities, orderBy+" "+order), offset, limit); err != nil {
 		c.log.Printf("error fetching entities by start letter: %v", err)
+		return nil, err
+	}
+
+	if err := parseUrls(out, c.log); err != nil {
+		return nil, err
+	}
+
+	return out, nil
+}
+
+// SearchEntities searches entities by keywords.
+func (c *Core) SearchEntities(query string, offset, limit int) ([]models.Entity, error) {
+	var out []models.Entity
+
+	if err := c.q.SearchEntities.Select(&out, query, offset, limit); err != nil {
+		c.log.Printf("error searching entities: %v", err)
+		return nil, err
+	}
+
+	if err := parseUrls(out, c.log); err != nil {
+		return nil, err
+	}
+
+	return out, nil
+}
+
+// SearchProjects searches projects by keywords.
+func (c *Core) SearchProjects(query string, tags, licenses []string, orderBy, order string, offset, limit int) ([]models.Project, error) {
+
+	exp := strings.ReplaceAll(c.q.QueryProjectsTpl, "%query%", c.q.SearchProjects)
+
+	var out []models.Project
+	if err := c.db.Select(&out, exp, query, pq.Array(tags), pq.Array(licenses), offset, limit); err != nil {
+		c.log.Printf("error searching projects: %v", err)
+		return nil, err
+	}
+
+	// Iterate and unmarshal EntityRaw into Entity struct of each project.
+	for n, p := range out {
+		fmt.Println(string(p.EntityRaw))
+		if err := p.Entity.UnmarshalJSON(p.EntityRaw); err != nil {
+			c.log.Printf("error unmarshalling entity: %d: %v", p.ID, err)
+			return nil, err
+		}
+		out[n] = p
+		out[n].EntityRaw = nil
+	}
+
+	if err := parseUrls(out, c.log); err != nil {
 		return nil, err
 	}
 
@@ -304,17 +362,17 @@ func (d *Core) getManifests(id int, guid string, lastID, limit int, status strin
 		// Unmarshal the entity URL. DB names and local names don't match,
 		// and it's a nested structure. Sucks.
 		{
-			var ug models.EntityURL
-			if err := ug.UnmarshalJSON(o.EntityRaw); err != nil {
+			var urls models.EntityURL
+			if err := urls.UnmarshalJSON(o.EntityRaw); err != nil {
 				d.log.Printf("error unmarshalling entity URL: %d: %v", id, err)
 				return nil, err
 			}
 
-			if u, err := common.IsURL("url", ug.WebpageURL, maxURLLen); err != nil {
-				d.log.Printf("error parsing entity URL: %d: %s: %v", id, ug.WebpageURL, err)
+			if u, err := common.IsURL("url", urls.WebpageURL, maxURLLen); err != nil {
+				d.log.Printf("error parsing entity URL: %d: %s: %v", id, urls.WebpageURL, err)
 				return nil, err
 			} else {
-				o.Entity.WebpageURL = v1.URL{URL: ug.WebpageURL, URLobj: u}
+				o.Entity.WebpageURL = v1.URL{URL: urls.WebpageURL, URLobj: u}
 			}
 		}
 
@@ -326,13 +384,13 @@ func (d *Core) getManifests(id int, guid string, lastID, limit int, status strin
 		// Unmarshal project URLs. DB names and local names don't match,
 		// and it's a nested structure. This sucks.
 		{
-			var ug models.ProjectURLs
-			if err := ug.UnmarshalJSON(o.ProjectsRaw); err != nil {
+			var urls models.ProjectURLs
+			if err := urls.UnmarshalJSON(o.ProjectsRaw); err != nil {
 				d.log.Printf("error unmarshalling project URLs: %d: %v", id, err)
 				return nil, err
 			}
 
-			for n, p := range ug {
+			for n, p := range urls {
 				if u, err := common.IsURL("url", p.WebpageURL, maxURLLen); err != nil {
 					d.log.Printf("error parsing entity URL: %d: %s: %v", id, p.WebpageURL, err)
 					return nil, err
@@ -380,4 +438,46 @@ func MakeGUID(u *url.URL) string {
 
 	guid := "@" + path.Join(u.Host, uri)
 	return guid
+}
+
+// parseUrls is a generic function that parses raw URL strings into v1.URL objects
+// for either Entity or Project slices
+func parseUrls[T models.Entity | models.Project](items []T, logger *log.Logger) error {
+	for i := range items {
+		item := &items[i]
+
+		// Handle Entity URLs
+		if entity, ok := any(item).(*models.Entity); ok {
+			if entity.WebpageURLRaw != "" {
+				if u, err := common.IsURL("url", entity.WebpageURLRaw, maxURLLen); err != nil {
+					logger.Printf("error parsing entity webpage URL: %s: %v", entity.WebpageURLRaw, err)
+					return err
+				} else {
+					entity.WebpageURL = v1.URL{URL: entity.WebpageURLRaw, URLobj: u}
+				}
+			}
+		}
+
+		// Handle Project URLs
+		if project, ok := any(item).(*models.Project); ok {
+			if project.WebpageURLRaw != "" {
+				if u, err := common.IsURL("url", project.WebpageURLRaw, maxURLLen); err != nil {
+					logger.Printf("error parsing project webpage URL: %s: %v", project.WebpageURLRaw, err)
+					return err
+				} else {
+					project.WebpageURL = v1.URL{URL: project.WebpageURLRaw, URLobj: u}
+				}
+			}
+
+			if project.RepositoryURLRaw != "" {
+				if u, err := common.IsURL("url", project.RepositoryURLRaw, maxURLLen); err != nil {
+					logger.Printf("error parsing project repository URL: %s: %v", project.RepositoryURLRaw, err)
+					return err
+				} else {
+					project.RepositoryURL = v1.URL{URL: project.RepositoryURLRaw, URLobj: u}
+				}
+			}
+		}
+	}
+	return nil
 }

@@ -176,28 +176,6 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(in *jlexer.Le
 			continue
 		}
 		switch key {
-		case "id":
-			out.ID = string(in.String())
-		case "guid":
-			out.GUID = string(in.String())
-		case "manifest_id":
-			out.ManifestID = int(in.Int())
-		case "manifest_guid":
-			out.ManifestGUID = string(in.String())
-		case "entity_name":
-			out.EntityName = string(in.String())
-		case "entity_type":
-			out.EntityType = string(in.String())
-		case "entity_num_projects":
-			out.EntityNumProjects = int(in.Int())
-		case "name":
-			out.Name = string(in.String())
-		case "description":
-			out.Description = string(in.String())
-		case "webpage_url":
-			out.WebpageURL = string(in.String())
-		case "repository_url":
-			out.RepositoryURL = string(in.String())
 		case "licenses":
 			if in.IsNull() {
 				in.Skip()
@@ -244,10 +222,24 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels2(in *jlexer.Le
 				}
 				in.Delim(']')
 			}
+		case "entity":
+			(out.Entity).UnmarshalEasyJSON(in)
+		case "id":
+			out.ID = int(in.Int())
 		case "updated_at":
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.UpdatedAt).UnmarshalJSON(data))
 			}
+		case "guid":
+			out.GUID = string(in.String())
+		case "name":
+			out.Name = string(in.String())
+		case "description":
+			out.Description = string(in.String())
+		case "webpageUrl":
+			(out.WebpageURL).UnmarshalEasyJSON(in)
+		case "repositoryUrl":
+			(out.RepositoryURL).UnmarshalEasyJSON(in)
 		default:
 			in.SkipRecursive()
 		}
@@ -263,68 +255,8 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(out *jwriter.
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.ID))
-	}
-	{
-		const prefix string = ",\"guid\":"
-		out.RawString(prefix)
-		out.String(string(in.GUID))
-	}
-	{
-		const prefix string = ",\"manifest_id\":"
-		out.RawString(prefix)
-		out.Int(int(in.ManifestID))
-	}
-	{
-		const prefix string = ",\"manifest_guid\":"
-		out.RawString(prefix)
-		out.String(string(in.ManifestGUID))
-	}
-	{
-		const prefix string = ",\"entity_name\":"
-		out.RawString(prefix)
-		out.String(string(in.EntityName))
-	}
-	{
-		const prefix string = ",\"entity_type\":"
-		out.RawString(prefix)
-		out.String(string(in.EntityType))
-	}
-	{
-		const prefix string = ",\"entity_num_projects\":"
-		out.RawString(prefix)
-		out.Int(int(in.EntityNumProjects))
-	}
-	{
-		const prefix string = ",\"name\":"
-		out.RawString(prefix)
-		out.String(string(in.Name))
-	}
-	{
-		const prefix string = ",\"description\":"
-		out.RawString(prefix)
-		out.String(string(in.Description))
-	}
-	{
-		const prefix string = ",\"webpage_url\":"
-		out.RawString(prefix)
-		out.String(string(in.WebpageURL))
-	}
-	{
-		const prefix string = ",\"repository_url\":"
-		out.RawString(prefix)
-		out.String(string(in.RepositoryURL))
-	}
-	{
 		const prefix string = ",\"licenses\":"
-		out.RawString(prefix)
+		out.RawString(prefix[1:])
 		if in.Licenses == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -355,9 +287,44 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels2(out *jwriter.
 		}
 	}
 	{
+		const prefix string = ",\"entity\":"
+		out.RawString(prefix)
+		(in.Entity).MarshalEasyJSON(out)
+	}
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix)
+		out.Int(int(in.ID))
+	}
+	{
 		const prefix string = ",\"updated_at\":"
 		out.RawString(prefix)
 		out.Raw((in.UpdatedAt).MarshalJSON())
+	}
+	{
+		const prefix string = ",\"guid\":"
+		out.RawString(prefix)
+		out.String(string(in.GUID))
+	}
+	{
+		const prefix string = ",\"name\":"
+		out.RawString(prefix)
+		out.String(string(in.Name))
+	}
+	{
+		const prefix string = ",\"description\":"
+		out.RawString(prefix)
+		out.String(string(in.Description))
+	}
+	{
+		const prefix string = ",\"webpageUrl\":"
+		out.RawString(prefix)
+		(in.WebpageURL).MarshalEasyJSON(out)
+	}
+	{
+		const prefix string = ",\"repositoryUrl\":"
+		out.RawString(prefix)
+		(in.RepositoryURL).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
@@ -769,28 +736,26 @@ func easyjsonD2b7633eDecodeGithubComFlossFundPortalInternalModels6(in *jlexer.Le
 			continue
 		}
 		switch key {
-		case "id":
-			out.ID = string(in.String())
 		case "manifest_id":
 			out.ManifestID = int(in.Int())
 		case "manifest_guid":
 			out.ManifestGUID = string(in.String())
+		case "num_projects":
+			out.NumProjects = int(in.Int())
 		case "type":
 			out.Type = string(in.String())
 		case "role":
 			out.Role = string(in.String())
 		case "name":
 			out.Name = string(in.String())
+		case "email":
+			out.Email = string(in.String())
+		case "phone":
+			out.Phone = string(in.String())
 		case "description":
 			out.Description = string(in.String())
-		case "webpage_url":
-			out.WebpageURL = string(in.String())
-		case "num_projects":
-			out.NumProjects = int(in.Int())
-		case "updated_at":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.UpdatedAt).UnmarshalJSON(data))
-			}
+		case "webpageUrl":
+			(out.WebpageURL).UnmarshalEasyJSON(in)
 		default:
 			in.SkipRecursive()
 		}
@@ -806,24 +771,19 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels6(out *jwriter.
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.ID))
-	}
-	{
 		const prefix string = ",\"manifest_id\":"
-		out.RawString(prefix)
+		out.RawString(prefix[1:])
 		out.Int(int(in.ManifestID))
 	}
 	{
 		const prefix string = ",\"manifest_guid\":"
 		out.RawString(prefix)
 		out.String(string(in.ManifestGUID))
+	}
+	{
+		const prefix string = ",\"num_projects\":"
+		out.RawString(prefix)
+		out.Int(int(in.NumProjects))
 	}
 	{
 		const prefix string = ",\"type\":"
@@ -841,24 +801,24 @@ func easyjsonD2b7633eEncodeGithubComFlossFundPortalInternalModels6(out *jwriter.
 		out.String(string(in.Name))
 	}
 	{
+		const prefix string = ",\"email\":"
+		out.RawString(prefix)
+		out.String(string(in.Email))
+	}
+	{
+		const prefix string = ",\"phone\":"
+		out.RawString(prefix)
+		out.String(string(in.Phone))
+	}
+	{
 		const prefix string = ",\"description\":"
 		out.RawString(prefix)
 		out.String(string(in.Description))
 	}
 	{
-		const prefix string = ",\"webpage_url\":"
+		const prefix string = ",\"webpageUrl\":"
 		out.RawString(prefix)
-		out.String(string(in.WebpageURL))
-	}
-	{
-		const prefix string = ",\"num_projects\":"
-		out.RawString(prefix)
-		out.Int(int(in.NumProjects))
-	}
-	{
-		const prefix string = ",\"updated_at\":"
-		out.RawString(prefix)
-		out.Raw((in.UpdatedAt).MarshalJSON())
+		(in.WebpageURL).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
