@@ -227,17 +227,16 @@ ORDER BY p.%s OFFSET $1 LIMIT $2;
 
 -- name: get-entities
 -- raw: true
-WITH entity_counts AS (
-    SELECT manifest_id, COUNT(*) AS project_count FROM projects GROUP BY manifest_id
-)
-SELECT 
-	COUNT(*) OVER () AS total,
+SELECT
+    COUNT(*) OVER () AS total,
     e.*,
-    ec.project_count AS num_projects,
+    (
+        SELECT COUNT(*)
+        FROM projects
+        WHERE manifest_id = e.manifest_id
+    ) AS num_projects,
     m.guid AS manifest_guid
-FROM entities e
-    JOIN entity_counts ec ON ec.manifest_id = e.manifest_id
-    JOIN manifests m ON m.id = e.manifest_id
+FROM entities e JOIN manifests m ON m.id = e.manifest_id
 ORDER BY %s OFFSET $1 LIMIT $2;
 
 -- name: get-manifests-dump
@@ -283,3 +282,54 @@ FROM manifests m
     LEFT JOIN entities e ON e.manifest_id = m.id
     LEFT JOIN project_json p ON p.manifest_id = m.id
 WHERE m.id > $1 ORDER BY m.id LIMIT $2;
+
+-- name: search-entities
+SELECT
+    COUNT(*) OVER () AS total,
+    t.*,
+    TS_RANK_CD(t.search_tokens, PLAINTO_TSQUERY('simple', $1)) AS rank,
+    COALESCE(project_counts.num_projects, 0) AS num_projects,
+    m.guid AS manifest_guid
+FROM entities t
+LEFT JOIN (
+    SELECT manifest_id, COUNT(*) AS num_projects
+    FROM projects GROUP BY manifest_id
+) AS project_counts ON project_counts.manifest_id = t.manifest_id
+JOIN manifests m ON m.id = t.manifest_id
+WHERE t.search_tokens @@ PLAINTO_TSQUERY('simple', $1)
+ORDER BY rank DESC, t.id OFFSET $2 LIMIT $3;
+
+-- name: search-projects
+-- $1 plaintext text search term
+-- $2 tags[]
+-- $3 licenses[]
+-- $4 offset
+-- $5 limit
+SELECT
+    COUNT(*) OVER () AS total,
+    p.*,
+    CASE
+        WHEN $1::TEXT != '' THEN TS_RANK_CD(p.search_tokens, PLAINTO_TSQUERY('simple', $1))
+        ELSE 0
+    END AS rank,
+    m.guid AS manifest_guid,
+    e.name AS entity_name,
+    e.type AS entity_type,
+    COALESCE(project_counts.num_projects, 0) AS entity_num_projects
+FROM projects p
+JOIN manifests m ON m.id = p.manifest_id
+JOIN entities e ON e.manifest_id = p.manifest_id
+LEFT JOIN (
+    SELECT manifest_id, COUNT(*) AS num_projects
+    FROM projects GROUP BY manifest_id
+) AS project_counts ON project_counts.manifest_id = p.manifest_id
+WHERE
+    ($1::TEXT != '' OR p.search_tokens @@ PLAINTO_TSQUERY('simple', $1)) AND
+    (CARDINALITY($2::TEXT[]) = 0 OR p.tags <@ $2) AND
+    (CARDINALITY($3::TEXT[]) = 0 OR p.licenses <@ $3)
+ORDER BY
+    CASE
+        WHEN $1::TEXT != '' THEN TS_RANK_CD(p.search_tokens, PLAINTO_TSQUERY('simple', $1))
+        ELSE 0
+    END DESC,
+    p.id OFFSET $4 LIMIT $5;

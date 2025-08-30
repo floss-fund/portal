@@ -7,7 +7,6 @@ import (
 
 	"github.com/floss-fund/portal/internal/core"
 	"github.com/floss-fund/portal/internal/crawl"
-	"github.com/floss-fund/portal/internal/search"
 	"github.com/jmoiron/sqlx"
 	"github.com/knadh/koanf/v2"
 	"github.com/knadh/paginator/v2"
@@ -44,7 +43,6 @@ type App struct {
 	consts  Consts
 	siteTpl *template.Template
 	core    *core.Core
-	search  *search.Search
 	crawl   *crawl.Crawl
 	schema  crawl.Schema
 	pg      *paginator.Paginator
@@ -83,8 +81,6 @@ func main() {
 	if ko.Bool("install") {
 		install(migrationsList[len(migrationsList)-1].version,
 			!ko.Bool("yes"),
-			ko.Bool("install-db"),
-			ko.Bool("install-search"),
 			app,
 			ko)
 		return
@@ -100,17 +96,13 @@ func main() {
 	// Initialize queries and data handler.
 	app.core = initCore(app.fs, db)
 	app.schema = initSchema(ko)
-	app.search = initSearch(ko)
-	app.crawl = initCrawl(app.schema, app.core, app.search, ko)
+	app.crawl = initCrawl(app.schema, app.core, ko)
 	app.pg = initPaginator(ko)
 
 	// Run the crawl mode.
 	switch ko.String("mode") {
 	case "crawl":
 		app.crawl.Crawl()
-		return
-	case "sync-search":
-		syncSearch(app.core, app.search, lo)
 		return
 	case "dump":
 		dumpManifests(app.core, lo)

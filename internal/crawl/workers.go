@@ -43,64 +43,56 @@ func (c *Crawl) dbWorker() {
 }
 
 func (c *Crawl) worker() {
-loop:
-	for {
-		select {
-		case j, ok := <-c.jobs:
-			if !ok {
-				break loop
-			}
+	for j := range c.jobs {
+		// Fetch and validate the manifest.
+		reCrawl, err := c.IsManifestModified(j.URLobj, j.LastModified)
+		if err != nil {
+			c.log.Printf("error fetching modified date: %s: %v", j.URL, err)
 
-			// Fetch and validate the manifest.
-			reCrawl, err := c.IsManifestModified(j.URLobj, j.LastModified)
-			if err != nil {
-				c.log.Printf("error fetching modified date: %s: %v", j.URL, err)
-
-				// Record the error.
-				if status, err := c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros); err == nil {
-					// If the manifest is no longer active, delete it from search.
-					if c.Callbacks.OnManifestUpdate != nil && status != core.ManifestStatusActive {
-						c.Callbacks.OnManifestUpdate(models.ManifestData{ID: j.ID}, status)
-					}
+			// Record the error.
+			if status, err := c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros); err == nil {
+				// If the manifest is no longer active, delete it from search.
+				if c.Callbacks.OnManifestUpdate != nil && status != core.ManifestStatusActive {
+					c.Callbacks.OnManifestUpdate(models.ManifestData{ID: j.ID}, status)
 				}
-
-				continue
 			}
 
-			if !reCrawl {
-				c.log.Printf("no modification. Skipping: %s", j.URL)
+			continue
+		}
 
-				// Touch and update its date.
-				_ = c.db.UpdateManifestDate(j.ID)
+		if !reCrawl {
+			c.log.Printf("no modification. Skipping: %s", j.URL)
 
-				continue
-			}
+			// Touch and update its date.
+			_ = c.db.UpdateManifestDate(j.ID)
 
-			// Fetch and validate the manifest.
-			status := j.Status
-			m, err := c.FetchManifest(j.URLobj)
-			m.ID = j.ID
-			if err != nil {
-				c.log.Printf("error crawling: %s: %v", j.URL, err)
+			continue
+		}
 
-				// Record the error.
-				status, _ = c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros)
-				if c.Callbacks.OnManifestUpdate != nil {
-					c.Callbacks.OnManifestUpdate(m, status)
-				}
+		// Fetch and validate the manifest.
+		status := j.Status
+		m, err := c.FetchManifest(j.URLobj)
+		m.ID = j.ID
+		if err != nil {
+			c.log.Printf("error crawling: %s: %v", j.URL, err)
 
-				continue
-			}
-
-			// Add it to the database.
-			if err := c.db.UpsertManifest(m, status); err != nil {
-				c.log.Printf("error upserting manifest: %s: %v", j.URL, err)
-				continue
-			}
-
-			if c.Callbacks.OnManifestUpdate != nil {
+			// Record the error.
+			status, _ = c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros)
+			if c.Callbacks != nil && c.Callbacks.OnManifestUpdate != nil {
 				c.Callbacks.OnManifestUpdate(m, status)
 			}
+
+			continue
+		}
+
+		// Add it to the database.
+		if err := c.db.UpsertManifest(m, status); err != nil {
+			c.log.Printf("error upserting manifest: %s: %v", j.URL, err)
+			continue
+		}
+
+		if c.Callbacks != nil && c.Callbacks.OnManifestUpdate != nil {
+			c.Callbacks.OnManifestUpdate(m, status)
 		}
 	}
 
