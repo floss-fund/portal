@@ -265,7 +265,7 @@ func handleSubmitPage(c echo.Context) error {
 	}
 
 	// Add it to the database.
-	m.GUID = core.MakeGUID(m.Manifest.URL.URLobj)
+	m.GUID = core.MakeGUID(m.URLobj)
 	m.GUID = strings.TrimSuffix(m.GUID, app.consts.ManifestURI)
 
 	if err := app.core.UpsertManifest(m, app.consts.DefaultSubmissionstatus); err != nil {
@@ -290,7 +290,14 @@ func handleValidateManifest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	b, err := m.Manifest.MarshalJSON()
+	// Build schema to respond to API.
+	manifest := v1.Manifest{
+		Version:  m.Version,
+		Entity:   m.Entity.ToSchema(),
+		Projects: m.Projects.ToSchema(),
+		Funding:  m.Funding,
+	}
+	b, err := manifest.MarshalJSON()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -317,7 +324,7 @@ func handleManifestPage(c echo.Context) error {
 		out = struct {
 			Page
 			Manifest models.ManifestData
-			Project  v1.Project
+			Project  models.Project
 		}{}
 	)
 
@@ -385,24 +392,24 @@ func handleManifestPage(c echo.Context) error {
 	}
 
 	// If it's a single project's page, get the project.
-	var prj v1.Project
+	var prj models.Project
 	if pGuid != "" {
-		idx := slices.IndexFunc(m.Manifest.Projects, func(o v1.Project) bool {
-			return o.GUID == pGuid
+		n := slices.IndexFunc(m.Projects, func(o models.Project) bool {
+			return o.GUID == mGuid+"/"+pGuid
 		})
-		if idx < 0 {
+		if n < 0 {
 			return errPage(c, http.StatusNotFound, "", "Project not found", "Project not found.")
 		}
-		prj = m.Manifest.Projects[idx]
+		prj = m.Projects[n]
 		out.Title = prj.Name + "by %s"
 		out.Description = abbrev(prj.Description, 200)
 	}
 
 	out.Manifest = m
 	out.Project = prj
-	out.Title = fmt.Sprintf(out.Title, m.Manifest.Entity.Name)
-	out.Description = fmt.Sprintf(out.Description, m.Manifest.Entity.Name)
-	out.Heading = m.Manifest.Entity.Name
+	out.Title = fmt.Sprintf(out.Title, m.Entity.Name)
+	out.Description = fmt.Sprintf(out.Description, m.Entity.Name)
+	out.Heading = m.Entity.Name
 	out.Tabs = []Tab{
 		{
 			ID:       "entity",
@@ -412,20 +419,20 @@ func handleManifestPage(c echo.Context) error {
 		},
 		{
 			ID:       "projects",
-			Label:    fmt.Sprintf("Projects (%d)", len(m.Manifest.Projects)),
+			Label:    fmt.Sprintf("Projects (%d)", len(m.Projects)),
 			Selected: tpl == "projects",
 			URL:      fmt.Sprintf("%s%sprojects/%s", app.consts.RootURL, prefix, m.GUID),
 		},
 		{
 			ID:       "funding",
 			Selected: tpl == "funding",
-			Label:    fmt.Sprintf("Funding plans (%d)", len(m.Manifest.Funding.Plans)),
+			Label:    fmt.Sprintf("Funding plans (%d)", len(m.Funding.Plans)),
 			URL:      fmt.Sprintf("%s%sfunding/%s", app.consts.RootURL, prefix, m.GUID),
 		},
 		{
 			ID:       "history",
 			Selected: tpl == "history",
-			Label:    fmt.Sprintf("History (%d)", len(m.Manifest.Funding.History)),
+			Label:    fmt.Sprintf("History (%d)", len(m.Funding.History)),
 			URL:      fmt.Sprintf("%s%shistory/%s", app.consts.RootURL, prefix, m.GUID),
 		},
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 type Schema interface {
-	Validate(models.ManifestData) (models.ManifestData, error)
+	// Validate(models.ManifestData) (models.ManifestData, error)
 	ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.ManifestData, error)
 }
 

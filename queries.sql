@@ -80,39 +80,23 @@ prj AS (
 SELECT (SELECT id FROM man) AS manifest_id;
 
 -- name: get-manifests
-WITH man AS (
-    SELECT * FROM manifests 
-    WHERE 
-    (CASE
-        WHEN $1 > 0 THEN id = $1
-        WHEN $2 != '' THEN guid = $2
-        ELSE TRUE
-    END)
-    AND (CASE 
-        WHEN $5 != '' THEN status = $5::manifest_status
-        ELSE TRUE
-    END)
-),
-entity AS (
-    SELECT m.id, TO_JSON(e) AS entity_raw 
-    FROM entities e
-    LEFT JOIN man m ON e.manifest_id = m.id
-),
-prj AS (
-    SELECT m.id, COALESCE(JSON_AGG(TO_JSON(p)), '[]'::json) AS projects_raw
-    FROM projects p 
-    JOIN man m ON p.manifest_id = m.id
-    GROUP BY m.id
-)
-SELECT m.id, m.guid, m.version, m.url, m.funding AS funding_raw, 
-       m.status, m.status_message, m.crawl_errors, 
-       m.crawl_message, m.created_at, m.updated_at, 
-       COALESCE(e.entity_raw, '[]'::json) AS entity_raw, 
-       COALESCE(p.projects_raw, '[]'::json) AS projects_raw
-FROM man m
-    LEFT JOIN entity e ON e.id = m.id
-    LEFT JOIN prj p ON p.id = m.id
-    WHERE m.id > $3 ORDER BY m.id LIMIT $4;
+SELECT id, guid, version, url, funding AS funding_raw, 
+       status, status_message, crawl_errors, 
+       crawl_message, created_at, updated_at, meta
+FROM manifests 
+WHERE 
+(CASE
+    WHEN $1 > 0 THEN id = $1
+    WHEN $2 != '' THEN guid = $2
+    ELSE TRUE
+END)
+AND (CASE 
+    WHEN $5 != '' THEN status = $5::manifest_status
+    ELSE TRUE
+END)
+AND id > $3 
+ORDER BY id 
+LIMIT $4;
 
 
 -- name: get-manifest-status
@@ -158,76 +142,16 @@ VALUES (
     $2
 );
 
--- name: get-recent-projects
+-- name: get-recent-projects-snippet
 WITH ranked_projects AS (
     SELECT 
         p.id,
-        p.guid,
-        p.manifest_id,
-        m.guid AS manifest_guid,
-        e.name AS entity_name,
-        e.type AS entity_type,
-        (SELECT COUNT(*) FROM projects WHERE manifest_id = p.manifest_id) AS entity_num_projects,
-        p.name,
-        p.description,
-        p.webpage_url,
-        p.repository_url,
-        p.licenses,
-        p.tags,
-        p.created_at,
-        ROW_NUMBER() OVER (PARTITION BY p.manifest_id ORDER BY p.created_at DESC) AS rn
+        ROW_NUMBER() OVER (PARTITION BY p.manifest_id ORDER BY p.created_at DESC) AS rn,
+        p.created_at
     FROM projects p
     JOIN manifests m ON p.manifest_id = m.id AND m.status = 'active'
-    JOIN entities e ON e.manifest_id = m.id
 )
-SELECT 
-    id,
-    guid,
-    manifest_id,
-    manifest_guid,
-    entity_name,
-    entity_type,
-    entity_num_projects,
-    name,
-    description,
-    webpage_url,
-    repository_url,
-    licenses,
-    tags,
-    created_at
-FROM ranked_projects
-WHERE rn <= 2
-ORDER BY created_at DESC
-LIMIT $1;
-
--- name: get-projects
-WITH project_counts AS (
-    SELECT manifest_id, COUNT(*) AS project_count FROM projects GROUP BY manifest_id
-)
-SELECT
-	COUNT(*) OVER () AS total,
-    CONCAT(m.guid, '/', p.guid) as id,
-    JSONB_BUILD_OBJECT(
-        'manifest_id', m.id,
-        'manifest_guid', m.guid,
-        'entity_id', e.id,
-        'type', e.type,
-        'role', e.role,
-        'name', e.name,
-        'num_projects', pc.project_count
-    ) AS entity,
-    p.name,
-    p.description,
-    p.webpage_url,
-    p.repository_url,
-    p.licenses,
-    p.tags,
-    p.updated_at
-FROM projects p
-    JOIN manifests m ON p.manifest_id = m.id
-    JOIN entities e ON e.manifest_id = m.id
-    JOIN project_counts pc ON pc.manifest_id = p.manifest_id
-ORDER BY p.%s OFFSET $1 LIMIT $2;
+SELECT id, $1::INT AS total FROM ranked_projects WHERE rn <= 2 ORDER BY created_at DESC LIMIT $1
 
 -- name: query-projects-template
 -- raw: true
@@ -245,13 +169,14 @@ SELECT
     JSONB_BUILD_OBJECT(
         'manifest_id', m.id,
         'manifest_guid', m.guid,
+        'manifest_url', m.url,
         'entity_id', e.id,
         'type', e.type,
         'role', e.role,
         'name', e.name,
         'num_projects', pc.num,
-        'webpageUrl', e.webpage_url,
-        'webpageWellknown', COALESCE(e.webpage_wellknown, '')
+        'webpage_url', e.webpage_url,
+        'webpage_wellknown', e.webpage_wellknown
     ) AS entity
 
     FROM projects AS p
@@ -261,7 +186,7 @@ SELECT
     JOIN pc ON pc.manifest_id = p.manifest_id
 ORDER BY o.ord;
 
--- name: search-projects
+-- name: search-projects-snippet
 -- raw: true
 -- $1 plaintext text search term
 -- $2 tags[]
@@ -286,6 +211,13 @@ ORDER BY
     END DESC
     OFFSET $4 LIMIT $5
 
+-- name: get-projects-snippet
+-- raw: true
+SELECT COUNT(*) OVER () AS total, id FROM projects ORDER BY %s OFFSET $1 LIMIT $2
+
+-- name: get-projects-by-manifest-snippet
+-- raw: true
+SELECT id, COUNT(*) OVER() AS total FROM projects WHERE manifest_id = $1 ORDER BY id
 
 -- name: get-entities
 -- raw: true
@@ -297,9 +229,24 @@ SELECT
         FROM projects
         WHERE manifest_id = e.manifest_id
     ) AS num_projects,
-    m.guid AS manifest_guid
+    m.guid AS manifest_guid,
+    m.url AS manifest_url
 FROM entities e JOIN manifests m ON m.id = e.manifest_id
 ORDER BY %s OFFSET $1 LIMIT $2;
+
+-- name: get-entity-by-manifest-snippet
+-- raw: true
+SELECT
+    e.*,
+    (
+        SELECT COUNT(*)
+        FROM projects
+        WHERE manifest_id = e.manifest_id
+    ) AS num_projects,
+    m.guid AS manifest_guid,
+    m.url AS manifest_url
+FROM entities e JOIN manifests m ON m.id = e.manifest_id
+WHERE e.manifest_id = $1;
 
 -- name: get-manifests-dump
 WITH project_json AS (
@@ -353,7 +300,8 @@ SELECT
     t.webpage_wellknown AS "webpageWellknown",
     TS_RANK_CD(t.search_tokens, PLAINTO_TSQUERY('simple', $1)) AS rank,
     COALESCE(project_counts.num_projects, 0) AS num_projects,
-    m.guid AS manifest_guid
+    m.guid AS manifest_guid,
+    m.url AS manifest_url
 FROM entities t
 LEFT JOIN (
     SELECT manifest_id, COUNT(*) AS num_projects
