@@ -22,6 +22,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/zerodha/easyjson v1.0.1
 	golang.org/x/mod v0.27.0
+	gopkg.in/volatiletech/null.v6 v6.0.0-20170828023728-0bef4e07ae1b
 )
 
 require (
@@ -54,4 +55,3 @@ require (
 )
 
 replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.8
-replace github.com/floss-fund/go-funding-json => /mnt/mydrive/workstation/code/go/my/floss.fund/go-funding-json

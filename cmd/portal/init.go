@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"html"
 	"html/template"
-	"io/ioutil"
 	"log"
 	mrand "math/rand"
 	"os"
@@ -370,7 +369,7 @@ func generateNewFiles() error {
 	// Inject a random password.
 	p := make([]byte, 12)
 	rand.Read(p)
-	pwd := []byte(fmt.Sprintf("%x", p))
+	pwd := fmt.Appendf(nil, "%x", p)
 
 	for i, c := range pwd {
 		if mrand.Intn(4) == 1 {
@@ -378,28 +377,28 @@ func generateNewFiles() error {
 		}
 	}
 
-	b = bytes.Replace(b, []byte("dictpress_admin_password"), pwd, -1)
+	b = bytes.ReplaceAll(b, []byte("dictpress_admin_password"), pwd)
 
-	if err := ioutil.WriteFile("config.toml", b, 0644); err != nil {
+	if err := os.WriteFile("config.toml", b, 0644); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Schema) Validate(m models.ManifestData) (models.ManifestData, error) {
-	schemaManifest, err := s.schema.Validate(m.Manifest)
-	if err != nil {
-		return m, err
-	}
-	m.Manifest = schemaManifest
-	return m, nil
-}
-
 func (s *Schema) ParseManifest(b []byte, manifestURL string, checkProvenance bool) (models.ManifestData, error) {
-	schemaManifest, err := s.schema.ParseManifest(b, manifestURL, checkProvenance)
+	scm, err := s.schema.ParseManifest(b, manifestURL, checkProvenance)
 	if err != nil {
 		return models.ManifestData{}, err
 	}
-	return models.ManifestData{Manifest: schemaManifest}, nil
+
+	// Convert v1.Manifest to models.ManifestData
+	return models.ManifestData{
+		Version:  scm.Version,
+		Entity:   models.EntityFromSchema(scm.Entity),
+		Projects: models.ProjectsFromSchema(scm.Projects),
+		Funding:  scm.Funding,
+		URLStr:   scm.URL.URL,
+		URLobj:   scm.URL.URLobj,
+	}, nil
 }

@@ -1,16 +1,16 @@
 {{ define "project-search" }}
-<section class="results projects" aria-label="Project search results">
+<section class="results projects" aria-label="Projects list">
   <ul>
       {{ range $r := .Data.Results }}
       <li class="result">
         <header>
           <div class="row">
             <div class="col-9">
-              <h3 class="title"><a href="{{ $.RootURL }}/view/project/{{ $r.ID }}">{{ .Name }}</a></h3>
+              <h3 class="title"><a href="{{ $.RootURL }}/view/project/{{ $r.GUID }}">{{ .Name }}</a></h3>
                 <div class="meta">
-                  <a href="{{ $.RootURL }}/view/{{ $r.ManifestGUID }}">
-                    <img src="{{ $.RootURL }}/static/ico-{{ $r.EntityType }}.svg" alt="" aria-hidden="true" /> {{ $r.EntityName }}
-                    {{ if $r.EntityNumProjects }}<span class="num-projects">({{ $r.EntityNumProjects }} {{ $r.EntityNumProjects | plural "project" "projects" }}</span>){{ end }}
+                  <a href="{{ $.RootURL }}/view/{{ $r.Entity.ManifestGUID }}">
+                    <img src="{{ $.RootURL }}/static/ico-{{ $r.Entity.Type }}.svg" alt="" aria-hidden="true" /> {{ $r.Entity.Name }}
+                    {{ if $r.Entity.NumProjects }}<span class="num-projects">({{ $r.Entity.NumProjects }} {{ $r.Entity.NumProjects | plural "project" "projects" }}</span>){{ end }}
                   </a>
                 </div>
             </div>
@@ -19,10 +19,10 @@
                   {{ $len := sub (len .Licenses) 1 }}
                   {{ trimPrefix "spdx:" (index .Licenses 0) }} {{ if (gt $len 0) }} +{{ $len }}{{ end }}
               </span>
-              <a href="{{ $r.WebpageURL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL) }}" aria-label="Visit project website">
+              <a href="{{ $r.WebpageURL.URL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL.URL) }}" aria-label="Visit project website">
                 <img src="/static/ico-link.svg" alt="" aria-hidden="true" />
               </a>  
-              <a href="{{ $r.RepositoryURL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL) }}" aria-label="Visit project repository">
+              <a href="{{ $r.RepositoryURL.URL }}" rel="noreferer nofollow" title="{{ trimPrefix "http://" (trimPrefix "https://" $r.RepositoryURL.URL) }}" aria-label="Visit project repository">
                 <img src="/static/ico-repo.svg" alt="" aria-hidden="true" />
               </a>
             </div>

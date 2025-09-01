@@ -18,7 +18,6 @@ import (
 	"github.com/lib/pq"
 )
 
-const maxURISize = 40
 const maxURLLen = 200
 
 var reGithub = regexp.MustCompile(`^(https://github\.com/([^/]+))/([^/]+)/(blob|raw)/([^/]+)`)
@@ -36,23 +35,25 @@ const (
 
 // Queries contains prepared DB queries.
 type Queries struct {
-	UpsertManifest       *sqlx.Stmt `query:"upsert-manifest"`
-	GetManifests         *sqlx.Stmt `query:"get-manifests"`
-	GetManifestStatus    *sqlx.Stmt `query:"get-manifest-status"`
-	GetForCrawling       *sqlx.Stmt `query:"get-for-crawling"`
-	UpdateManifestStatus *sqlx.Stmt `query:"update-manifest-status"`
-	UpdateManifestDate   *sqlx.Stmt `query:"update-manifest-date"`
-	UpdateCrawlError     *sqlx.Stmt `query:"update-crawl-error"`
-	DeleteManifest       *sqlx.Stmt `query:"delete-manifest"`
-	GetTopTags           *sqlx.Stmt `query:"get-top-tags"`
-	InsertReport         *sqlx.Stmt `query:"insert-report"`
-	GetRecentProjects    *sqlx.Stmt `query:"get-recent-projects"`
-	GetProjects          string     `query:"get-projects"`
-	GetEntities          string     `query:"get-entities"`
-	GetManifestsDump     *sqlx.Stmt `query:"get-manifests-dump"`
-	SearchEntities       *sqlx.Stmt `query:"search-entities"`
-	QueryProjectsTpl     string     `query:"query-projects-template"`
-	SearchProjects       string     `query:"search-projects"`
+	UpsertManifest        *sqlx.Stmt `query:"upsert-manifest"`
+	GetManifests          *sqlx.Stmt `query:"get-manifests"`
+	GetManifestStatus     *sqlx.Stmt `query:"get-manifest-status"`
+	GetForCrawling        *sqlx.Stmt `query:"get-for-crawling"`
+	UpdateManifestStatus  *sqlx.Stmt `query:"update-manifest-status"`
+	UpdateManifestDate    *sqlx.Stmt `query:"update-manifest-date"`
+	UpdateCrawlError      *sqlx.Stmt `query:"update-crawl-error"`
+	DeleteManifest        *sqlx.Stmt `query:"delete-manifest"`
+	GetTopTags            *sqlx.Stmt `query:"get-top-tags"`
+	InsertReport          *sqlx.Stmt `query:"insert-report"`
+	GetRecentProjects     string     `query:"get-recent-projects-snippet"`
+	GetProjects           string     `query:"get-projects-snippet"`
+	GetProjectsByManifest string     `query:"get-projects-by-manifest-snippet"`
+	GetEntities           string     `query:"get-entities"`
+	GetEntityByManifest   string     `query:"get-entity-by-manifest-snippet"`
+	GetManifestsDump      *sqlx.Stmt `query:"get-manifests-dump"`
+	SearchEntities        *sqlx.Stmt `query:"search-entities"`
+	QueryProjectsTpl      string     `query:"query-projects-template"`
+	SearchProjects        string     `query:"search-projects-snippet"`
 }
 
 type Core struct {
@@ -74,8 +75,8 @@ func New(q *Queries, db *sqlx.DB, o Opt, lo *log.Logger) *Core {
 }
 
 // GetManifest retrieves a particular manifest.
-func (d *Core) GetManifest(id int, guid string, status string) (models.ManifestData, error) {
-	out, err := d.getManifests(id, guid, 0, 1, status)
+func (c *Core) GetManifest(id int, guid string, status string) (models.ManifestData, error) {
+	out, err := c.getManifests(id, guid, 0, 1, status)
 	if err != nil || len(out) == 0 {
 		return models.ManifestData{}, ErrNotFound
 	}
@@ -84,8 +85,8 @@ func (d *Core) GetManifest(id int, guid string, status string) (models.ManifestD
 }
 
 // GetManifests retrieves N manifests.
-func (d *Core) GetManifests(lastID, limit int, status string) ([]models.ManifestData, error) {
-	out, err := d.getManifests(0, "", lastID, limit, status)
+func (c *Core) GetManifests(lastID, limit int, status string) ([]models.ManifestData, error) {
+	out, err := c.getManifests(0, "", lastID, limit, status)
 	if err != nil {
 		return nil, err
 	}
@@ -95,14 +96,14 @@ func (d *Core) GetManifests(lastID, limit int, status string) ([]models.Manifest
 
 // GetManifestStatus checks whether a given manifest URL exists in the databse.
 // If one exists, its status is returned.
-func (d *Core) GetManifestStatus(url string) (string, error) {
+func (c *Core) GetManifestStatus(url string) (string, error) {
 	var status string
-	if err := d.q.GetManifestStatus.Get(&status, url); err != nil {
+	if err := c.q.GetManifestStatus.Get(&status, url); err != nil {
 		if err == sql.ErrNoRows {
 			return "", nil
 		}
 
-		d.log.Printf("error checking manifest status: %s: %v", url, err)
+		c.log.Printf("error checking manifest status: %s: %v", url, err)
 		return "", err
 	}
 
@@ -110,15 +111,23 @@ func (d *Core) GetManifestStatus(url string) (string, error) {
 }
 
 // UpsertManifest upserts an entry into the database.
-func (d *Core) UpsertManifest(m models.ManifestData, status string) error {
-	body, err := m.Manifest.MarshalJSON()
+func (c *Core) UpsertManifest(m models.ManifestData, status string) error {
+
+	// Build schema to respond to API.
+	manifest := v1.Manifest{
+		Version:  m.Version,
+		Entity:   m.Entity.ToSchema(),
+		Projects: m.Projects.ToSchema(),
+		Funding:  m.Funding,
+	}
+	b, err := manifest.MarshalJSON()
 	if err != nil {
-		d.log.Printf("error marshalling manifest: %s: %v", m.URL, err)
+		c.log.Printf("error marshalling manifest: %s: %v", m.URLStr, err)
 		return err
 	}
 
-	if _, err := d.q.UpsertManifest.Exec(json.RawMessage(body), m.Manifest.URL.URL, m.GUID, json.RawMessage("{}"), status, ""); err != nil {
-		d.log.Printf("error upsering manifest: %v", err)
+	if _, err := c.q.UpsertManifest.Exec(json.RawMessage(b), m.URLStr, m.GUID, json.RawMessage("{}"), status, ""); err != nil {
+		c.log.Printf("error upsering manifest: %v", err)
 		return err
 	}
 
@@ -127,17 +136,17 @@ func (d *Core) UpsertManifest(m models.ManifestData, status string) error {
 
 // GetManifestForCrawling retrieves manifest URLs that need to be crawled again. It returns records in batches of limit length,
 // continued from the last processed row ID which is the offsetID.
-func (d *Core) GetManifestForCrawling(age string, offsetID, maxCrawlErrors, limit int) ([]models.ManifestJob, error) {
+func (c *Core) GetManifestForCrawling(age string, offsetID, maxCrawlErrors, limit int) ([]models.ManifestJob, error) {
 	var out []models.ManifestJob
-	if err := d.q.GetForCrawling.Select(&out, offsetID, age, maxCrawlErrors, limit); err != nil {
-		d.log.Printf("error fetching URLs for crawling: %v", err)
+	if err := c.q.GetForCrawling.Select(&out, offsetID, age, maxCrawlErrors, limit); err != nil {
+		c.log.Printf("error fetching URLs for crawling: %v", err)
 		return nil, err
 	}
 
 	for n, u := range out {
 		url, err := common.IsURL("url", u.URL, maxURLLen)
 		if err != nil {
-			d.log.Printf("error parsing url: %s: %v: ", u.URL, err)
+			c.log.Printf("error parsing url: %s: %v: ", u.URL, err)
 			continue
 		}
 
@@ -149,9 +158,9 @@ func (d *Core) GetManifestForCrawling(age string, offsetID, maxCrawlErrors, limi
 }
 
 // UpdateManifestStatus updates a manifest's status.
-func (d *Core) UpdateManifestStatus(id int, status string) error {
-	if _, err := d.q.UpdateManifestStatus.Exec(id, status); err != nil {
-		d.log.Printf("error updating manifest status: %d: %v", id, err)
+func (c *Core) UpdateManifestStatus(id int, status string) error {
+	if _, err := c.q.UpdateManifestStatus.Exec(id, status); err != nil {
+		c.log.Printf("error updating manifest status: %d: %v", id, err)
 		return err
 	}
 
@@ -159,9 +168,9 @@ func (d *Core) UpdateManifestStatus(id int, status string) error {
 }
 
 // UpdateManifestDate updates a manifest's "updated_at" date.
-func (d *Core) UpdateManifestDate(id int) error {
-	if _, err := d.q.UpdateManifestDate.Exec(id); err != nil {
-		d.log.Printf("error updating manifest date: %d: %v", id, err)
+func (c *Core) UpdateManifestDate(id int) error {
+	if _, err := c.q.UpdateManifestDate.Exec(id); err != nil {
+		c.log.Printf("error updating manifest date: %d: %v", id, err)
 		return err
 	}
 
@@ -170,10 +179,10 @@ func (d *Core) UpdateManifestDate(id int) error {
 
 // UpdateManifestCrawlError updates a manifest's crawl error count and sets
 // it to 'disabled' if it exceeds the given limit.
-func (d *Core) UpdateManifestCrawlError(id int, message string, maxErrors int, disableOnErrors bool) (string, error) {
+func (c *Core) UpdateManifestCrawlError(id int, message string, maxErrors int, disableOnErrors bool) (string, error) {
 	var status string
-	if err := d.q.UpdateCrawlError.Get(&status, id, message, maxErrors, disableOnErrors); err != nil {
-		d.log.Printf("error updating manifest crawl error status: %d: %v", id, err)
+	if err := c.q.UpdateCrawlError.Get(&status, id, message, maxErrors, disableOnErrors); err != nil {
+		c.log.Printf("error updating manifest crawl error status: %d: %v", id, err)
 		return "", err
 	}
 
@@ -181,9 +190,9 @@ func (d *Core) UpdateManifestCrawlError(id int, message string, maxErrors int, d
 }
 
 // DeleteManifest deletes a manifest and all associated data;
-func (d *Core) DeleteManifest(id int, guid string) error {
-	if _, err := d.q.DeleteManifest.Exec(id, guid); err != nil {
-		d.log.Printf("error deleting manifest: %d: %v", id, err)
+func (c *Core) DeleteManifest(id int, guid string) error {
+	if _, err := c.q.DeleteManifest.Exec(id, guid); err != nil {
+		c.log.Printf("error deleting manifest: %d: %v", id, err)
 		return err
 	}
 
@@ -191,12 +200,12 @@ func (d *Core) DeleteManifest(id int, guid string) error {
 }
 
 // GetTopTags returns top N tags referenced across projects.
-func (d *Core) GetTopTags(limit int) ([]string, error) {
+func (c *Core) GetTopTags(limit int) ([]string, error) {
 	res := []struct {
 		Tag string `db:"tag"`
 	}{}
-	if err := d.q.GetTopTags.Select(&res, limit); err != nil {
-		d.log.Printf("error fetching top tags: %v", err)
+	if err := c.q.GetTopTags.Select(&res, limit); err != nil {
+		c.log.Printf("error fetching top tags: %v", err)
 		return nil, err
 	}
 
@@ -209,14 +218,17 @@ func (d *Core) GetTopTags(limit int) ([]string, error) {
 }
 
 // GetRecentProjects retrieves N recently updated projects.
-func (d *Core) GetRecentProjects(limit int) ([]models.Project, error) {
-	var out []models.Project
-	if err := d.q.GetRecentProjects.Select(&out, limit); err != nil {
-		d.log.Printf("error fetching recent projects: %v", err)
+func (c *Core) GetRecentProjects(limit int) (models.Projects, error) {
+	exp := strings.ReplaceAll(c.q.QueryProjectsTpl, "%query%", c.q.GetRecentProjects)
+
+	var out models.Projects
+	if err := c.db.Select(&out, exp, limit); err != nil {
+		c.log.Printf("error fetching recent projects: %v", err)
 		return nil, err
 	}
 
-	if err := parseUrls(out, d.log); err != nil {
+	if err := out.Parse(); err != nil {
+		c.log.Printf("error parsing projects: %v", err)
 		return nil, err
 	}
 
@@ -224,9 +236,9 @@ func (d *Core) GetRecentProjects(limit int) ([]models.Project, error) {
 }
 
 // InsertManifestReport inserts a flagged report with reason for the manifest
-func (d *Core) InsertManifestReport(id int, reason string) error {
-	if _, err := d.q.InsertReport.Exec(id, reason); err != nil {
-		d.log.Printf("error inserting report for manifest: %d: %v", id, err)
+func (c *Core) InsertManifestReport(id int, reason string) error {
+	if _, err := c.q.InsertReport.Exec(id, reason); err != nil {
+		c.log.Printf("error inserting report for manifest: %d: %v", id, err)
 		return err
 	}
 
@@ -234,15 +246,17 @@ func (d *Core) InsertManifestReport(id int, reason string) error {
 }
 
 // GetProjects retrieves paginated projects optionally sorted by certain fields.
-func (c *Core) GetProjects(orderBy, order string, offset, limit int) ([]models.Project, error) {
-	var out []models.Project
+func (c *Core) GetProjects(orderBy, order string, offset, limit int) (models.Projects, error) {
+	exp := strings.ReplaceAll(c.q.QueryProjectsTpl, "%query%", fmt.Sprintf(c.q.GetProjects, orderBy+" "+order))
 
-	if err := c.db.Select(&out, fmt.Sprintf(c.q.GetProjects, orderBy+" "+order), offset, limit); err != nil {
+	var out models.Projects
+	if err := c.db.Select(&out, exp, offset, limit); err != nil {
 		c.log.Printf("error fetching projects by start letter: %v", err)
 		return nil, err
 	}
 
-	if err := parseUrls(out, c.log); err != nil {
+	if err := out.Parse(); err != nil {
+		c.log.Printf("error parsing projects: %v", err)
 		return nil, err
 	}
 
@@ -258,8 +272,12 @@ func (c *Core) GetEntities(orderBy, order string, offset, limit int) ([]models.E
 		return nil, err
 	}
 
-	if err := parseUrls(out, c.log); err != nil {
-		return nil, err
+	for n, o := range out {
+		if err := o.Parse(); err != nil {
+			c.log.Printf("error parsing entity: %s: %v", o.ManifestGUID, err)
+			return nil, err
+		}
+		out[n] = o
 	}
 
 	return out, nil
@@ -274,36 +292,30 @@ func (c *Core) SearchEntities(query string, offset, limit int) ([]models.Entity,
 		return nil, err
 	}
 
-	if err := parseUrls(out, c.log); err != nil {
-		return nil, err
+	for n, o := range out {
+		if err := o.Parse(); err != nil {
+			c.log.Printf("error parsing entity: %s: %v", o.ManifestGUID, err)
+			return nil, err
+		}
+		out[n] = o
 	}
 
 	return out, nil
 }
 
 // SearchProjects searches projects by keywords.
-func (c *Core) SearchProjects(query string, tags, licenses []string, orderBy, order string, offset, limit int) ([]models.Project, error) {
-
+func (c *Core) SearchProjects(query string, tags, licenses []string, orderBy, order string, offset, limit int) (models.Projects, error) {
 	exp := strings.ReplaceAll(c.q.QueryProjectsTpl, "%query%", c.q.SearchProjects)
 
-	var out []models.Project
+	var out models.Projects
 	if err := c.db.Select(&out, exp, query, pq.Array(tags), pq.Array(licenses), offset, limit); err != nil {
 		c.log.Printf("error searching projects: %v", err)
 		return nil, err
 	}
 
 	// Iterate and unmarshal EntityRaw into Entity struct of each project.
-	for n, p := range out {
-		fmt.Println(string(p.EntityRaw))
-		if err := p.Entity.UnmarshalJSON(p.EntityRaw); err != nil {
-			c.log.Printf("error unmarshalling entity: %d: %v", p.ID, err)
-			return nil, err
-		}
-		out[n] = p
-		out[n].EntityRaw = nil
-	}
-
-	if err := parseUrls(out, c.log); err != nil {
+	if err := out.Parse(); err != nil {
+		c.log.Printf("error parsing projects: %v", err)
 		return nil, err
 	}
 
@@ -322,34 +334,25 @@ func (c *Core) GetManifestsDump(lastID, limit int) ([]models.ManifestExport, err
 }
 
 // getManifests retrieves one or more manifests.
-func (d *Core) getManifests(id int, guid string, lastID, limit int, status string) ([]models.ManifestData, error) {
+func (c *Core) getManifests(id int, guid string, lastID, limit int, status string) ([]models.ManifestData, error) {
 	var (
 		out []models.ManifestData
 	)
 
-	// Get the manifest. entity{} and projects[{}] are retrieved
-	// as JSON fields that need to be manually unmarshalled.
-	if err := d.q.GetManifests.Select(&out, id, guid, lastID, limit, status); err != nil {
+	// Get the manifest.
+	if err := c.q.GetManifests.Select(&out, id, guid, lastID, limit, status); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
 		}
 
-		d.log.Printf("error fetching manifest: %d: %v", id, err)
+		c.log.Printf("error fetching manifest: %d: %v", id, err)
 		return nil, err
 	}
 
 	for n, o := range out {
-		o := o
-
-		// Entity.
-		if err := o.Entity.UnmarshalJSON(o.EntityRaw); err != nil {
-			d.log.Printf("error unmarshalling entity: %d: %v", id, err)
-			return nil, err
-		}
-
 		// Funding.
 		if err := o.Funding.UnmarshalJSON(o.FundingRaw); err != nil {
-			d.log.Printf("error unmarshalling funding: %d: %v", id, err)
+			c.log.Printf("error unmarshalling funding: %s: %v", o.GUID, err)
 			return nil, err
 		}
 
@@ -359,55 +362,61 @@ func (d *Core) getManifests(id int, guid string, lastID, limit int, status strin
 			o.Channels[c.GUID] = c
 		}
 
-		// Unmarshal the entity URL. DB names and local names don't match,
-		// and it's a nested structure. Sucks.
-		{
-			var urls models.EntityURL
-			if err := urls.UnmarshalJSON(o.EntityRaw); err != nil {
-				d.log.Printf("error unmarshalling entity URL: %d: %v", id, err)
-				return nil, err
-			}
-
-			if u, err := common.IsURL("url", urls.WebpageURL, maxURLLen); err != nil {
-				d.log.Printf("error parsing entity URL: %d: %s: %v", id, urls.WebpageURL, err)
-				return nil, err
-			} else {
-				o.Entity.WebpageURL = v1.URL{URL: urls.WebpageURL, URLobj: u}
-			}
-		}
-
-		if err := o.Projects.UnmarshalJSON(o.ProjectsRaw); err != nil {
-			d.log.Printf("error unmarshalling projects: %d: %v", id, err)
+		// Fetch entity for this manifest.
+		entity, err := c.getEntityByManifest(o.ID)
+		if err != nil && err != ErrNotFound {
+			c.log.Printf("error fetching entity for manifest %d: %v", o.ID, err)
 			return nil, err
 		}
-
-		// Unmarshal project URLs. DB names and local names don't match,
-		// and it's a nested structure. This sucks.
-		{
-			var urls models.ProjectURLs
-			if err := urls.UnmarshalJSON(o.ProjectsRaw); err != nil {
-				d.log.Printf("error unmarshalling project URLs: %d: %v", id, err)
-				return nil, err
-			}
-
-			for n, p := range urls {
-				if u, err := common.IsURL("url", p.WebpageURL, maxURLLen); err != nil {
-					d.log.Printf("error parsing entity URL: %d: %s: %v", id, p.WebpageURL, err)
-					return nil, err
-				} else {
-					o.Projects[n].WebpageURL = v1.URL{URL: p.WebpageURL, URLobj: u}
-				}
-
-				if u, err := common.IsURL("url", p.RepositoryURL, maxURLLen); err != nil {
-					d.log.Printf("error parsing entity URL: %d: %s: %v", id, p.RepositoryURL, err)
-					return nil, err
-				} else {
-					o.Projects[n].RepositoryURL = v1.URL{URL: p.RepositoryURL, URLobj: u}
-				}
-			}
+		if err != ErrNotFound {
+			o.Entity = entity
 		}
 
+		// Fetch projects for this manifest.
+		projects, err := c.getProjectsByManifest(o.ID)
+		if err != nil {
+			c.log.Printf("error fetching projects for manifest %d: %v", o.ID, err)
+			return nil, err
+		}
+		o.Projects = projects
+
 		out[n] = o
+	}
+
+	return out, nil
+}
+
+// getEntityByManifest retrieves entity for a specific manifest.
+func (c *Core) getEntityByManifest(manifestID int) (models.Entity, error) {
+	var out models.Entity
+	if err := c.db.Get(&out, c.q.GetEntityByManifest, manifestID); err != nil {
+		if err == sql.ErrNoRows {
+			return models.Entity{}, ErrNotFound
+		}
+		c.log.Printf("error fetching entity by manifest: %v", err)
+		return models.Entity{}, err
+	}
+
+	if err := out.Parse(); err != nil {
+		c.log.Printf("error parsing entity: %s: %v", out.ManifestGUID, err)
+		return models.Entity{}, err
+	}
+
+	return out, nil
+}
+
+// getProjectsByManifest retrieves projects for a specific manifest.
+func (c *Core) getProjectsByManifest(manifestID int) (models.Projects, error) {
+	exp := strings.ReplaceAll(c.q.QueryProjectsTpl, "%query%", c.q.GetProjectsByManifest)
+
+	var out models.Projects
+	if err := c.db.Select(&out, exp, manifestID); err != nil {
+		c.log.Printf("error fetching projects by manifest: %v", err)
+		return nil, err
+	}
+	if err := out.Parse(); err != nil {
+		c.log.Printf("error parsing projects: %v", err)
+		return nil, err
 	}
 
 	return out, nil
@@ -438,46 +447,4 @@ func MakeGUID(u *url.URL) string {
 
 	guid := "@" + path.Join(u.Host, uri)
 	return guid
-}
-
-// parseUrls is a generic function that parses raw URL strings into v1.URL objects
-// for either Entity or Project slices
-func parseUrls[T models.Entity | models.Project](items []T, logger *log.Logger) error {
-	for i := range items {
-		item := &items[i]
-
-		// Handle Entity URLs
-		if entity, ok := any(item).(*models.Entity); ok {
-			if entity.WebpageURLRaw != "" {
-				if u, err := common.IsURL("url", entity.WebpageURLRaw, maxURLLen); err != nil {
-					logger.Printf("error parsing entity webpage URL: %s: %v", entity.WebpageURLRaw, err)
-					return err
-				} else {
-					entity.WebpageURL = v1.URL{URL: entity.WebpageURLRaw, URLobj: u}
-				}
-			}
-		}
-
-		// Handle Project URLs
-		if project, ok := any(item).(*models.Project); ok {
-			if project.WebpageURLRaw != "" {
-				if u, err := common.IsURL("url", project.WebpageURLRaw, maxURLLen); err != nil {
-					logger.Printf("error parsing project webpage URL: %s: %v", project.WebpageURLRaw, err)
-					return err
-				} else {
-					project.WebpageURL = v1.URL{URL: project.WebpageURLRaw, URLobj: u}
-				}
-			}
-
-			if project.RepositoryURLRaw != "" {
-				if u, err := common.IsURL("url", project.RepositoryURLRaw, maxURLLen); err != nil {
-					logger.Printf("error parsing project repository URL: %s: %v", project.RepositoryURLRaw, err)
-					return err
-				} else {
-					project.RepositoryURL = v1.URL{URL: project.RepositoryURLRaw, URLobj: u}
-				}
-			}
-		}
-	}
-	return nil
 }
