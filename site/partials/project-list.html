@@ -1,0 +1,11 @@
+{{ define "project-list" }}
+<section class="results projects" aria-label="Projects list">
+  <ul>
+      {{ range $r := .Data.Results }}
+      <li class="result">
+        {{ template "project" . }}
+      </li>
+      {{ end }}
+  </ul>
+</section>
+{{ end }}

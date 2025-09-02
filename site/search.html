@@ -9,9 +9,9 @@
   </nav>
 
   {{ if eq .Data.QueryType "project" }}
-    {{ template "project-search" . }}
+    {{ template "project-list" . }}
   {{ else if eq .Data.QueryType "entity" }}
-    {{ template "entity-results" . }}
+    {{ template "entity-list" . }}
   {{ end }}
 
   <nav class="pagination bottom" aria-label="Result pages">

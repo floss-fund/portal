@@ -25,9 +25,9 @@
   {{ end }}
 
   {{ if eq $.Data.Type "projects" }}
-    {{ template "project-search" . }}
+    {{ template "project-list" . }}
   {{ else }}
-    {{ template "entity-results" . }}
+    {{ template "entity-list" . }}
   {{ end }}
 
   <nav class="pagination top" aria-label="Result pages">

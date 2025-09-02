@@ -5,9 +5,9 @@
   <h3>{{ .Data.Total }} Directory</h3>
 
   {{ if eq .Data.Q.Type "project" }}
-    {{ template "project-search" . }}
+    {{ template "project-list" . }}
   {{ else if eq .Data.Q.Type "entity" }}
-    {{ template "entity-results" . }}
+    {{ template "entity-list" . }}
   {{ end }}
 
   <nav class="pagination bottom" aria-label="Result pages">

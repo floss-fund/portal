@@ -1,0 +1,17 @@
+{{ define "projects" }}
+{{ template "header" . }}
+
+<h2>Projects ({{ len .Data.Manifest.Projects }})</h2>
+
+<section class="results projects" aria-labelledby="tab-projects">
+  <ul>
+      {{ range $r := .Data.Manifest.Projects }}
+      <li class="result">
+        {{ template "project" $r }}
+      </li>
+      {{ end }}
+  </ul>
+</section>
+
+{{ template "footer" . }}
+{{ end }}

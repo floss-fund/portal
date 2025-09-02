@@ -358,7 +358,7 @@ func handleManifestPage(c echo.Context) error {
 		out.Description = "Projects by %s looking for free and open source funding"
 	} else if strings.HasPrefix(mGuid, prefix+"project/") {
 		// Single project.
-		tpl = "project"
+		tpl = "project-page"
 
 		// Extract the last part of the URI.
 		var (

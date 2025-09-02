@@ -1,4 +1,4 @@
-{{ define "entity-results" }}
+{{ define "entity-list" }}
 <section class="results entities" aria-label="Entity search results">
     <ul>
         {{ range $r := .Data.Results }}
@@ -19,8 +19,8 @@
                       </a>  
                       {{ template "verified-link"
                         ( dict
-                          "manifest_url" $r.WebpageURL
-                          "target_url" .Data.Manifest.Entity.WebpageURL
+                          "manifest_url" $r.ManifestURL
+                          "target_url" $r.WebpageURL
                           "icon" "/static/ico-link.svg"
                           "label" true
                         )
