@@ -737,7 +737,7 @@ table .filter {
     display: flex;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 520px) {
     .modal {
         width: 95%;
     }
@@ -773,7 +773,6 @@ table .filter {
     }
     .header .logo {
         text-align: center;
-        margin: 10px 0;
     }
     .header .nav {
         text-align: center;
@@ -804,5 +803,13 @@ table .filter {
     }
     .mast .tabs .tab:last-child {
         border-bottom: 0;
+    }
+
+    .results .title {
+        margin: 0;
+        display: block;
+    }
+    .results .props a {
+        margin: 0 10px 0 0;
     }
  }
