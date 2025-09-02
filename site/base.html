@@ -38,7 +38,7 @@
               {{ if or (HasField .Data "Index") (HasField .Data "Q")  }}autofocus{{ end }} />
             <button type="submit">Search</button>
           </div>
-          <fieldset class="row options text-small text-grey" role="group" aria-label="Search options">
+          <fieldset class="row options text-grey" role="group" aria-label="Search options">
             <div class="col-6">
               <label><input type="radio" name="type" value="project" id="type-project" {{ if or (not $q) (eq .Data.QueryType "project" ) }}checked{{ end }} /> Projects</label>
               <label><input type="radio" name="type" value="entity" {{ if and $q (eq .Data.QueryType "entity" ) }}checked{{ end }} /> Entities</label>
@@ -52,7 +52,7 @@
           <div class="row">
             <div class="col-8">
               <h1 class="title">{{ .Data.Heading }}</h1>
-              <div class="subheading meta text-grey text-small">
+              <div class="subheading meta text-grey">
                 {{ if and (HasField .Data "Project") (ne .Data.Project.GUID "") }}
                   <a href="{{ .RootURL }}/view/{{ .Data.Manifest.GUID }}">
                     by <img src="{{ .RootURL }}/static/ico-{{ .Data.Manifest.Entity.Type }}.svg" alt="" aria-hidden="true" /> {{ title .Data.Manifest.Entity.Name }}
