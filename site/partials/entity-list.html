@@ -6,23 +6,22 @@
           <header>
             <div class="row">
                 <div class="col-9">
-                    <h3 class="title"><a href="{{ $.RootURL }}/view/{{ $r.ManifestGUID }}">{{ .Name }}</a></h3>
+                  <div class="title">
+                    <h4><a href="{{ $.RootURL }}/view/{{ $r.ManifestGUID }}">{{ .Name }}</a></h4>
                     <div class="meta text-grey">
                         <img src="{{ $.RootURL }}/static/ico-{{ $r.Type }}.svg" alt="" aria-hidden="true" /> {{ title $r.Type }} ({{ $r.NumProjects }} projects)
                     </div>
-                    <p>{{ abbrev 200 $r.Description }}</p>
+                  </div>
+                  <p class="description">{{ abbrev 200 $r.Description }}</p>
                 </div>
                 <div class="col-3 col-end">
-                    <div class="meta">
-                      <a href="{{ $r.WebpageURL }}" rel="noreferer nofollow" class="ellip">
-                        <img src="/static/ico-link.svg" alt="" aria-hidden="true" /> {{ trimPrefix "http://" (trimPrefix "https://" $r.WebpageURL.URL) }}
-                      </a>  
+                    <div class="meta"> 
                       {{ template "verified-link"
                         ( dict
                           "manifest_url" $r.ManifestURL
                           "target_url" $r.WebpageURL
                           "icon" "/static/ico-link.svg"
-                          "label" true
+                          "label" false
                         )
                       }}
                     </div>

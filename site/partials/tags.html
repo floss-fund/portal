@@ -1,5 +1,5 @@
 {{ define "tags" }}
-<nav class="tags">
+<nav class="tags" aria-label="Tags">
   {{ range $t := . }}
     <a href="/search?type=project&tag={{ $t }}" class="tag">{{ $t }}</a>
   {{ end }}

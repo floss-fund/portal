@@ -2,19 +2,17 @@
 <header>
   <div class="row">
     <div class="col-9">
-      <h3 class="title"><a href="/view/project/{{ .GUID }}">{{ .Name }}</a></h3>
+      <div class="title">
+        <h4><a href="/view/project/{{ .GUID }}">{{ .Name }}</a></h4>
         <div class="meta">
           <a href="/view/{{ .Entity.ManifestGUID }}">
             <img src="/static/ico-{{ .Entity.Type }}.svg" alt="" aria-hidden="true" /> {{ .Entity.Name }}
             {{ if .Entity.NumProjects }}<span class="num-projects">({{ .Entity.NumProjects }} {{ .Entity.NumProjects | plural "project" "projects" }}</span>){{ end }}
           </a>
         </div>
+      </div>
     </div>
     <div class="col-3 col-end props">
-      <span class="license text-small text-grey" aria-label="License">
-          {{ $len := sub (len .Licenses) 1 }}
-          {{ trimPrefix "spdx:" (index .Licenses 0) }} {{ if (gt $len 0) }} +{{ $len }}{{ end }}
-      </span>
       {{ template "verified-link"
         ( dict
           "manifest_url" .Entity.ManifestURL
@@ -38,6 +36,11 @@
 <p class="description" aria-label="Project description">{{ abbrev 200 .Description }}</p>
 
 <footer class="meta">
+  <span class="license" aria-label="License">
+      {{ $len := sub (len .Licenses) 1 }}
+      {{ trimPrefix "spdx:" (index .Licenses 0) }} {{ if (gt $len 0) }} +{{ $len }}{{ end }}
+  </span>
+
   {{ template "tags" .Tags }}
 </footer>
 {{ end }}

@@ -11,15 +11,15 @@
 
 	<div class="updates">
 		{{ if .Data.Tags }}
-			<div class="block box" role="region">
-				<h3>Popular tags</h3><br />
+			<div class="block box top-tags" role="region">
+				<h2 class="title">Popular tags</h2>
 				{{ template "tags" .Data.Tags }}
 			</div>
 		{{ end }}
 
 		{{ if .Data.Results }}
-			<div class="block">
-				<h3>Recent projects</h3>
+			<div class="block recent-projects" role="region">
+				<h2 class="title">Recent projects</h2>
 				{{ template "project-list" . }}
 			</div>
 		{{ end }}

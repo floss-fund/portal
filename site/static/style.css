@@ -1,6 +1,6 @@
 :root {
-    --primary: #0EA74B;
-    --black: #222;
+    --primary: #179B4C;
+    --black: #333;
 }
 
 * {
@@ -9,14 +9,14 @@
 html, body {
     margin: 0;
     padding: 0;
-    font-size: 19px;
+    font-size: 15px;
+    line-height: 1.4;
     min-width: 320px;
 }
 body {
     background: #fff;
-    font-family: "Rubik", sans-serif;
+    font-family: sans-serif;
     font-weight: 400;
-    line-height: 1.4;
     color: var(--black);
 }
 
@@ -47,15 +47,15 @@ h1 {
 }
 h2 {
     font-size: 1.5rem;
+    margin-bottom: 15px;
 }
-
 h3 {
     font-size: 1.3rem;
     margin-bottom: 10px;
 }
 
 h4 {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     margin-bottom: 10px;
 }
 
@@ -64,7 +64,7 @@ p {
 }
 
 hr {
-    background: #e3d2af;
+    background: #ddd;
     border: 0;
     height: 1px;
     margin: 45px 0;
@@ -290,18 +290,11 @@ button.small {
 }
 
 .tags a {
-    background-color: #e1fdec;
-    color: var(--primary) !important;
     display: inline-block;
-    margin: 0 5px 10px 0;
-    text-decoration: none;
-    border-radius: 30px;
-    padding: 3px 15px;
-    font-size: 0.875rem;
+    margin-right: 10px;
 }
     .tags a:hover {
-        background-color: var(--primary);
-        color: #fff !important;
+        color: var(--primary);
     }
 
 .align-right {
@@ -347,7 +340,7 @@ button.small {
   }
 
 .mast {
-    background: #f4f4f4;
+    background: #f8f8f8;
 }
     .mast .tabs .tab {
         background: #eee;
@@ -381,11 +374,11 @@ button.small {
 }
 
 .header {
-    padding: 30px 0 0 0;
+    padding: 20px 0 0 0;
     overflow: hidden;
 }
     .header .bar {
-        margin-bottom: 45px;
+        margin-bottom: 20px;
     }
         .header .nav a {
             margin-left: 30px;
@@ -415,9 +408,6 @@ button.small {
         color: var(--black);
     }
 
-.intro {
-    margin: 15vh 0 60px 0;
-}
     .intro .title {
         margin: 0 0 15px 0;
     }
@@ -426,7 +416,7 @@ button.small {
     }
     .intro p {
         color: #777;
-        font-size: 1.3rem;
+        font-size: 1.1rem;
     }
     .intro .name span {
         color: var(--primary);
@@ -437,7 +427,7 @@ button.small {
     }
 
 .search {
-    margin-bottom: 60px;
+    margin-bottom: 30px;
     position: relative;
 }
     .search .more {
@@ -496,10 +486,16 @@ table .filter {
     }
 
 .home .updates .block {
-    margin-top: 90px;
+    margin-top: 60px;
 }
+    .home .recent-projects > .title {
+        margin: 0 0 30px 0;
+    }
     .home .updates .block:last-child {
         margin-bottom: 0;
+    }
+    .home .top-tags {
+        line-height: 1.7;
     }
 
 .validate textarea {
@@ -515,12 +511,29 @@ table .filter {
     padding: 0;
 }
     .results .result {
-        margin-bottom: 30px;
-        padding: 20px;
-        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        padding-bottom: 30px;
+        /* padding: 20px; */
+        border-bottom: 1px solid #eee;
+    }
+    .results .result:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: 0;
     }
     .results .title {
+        margin: 0 0 5px 0;
+        display: inline-flex;
+        align-items: center;
+    }
+    .results .title h4 {
+        margin: 0 15px 0 0;
+    }
+    .results .title .meta img {
         margin: 0;
+    }
+    .results .description {
+        margin: 0 0 10px 0;
     }
     .results p:last-child {
         margin-bottom: 0;
@@ -541,6 +554,17 @@ table .filter {
         }
         .results .props a:hover {
             opacity: 1;
+        }
+        .results footer.meta {
+            font-size: 0.9rem;
+            display: inline-flex;
+        }
+        .results footer.meta .license {
+            margin-right: 20px;
+            display: inline-block;
+            background-color: #eee;
+            padding: 1px 6px;
+            border-radius: 3px;
         }
     .meta a {
         color: #888;
@@ -570,6 +594,10 @@ table .filter {
     padding-bottom: 30px;
     margin-bottom: 30px;
 }
+    .project .props .link {
+        display: block;
+        margin-bottom: 10px;
+    }
     .project .props .block:last-child {
         border: 0;
         margin-bottom: 0;
@@ -705,7 +733,6 @@ table .filter {
     display: none;
 }
 
-
 .modal-toggle:checked ~ .modal-overlay {
     display: flex;
 }
@@ -720,9 +747,7 @@ table .filter {
         margin-top: 20px;
         margin-bottom: 20px;
     }
-}
 
-@media (max-width: 500px) {
     h1 {
         font-size: 1.6rem;
     }
@@ -768,25 +793,16 @@ table .filter {
     .intro {
         margin: 0;
     }
-    .results .result {
-        padding: 15px;
-    }
     .mast .tabs .tab {
         display: block;
         width: 100%;
         max-width: none;
         border-bottom: 1px solid #ccc;
     }
+    .mast .tabs .tab span {
+        padding: 8px 15px;
+    }
     .mast .tabs .tab:last-child {
         border-bottom: 0;
-    }
-
-    .results .props {
-      display: flex;
-      align-items: center;
-    }
-
-    .results .props > *:first-child {
-      flex-grow: 1;
     }
  }
