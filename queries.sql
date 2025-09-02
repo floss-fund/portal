@@ -202,7 +202,7 @@ SELECT
     END AS rank
 FROM projects p
 WHERE
-    ($1::TEXT != '' OR p.search_tokens @@ PLAINTO_TSQUERY('simple', $1)) AND
+    ($1::TEXT = '' OR p.search_tokens @@ PLAINTO_TSQUERY('simple', $1)) AND
     (CARDINALITY($2::TEXT[]) = 0 OR p.tags <@ $2) AND
     (CARDINALITY($3::TEXT[]) = 0 OR p.licenses <@ $3)
 ORDER BY
