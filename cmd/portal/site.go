@@ -475,7 +475,8 @@ func handleSearchPage(c echo.Context) error {
 
 	// Sanitize search fields.
 	query = strings.TrimSpace(query)
-	if (query == "" || len(query) > 128) && len(tags) == 0 && len(licenses) == 0 {
+	if ((query == "" || len(query) > 128) && len(tags) == 0 && len(licenses) == 0) ||
+		len(tags) > 5 || len(licenses) > 5 {
 		return c.Redirect(http.StatusTemporaryRedirect, app.consts.RootURL)
 	}
 
@@ -530,9 +531,16 @@ func handleSearchPage(c echo.Context) error {
 	qp.Set("q", query)
 	qp.Set("type", typ)
 
+	heading := abbrev(query, 50)
+	if heading != "" {
+		heading = fmt.Sprintf(`Search "%s"`, heading)
+	} else if heading == "" && len(tags) > 0 {
+		heading = "#" + strings.Join(tags, ", ")
+	}
+
 	out.Pagination = template.HTML(pg.HTML("", qp))
 	out.Title = "Search"
-	out.Heading = fmt.Sprintf(`Search "%s"`, query)
+	out.Heading = heading
 	out.QueryType = typ
 	out.Query = query
 	out.Total = total

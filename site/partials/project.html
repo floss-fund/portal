@@ -37,8 +37,11 @@
 
 <footer class="meta">
   <span class="license" aria-label="License">
+      {{ $l := (index .Licenses 0) }}
       {{ $len := sub (len .Licenses) 1 }}
-      {{ trimPrefix "spdx:" (index .Licenses 0) }} {{ if (gt $len 0) }} +{{ $len }}{{ end }}
+      <a href="/search?type=project&license={{ $l }}">
+        {{ trimPrefix "spdx:" $l }} {{ if (gt $len 0) }} +{{ $len }}{{ end }}
+      </a>
   </span>
 
   {{ template "tags" .Tags }}
