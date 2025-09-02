@@ -19,6 +19,7 @@ currencies = "data/currencies.json"
 [site]
 home_num_tags = 25
 home_num_projects = 20
+listings_per_page = 20
 
 enable_captcha = false
 

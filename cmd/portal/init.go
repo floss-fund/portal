@@ -233,7 +233,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
 }
 
 func initPaginator(ko *koanf.Koanf) *paginator.Paginator {
-	perPage := ko.MustInt("search.per_page")
+	perPage := ko.MustInt("site.listings_per_page")
 	pgOpt := paginator.Default()
 	pgOpt.DefaultPerPage = perPage
 	pgOpt.MaxPerPage = perPage
