@@ -307,6 +307,46 @@ func initHTTPOpt() common.HTTPOpt {
 	}
 }
 
+// formatNumber formats a number with thousands separators
+func formatNumber(n interface{}) string {
+	var num float64
+	switch v := n.(type) {
+	case int:
+		num = float64(v)
+	case int64:
+		num = float64(v)
+	case float64:
+		num = v
+	default:
+		return fmt.Sprintf("%v", n)
+	}
+
+	if num == 0 {
+		return "0"
+	}
+
+	isNegative := num < 0
+	if isNegative {
+		num = -num
+	}
+
+	result := fmt.Sprintf("%.0f", num)
+	var parts []string
+	for i := len(result); i > 0; i -= 3 {
+		start := i - 3
+		if start < 0 {
+			start = 0
+		}
+		parts = append([]string{result[start:i]}, parts...)
+	}
+
+	formatted := strings.Join(parts, ",")
+	if isNegative {
+		formatted = "-" + formatted
+	}
+	return formatted
+}
+
 func initSiteTemplates(dirPath string, wellKnownURI string) *template.Template {
 	// Create a new template set
 	tmpl := template.New("")
@@ -345,6 +385,9 @@ func initSiteTemplates(dirPath string, wellKnownURI string) *template.Template {
 
 			return urlStatus{Verified: false, Error: err}
 		},
+
+		// Format numbers with thousands separators
+		"formatNumber": formatNumber,
 	})
 
 	// Parse all HTML files that match the pattern
