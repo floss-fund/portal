@@ -178,12 +178,12 @@ SELECT
         'webpage_url', e.webpage_url,
         'webpage_wellknown', e.webpage_wellknown
     ) AS entity
-
     FROM projects AS p
     JOIN manifests m ON m.id = p.manifest_id
     JOIN entities e ON e.manifest_id = p.manifest_id
     JOIN ordIds o ON o.id = p.id
     JOIN pc ON pc.manifest_id = p.manifest_id
+    WHERE m.status = 'active'
 ORDER BY o.ord;
 
 -- name: search-projects-snippet
@@ -232,6 +232,7 @@ SELECT
     m.guid AS manifest_guid,
     m.url AS manifest_url
 FROM entities e JOIN manifests m ON m.id = e.manifest_id
+WHERE m.status = 'active'
 ORDER BY %s OFFSET $1 LIMIT $2;
 
 -- name: get-entity-by-manifest-snippet
