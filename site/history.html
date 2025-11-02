@@ -20,9 +20,9 @@
 				{{ range $p := .Data.Manifest.Funding.History }}
 					<tr id="history-{{ $p.Year }}">
 						<td>{{ $p.Year }}</td>
-						<td>{{ $p.Income }}</td>
-						<td>{{ $p.Expenses }}</td>
-						<td>{{ $p.Taxes }}</td>
+						<td>{{ formatNumber $p.Income }}</td>
+						<td>{{ formatNumber $p.Expenses }}</td>
+						<td>{{ formatNumber $p.Taxes }}</td>
 						<td>{{ $p.Currency }}</td>
 					</tr>
 					{{ if $p.Description }}
