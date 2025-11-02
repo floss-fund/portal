@@ -74,6 +74,6 @@ disallowed_domains = [
 [db]
 host = "localhost"
 port = 5432
-db = "floss"
-user = "floss"
-password = "floss"
+db = "portal"
+user = "portal"
+password = "portal"

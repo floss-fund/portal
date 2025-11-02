@@ -1,0 +1,36 @@
+version: 2
+
+env:
+  - GO111MODULE=on
+  - CGO_ENABLED=0
+
+before:
+  hooks:
+    - make generate
+
+builds:
+  - id: portal
+    binary: portal
+    # Let goreleaser handle the actual compilation (using Makefile's ldflags pattern)
+    # but delegate packing to make
+    main: ./cmd/portal
+    goos:
+      - darwin
+      - linux
+      - freebsd
+      - openbsd
+      - netbsd
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X "main.buildString={{ .Tag }} ({{ .ShortCommit }} {{ .Date }})" -X "main.versionString={{ .Tag }}"
+
+    hooks:
+      # Use make pack-bin to stuff executables with static assets (same as make dist)
+      post: make pack-bin BIN={{ .Path }}
+
+archives:
+  - formats: ['tar.gz']
+    files:
+      - README.md
+      - LICENSE
