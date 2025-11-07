@@ -62,8 +62,10 @@
                 {{ end }}
               </div><!-- subheading -->
             </div>
-            <div class="col-4 col-end align-right">
-              <label for="modal-1" class="icon-button">Report <img src="/static/ico-flag.svg" alt="" aria-hidden="true" title="Report"/></label>
+            <div class="col-4 col-end">
+              <div class="align-right">
+                <label for="modal-1" class="icon-button">Report <img src="/static/ico-flag.svg" alt="" aria-hidden="true" title="Report"/></label>
+              </div>
               <input hx-get="/report/{{ .Data.Manifest.GUID }}" hx-target="#report" type="checkbox" id="modal-1" class="modal-toggle" />
               <div class="modal-overlay" id="report"></div>
             </div> <!-- Report -->
@@ -115,6 +117,7 @@
     Listing content licensed under CC BY-SA 4.0.
     <a href="https://github.com/floss-fund/portal">Source.</a>
   </footer>
+  <script type="module" src="{{ .RootURL }}/static/htmx.min.js?v={{ .AssetVer }}"></script>
   <script type="module" src="{{ .RootURL }}/static/main.js?v={{ .AssetVer }}"></script>
 </body>
 </html>

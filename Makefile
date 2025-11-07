@@ -29,7 +29,7 @@ $(STUFFBIN):
 	go install github.com/knadh/stuffbin/...
 
 $(BIN): $(shell find . -type f -name "*.go")
-	CGO_ENABLED=0 go build -o ${BIN} -ldflags="-s -w -X 'main.buildString=${BUILDSTR}' -X 'main.versionString=${VERSION}'" cmd/${BIN}/*.go
+	CGO_ENABLED=0 go build -o ${BIN} -ldflags="-s -w -X 'main.buildString=${BUILDSTR}' -X 'main.versionString=${VERSION}'" $(ls *.go | grep -v '_test.go') cmd/${BIN}/*.go
 
 .PHONY: generate
 generate: $(GENERATED_EASYJSON_MODELS)
