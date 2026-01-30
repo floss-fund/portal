@@ -10,8 +10,9 @@ WITH man AS (
         $5,
         $6
     )
-    ON CONFLICT (url) DO UPDATE
+    ON CONFLICT (guid) DO UPDATE
     SET version = $1->>'version',
+        url = $2,
         funding = $1::JSONB->'funding',
         meta = $4,
         status = $5,

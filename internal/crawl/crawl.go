@@ -35,10 +35,9 @@ type Opt struct {
 }
 
 type Crawl struct {
-	opt       *Opt
-	sc        Schema
-	Callbacks *Callbacks
-	db        DB
+	opt *Opt
+	sc  Schema
+	db  DB
 
 	wg   *sync.WaitGroup
 	jobs chan models.ManifestJob
@@ -47,21 +46,16 @@ type Crawl struct {
 	log *log.Logger
 }
 
-type Callbacks struct {
-	OnManifestUpdate func(m models.ManifestData, status string)
-}
-
 var (
 	ErrRatelimited = errors.New("host rate limited the request")
 )
 
-func New(o *Opt, sc Schema, cb *Callbacks, db DB, l *log.Logger) *Crawl {
+func New(o *Opt, sc Schema, db DB, l *log.Logger) *Crawl {
 	return &Crawl{
-		opt:       o,
-		sc:        sc,
-		Callbacks: cb,
-		db:        db,
-		hc:        common.NewHTTPClient(o.HTTP, l),
+		opt: o,
+		sc:  sc,
+		db:  db,
+		hc:  common.NewHTTPClient(o.HTTP, l),
 
 		wg:   &sync.WaitGroup{},
 		jobs: make(chan models.ManifestJob, o.BatchSize),

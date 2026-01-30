@@ -102,11 +102,6 @@ func handleUpdateManifestStatus(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	// Delete it from search if the status isn't active.
-	if m, err := app.core.GetManifest(id, "", "active"); err == nil {
-		app.crawl.Callbacks.OnManifestUpdate(m, status)
-	}
-
 	return c.JSON(http.StatusOK, okResp{true})
 }
 

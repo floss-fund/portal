@@ -229,7 +229,7 @@ func initCrawl(sc crawl.Schema, co *core.Core, ko *koanf.Koanf) *crawl.Crawl {
 		HTTP: initHTTPOpt(),
 	}
 
-	return crawl.New(&opt, sc, nil, co, lo)
+	return crawl.New(&opt, sc, co, lo)
 }
 
 func initPaginator(ko *koanf.Koanf) *paginator.Paginator {

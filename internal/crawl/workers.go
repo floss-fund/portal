@@ -2,9 +2,6 @@ package crawl
 
 import (
 	"time"
-
-	"github.com/floss-fund/portal/internal/core"
-	"github.com/floss-fund/portal/internal/models"
 )
 
 func (c *Crawl) dbWorker() {
@@ -50,12 +47,7 @@ func (c *Crawl) worker() {
 			c.log.Printf("error fetching modified date: %s: %v", j.URL, err)
 
 			// Record the error.
-			if status, err := c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros); err == nil {
-				// If the manifest is no longer active, delete it from search.
-				if c.Callbacks.OnManifestUpdate != nil && status != core.ManifestStatusActive {
-					c.Callbacks.OnManifestUpdate(models.ManifestData{ID: j.ID}, status)
-				}
-			}
+			c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros)
 
 			continue
 		}
@@ -77,10 +69,7 @@ func (c *Crawl) worker() {
 			c.log.Printf("error crawling: %s: %v", j.URL, err)
 
 			// Record the error.
-			status, _ = c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros)
-			if c.Callbacks != nil && c.Callbacks.OnManifestUpdate != nil {
-				c.Callbacks.OnManifestUpdate(m, status)
-			}
+			c.db.UpdateManifestCrawlError(j.ID, err.Error(), c.opt.MaxCrawlErrors, c.opt.DisableOnErrros)
 
 			continue
 		}
@@ -89,10 +78,6 @@ func (c *Crawl) worker() {
 		if err := c.db.UpsertManifest(m, status); err != nil {
 			c.log.Printf("error upserting manifest: %s: %v", j.URL, err)
 			continue
-		}
-
-		if c.Callbacks != nil && c.Callbacks.OnManifestUpdate != nil {
-			c.Callbacks.OnManifestUpdate(m, status)
 		}
 	}
 
